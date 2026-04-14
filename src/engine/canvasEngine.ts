@@ -67,7 +67,11 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
   // sequencerActor is read synchronously in RAF loop for Phase 2+ — reference kept
   void sequencerActor
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    // Engine cannot function without a 2D context — fail loudly with a clear message
+    throw new Error('[canvasEngine] Failed to acquire 2D rendering context. Hardware acceleration may be disabled.')
+  }
   let rafId: number | null = null
   let dirty = true
 
