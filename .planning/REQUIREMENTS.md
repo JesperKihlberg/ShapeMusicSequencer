@@ -83,28 +83,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CANV-01 | — | Pending |
-| CANV-02 | — | Pending |
-| CANV-03 | — | Pending |
-| SHPE-01 | — | Pending |
-| COLR-01 | — | Pending |
-| COLR-02 | — | Pending |
-| COLR-03 | — | Pending |
-| AUDI-01 | — | Pending |
-| AUDI-02 | — | Pending |
-| ANIM-01 | — | Pending |
-| PANL-01 | — | Pending |
-| PANL-02 | — | Pending |
-| PANL-03 | — | Pending |
-| PLAY-01 | — | Pending |
-| PLAY-02 | — | Pending |
-| PLAY-03 | — | Pending |
+| CANV-01 | Phase 1 | Pending |
+| CANV-02 | Phase 3 | Pending |
+| CANV-03 | Phase 3 | Pending |
+| SHPE-01 | Phase 2 | Pending |
+| COLR-01 | Phase 2 | Pending |
+| COLR-02 | Phase 2 | Pending |
+| COLR-03 | Phase 2 | Pending |
+| AUDI-01 | Phase 2 | Pending |
+| AUDI-02 | Phase 2 | Pending |
+| ANIM-01 | Phase 4 | Pending |
+| PANL-01 | Phase 4 | Pending |
+| PANL-02 | Phase 4 | Pending |
+| PANL-03 | Phase 4 | Pending |
+| PLAY-01 | Phase 5 | Pending |
+| PLAY-02 | Phase 5 | Pending |
+| PLAY-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️ (will be mapped during roadmap creation)
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after initial definition*
+*Last updated: 2026-04-14 after roadmap creation*
