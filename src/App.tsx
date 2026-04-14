@@ -1,4 +1,5 @@
 import './styles/index.css'
+import { CanvasContainer } from './components/CanvasContainer'
 
 export function App() {
   return (
@@ -10,8 +11,10 @@ export function App() {
         </span>
       </header>
 
-      {/* Canvas area — placeholder div; CanvasContainer added in Plan 03 */}
-      <main className="canvas-area" />
+      {/* Canvas area — CanvasContainer mounts the engine after DOM is ready */}
+      <main className="canvas-area">
+        <CanvasContainer />
+      </main>
     </div>
   )
 }
