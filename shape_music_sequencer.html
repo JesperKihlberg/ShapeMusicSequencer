@@ -1,0 +1,458 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+#app { display: flex; flex-direction: column; height: 600px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+#toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); flex-wrap: wrap; }
+.tool-group { display: flex; align-items: center; gap: 4px; }
+.tool-label { font-size: 11px; color: var(--color-text-secondary); margin-right: 2px; }
+.tool-btn { padding: 4px 10px; font-size: 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; transition: background 0.1s; }
+.tool-btn:hover { background: var(--color-background-secondary); }
+.tool-btn.active { background: var(--color-background-secondary); border-color: var(--color-border-primary); font-weight: 500; }
+#play-btn { padding: 4px 14px; font-size: 13px; font-weight: 500; }
+#canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; }
+#info-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 180px; background: var(--color-background-primary); border-left: 0.5px solid var(--color-border-tertiary); padding: 12px; display: none; flex-direction: column; gap: 10px; overflow-y: auto; }
+#info-panel.open { display: flex; }
+.panel-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); }
+.panel-row { display: flex; flex-direction: column; gap: 3px; }
+.panel-row label { font-size: 11px; color: var(--color-text-secondary); }
+.panel-row input[type=range] { width: 100%; }
+.panel-row select { width: 100%; font-size: 12px; padding: 3px 4px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
+.panel-row .val { font-size: 11px; color: var(--color-text-tertiary); text-align: right; }
+.del-btn { padding: 4px 8px; font-size: 11px; color: var(--color-text-danger); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: transparent; cursor: pointer; width: 100%; }
+.del-btn:hover { background: var(--color-background-danger); }
+#hint { position: absolute; bottom: 8px; left: 8px; font-size: 11px; color: var(--color-text-tertiary); pointer-events: none; }
+</style>
+
+<div id="app">
+  <div id="toolbar">
+    <div class="tool-group">
+      <button class="tool-btn" id="play-btn" onclick="togglePlay()">▶ Play</button>
+      <span class="tool-label">BPM</span>
+      <input type="range" min="60" max="180" value="120" id="bpm-slider" style="width:70px" oninput="setBpm(this.value)">
+      <span id="bpm-val" style="font-size:12px;min-width:28px">120</span>
+    </div>
+    <div class="tool-group">
+      <span class="tool-label">Shape</span>
+      <button class="tool-btn active" id="sh-circle" onclick="setShape('circle',this)">●</button>
+      <button class="tool-btn" id="sh-square" onclick="setShape('square',this)">■</button>
+      <button class="tool-btn" id="sh-triangle" onclick="setShape('triangle',this)">▲</button>
+      <button class="tool-btn" id="sh-diamond" onclick="setShape('diamond',this)">◆</button>
+      <button class="tool-btn" id="sh-star" onclick="setShape('star',this)">★</button>
+    </div>
+    <div class="tool-group">
+      <span class="tool-label">Color</span>
+      <input type="color" id="color-pick" value="#e24b4a" style="width:32px;height:26px;border:0.5px solid var(--color-border-secondary);border-radius:4px;cursor:pointer;padding:1px;">
+    </div>
+    <div class="tool-group">
+      <button class="tool-btn" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div id="info-panel">
+      <div class="panel-title" id="panel-shape-name">Shape</div>
+      <div class="panel-row">
+        <label>Pulse rate (LFO)</label>
+        <input type="range" min="0" max="10" step="0.1" value="2" id="p-lfo" oninput="updateSelected('lfo',+this.value);document.getElementById('p-lfo-v').textContent=this.value">
+        <div class="val" id="p-lfo-v">2.0</div>
+      </div>
+      <div class="panel-row">
+        <label>Pulse depth</label>
+        <input type="range" min="0" max="1" step="0.01" value="0.6" id="p-depth" oninput="updateSelected('depth',+this.value);document.getElementById('p-depth-v').textContent=(+this.value*100).toFixed(0)+'%'">
+        <div class="val" id="p-depth-v">60%</div>
+      </div>
+      <div class="panel-row">
+        <label>Volume</label>
+        <input type="range" min="0" max="1" step="0.01" value="0.5" id="p-vol" oninput="updateSelected('volume',+this.value);document.getElementById('p-vol-v').textContent=(+this.value*100).toFixed(0)+'%'">
+        <div class="val" id="p-vol-v">50%</div>
+      </div>
+      <div class="panel-row">
+        <label>Reverb</label>
+        <input type="range" min="0" max="1" step="0.01" value="0.2" id="p-rev" oninput="updateSelected('reverb',+this.value);document.getElementById('p-rev-v').textContent=(+this.value*100).toFixed(0)+'%'">
+        <div class="val" id="p-rev-v">20%</div>
+      </div>
+      <div class="panel-row">
+        <label>Filter cutoff</label>
+        <input type="range" min="100" max="8000" step="10" value="2000" id="p-cut" oninput="updateSelected('cutoff',+this.value);document.getElementById('p-cut-v').textContent=this.value+'Hz'">
+        <div class="val" id="p-cut-v">2000Hz</div>
+      </div>
+      <div class="panel-row">
+        <label>Animation</label>
+        <select id="p-anim" onchange="updateSelected('anim',this.value)">
+          <option value="pulse">Pulse (size)</option>
+          <option value="spin">Spin</option>
+          <option value="bounce">Bounce</option>
+          <option value="morph">Morph</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+      <button class="del-btn" onclick="deleteSelected()">Remove shape</button>
+    </div>
+    <div id="hint">Click canvas to place shape · Click shape to edit</div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+let shapes = [];
+let selected = null;
+let currentShape = 'circle';
+let playing = false;
+let bpm = 120;
+let beatPhase = 0;
+let lastTime = null;
+let animFrame = null;
+let audioCtx = null;
+let masterGain = null;
+let convolver = null;
+
+function resize() {
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.7;
+  convolver = audioCtx.createConvolver();
+  const len = audioCtx.sampleRate * 2;
+  const buf = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+  }
+  convolver.buffer = buf;
+  convolver.connect(masterGain);
+  masterGain.connect(audioCtx.destination);
+}
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+function colorToFreq(hex, shapeType) {
+  const {r,g,b} = hexToRgb(hex);
+  const baseFreqs = { circle:110, square:220, triangle:165, diamond:330, star:55 };
+  const base = baseFreqs[shapeType] || 110;
+  const hue = Math.atan2(Math.sqrt(3)*(g-b), 2*r-g-b) / (2*Math.PI);
+  const normalized = ((hue % 1) + 1) % 1;
+  return base * Math.pow(2, normalized * 2);
+}
+
+function colorToWaveform(shapeType) {
+  return { circle:'sine', square:'square', triangle:'triangle', diamond:'sawtooth', star:'sawtooth' }[shapeType] || 'sine';
+}
+
+function playShape(shape, gainMult = 1) {
+  if (!audioCtx) return;
+  const freq = colorToFreq(shape.color, shape.type);
+  const wave = colorToWaveform(shape.type);
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = shape.cutoff || 2000;
+  filter.Q.value = 1;
+  osc.type = wave;
+  osc.frequency.value = freq;
+  const vol = (shape.volume || 0.5) * gainMult;
+  g.gain.setValueAtTime(0, audioCtx.currentTime);
+  g.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.02);
+  const decay = shape.type === 'star' ? 0.08 : 0.3;
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + decay);
+  osc.connect(filter);
+  filter.connect(g);
+  const rev = shape.reverb || 0;
+  if (rev > 0) {
+    const dryGain = audioCtx.createGain();
+    const wetGain = audioCtx.createGain();
+    dryGain.gain.value = 1 - rev;
+    wetGain.gain.value = rev;
+    g.connect(dryGain);
+    g.connect(convolver);
+    const convGain = audioCtx.createGain();
+    convGain.gain.value = rev;
+    convolver.connect(wetGain);
+    dryGain.connect(masterGain);
+    wetGain.connect(masterGain);
+  } else {
+    g.connect(masterGain);
+  }
+  osc.start();
+  osc.stop(audioCtx.currentTime + decay + 0.05);
+}
+
+function getColor(hex, alpha=1) {
+  const {r,g,b} = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function drawShape(shape, phase) {
+  const { x, y, size, type, color, anim, lfo, depth } = shape;
+  let s = size;
+  let angle = 0;
+  let morphT = 0;
+  const lfoVal = Math.sin(phase * (lfo||2) * Math.PI * 2);
+
+  if (anim === 'pulse') s = size * (1 - (depth||0.6) * 0.5 + (depth||0.6) * 0.5 * (lfoVal * 0.5 + 0.5));
+  else if (anim === 'bounce') { shape._by = (shape._by||0); shape._bvy = (shape._bvy||0.01); shape._by += shape._bvy; if(Math.abs(shape._by)>8){shape._bvy*=-1;} }
+  else if (anim === 'spin') angle = phase * (lfo||2) * Math.PI * 2;
+  else if (anim === 'morph') morphT = lfoVal * 0.5 + 0.5;
+
+  const dy = anim === 'bounce' ? (shape._by||0) : 0;
+  ctx.save();
+  ctx.translate(x, y + dy);
+  ctx.rotate(angle);
+
+  const isSelected = shape === selected;
+  if (isSelected) {
+    ctx.beginPath();
+    ctx.arc(0, 0, s + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = getColor(color, 0.4);
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  ctx.fillStyle = getColor(color, 0.85);
+  ctx.strokeStyle = getColor(color, 1);
+  ctx.lineWidth = 1.5;
+
+  ctx.beginPath();
+  if (type === 'circle') {
+    ctx.arc(0, 0, s, 0, Math.PI * 2);
+  } else if (type === 'square') {
+    const ms = morphT > 0 ? s * (1 - morphT * 0.3) : s;
+    roundRect(ctx, -ms, -ms, ms*2, ms*2, morphT * ms * 0.5);
+  } else if (type === 'triangle') {
+    ctx.moveTo(0, -s);
+    ctx.lineTo(s * 0.866, s * 0.5);
+    ctx.lineTo(-s * 0.866, s * 0.5);
+    ctx.closePath();
+  } else if (type === 'diamond') {
+    ctx.moveTo(0, -s);
+    ctx.lineTo(s * 0.6, 0);
+    ctx.lineTo(0, s);
+    ctx.lineTo(-s * 0.6, 0);
+    ctx.closePath();
+  } else if (type === 'star') {
+    const spikes = 5, outerR = s, innerR = s * 0.4;
+    for (let i = 0; i < spikes * 2; i++) {
+      const r = i % 2 === 0 ? outerR : innerR;
+      const a = (i * Math.PI) / spikes - Math.PI / 2;
+      i === 0 ? ctx.moveTo(Math.cos(a)*r, Math.sin(a)*r) : ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r);
+    }
+    ctx.closePath();
+  }
+  ctx.fill();
+  ctx.stroke();
+
+  const pulseGlow = anim === 'pulse' ? Math.max(0, lfoVal) : 0;
+  if (pulseGlow > 0.3) {
+    ctx.beginPath();
+    ctx.arc(0, 0, s * (1 + pulseGlow * 0.4), 0, Math.PI * 2);
+    ctx.strokeStyle = getColor(color, pulseGlow * 0.3);
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(128,128,128,0.08)';
+  ctx.lineWidth = 0.5;
+  const step = 60;
+  for (let x = 0; x < canvas.width; x += step) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += step) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+  }
+}
+
+function loop(ts) {
+  animFrame = requestAnimationFrame(loop);
+  const dt = lastTime ? Math.min((ts - lastTime) / 1000, 0.1) : 0;
+  lastTime = ts;
+
+  if (playing) {
+    const prevPhase = beatPhase;
+    beatPhase = (beatPhase + dt * bpm / 60) % 1;
+    if (prevPhase > beatPhase || (prevPhase < 0.05 && beatPhase < 0.05)) {
+      shapes.forEach(s => { if(s.type !== 'star') playShape(s); });
+    }
+    const subDiv = 0.25;
+    const prevSub = prevPhase % subDiv;
+    const currSub = beatPhase % subDiv;
+    if (prevSub > currSub) {
+      shapes.filter(s => s.type === 'star').forEach(s => playShape(s, 0.6));
+    }
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
+
+  if (playing) {
+    const px = canvas.width * beatPhase;
+    ctx.beginPath();
+    ctx.moveTo(px, 0); ctx.lineTo(px, canvas.height);
+    ctx.strokeStyle = 'rgba(128,128,128,0.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  shapes.forEach(s => drawShape(s, beatPhase));
+}
+
+requestAnimationFrame(loop);
+
+function togglePlay() {
+  initAudio();
+  playing = !playing;
+  beatPhase = 0;
+  document.getElementById('play-btn').textContent = playing ? '■ Stop' : '▶ Play';
+  if (playing) shapes.forEach(s => playShape(s));
+}
+
+function setBpm(v) {
+  bpm = +v;
+  document.getElementById('bpm-val').textContent = v;
+}
+
+function setShape(type, btn) {
+  currentShape = type;
+  document.querySelectorAll('.tool-btn[id^=sh-]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function getCanvasPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY };
+}
+
+function hitTest(pos) {
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    const s = shapes[i];
+    const dx = pos.x - s.x, dy = pos.y - s.y;
+    if (Math.sqrt(dx*dx+dy*dy) < s.size + 8) return s;
+  }
+  return null;
+}
+
+canvas.addEventListener('click', e => {
+  const pos = getCanvasPos(e);
+  const hit = hitTest(pos);
+  if (hit) {
+    selectShape(hit);
+  } else {
+    const color = document.getElementById('color-pick').value;
+    const {r,g,b} = hexToRgb(color);
+    const brightness = (r*0.299 + g*0.587 + b*0.114) / 255;
+    const size = 20 + brightness * 30;
+    const shape = {
+      x: pos.x, y: pos.y,
+      type: currentShape,
+      color,
+      size,
+      lfo: 2, depth: 0.6, volume: 0.5, reverb: 0.2, cutoff: 2000,
+      anim: currentShape === 'star' ? 'pulse' : 'pulse',
+    };
+    shapes.push(shape);
+    selectShape(shape);
+    initAudio();
+    playShape(shape);
+  }
+});
+
+let dragShape = null, dragOff = {x:0,y:0};
+canvas.addEventListener('mousedown', e => {
+  const pos = getCanvasPos(e);
+  const hit = hitTest(pos);
+  if (hit) { dragShape = hit; dragOff = {x: pos.x - hit.x, y: pos.y - hit.y}; }
+});
+canvas.addEventListener('mousemove', e => {
+  if (!dragShape) return;
+  const pos = getCanvasPos(e);
+  dragShape.x = pos.x - dragOff.x;
+  dragShape.y = pos.y - dragOff.y;
+});
+canvas.addEventListener('mouseup', () => { dragShape = null; });
+
+function selectShape(shape) {
+  selected = shape;
+  const panel = document.getElementById('info-panel');
+  panel.classList.add('open');
+  document.getElementById('panel-shape-name').textContent = shape.type + ' · ' + shape.color;
+  document.getElementById('p-lfo').value = shape.lfo;
+  document.getElementById('p-lfo-v').textContent = shape.lfo.toFixed(1);
+  document.getElementById('p-depth').value = shape.depth;
+  document.getElementById('p-depth-v').textContent = Math.round(shape.depth*100)+'%';
+  document.getElementById('p-vol').value = shape.volume;
+  document.getElementById('p-vol-v').textContent = Math.round(shape.volume*100)+'%';
+  document.getElementById('p-rev').value = shape.reverb;
+  document.getElementById('p-rev-v').textContent = Math.round(shape.reverb*100)+'%';
+  document.getElementById('p-cut').value = shape.cutoff;
+  document.getElementById('p-cut-v').textContent = shape.cutoff+'Hz';
+  document.getElementById('p-anim').value = shape.anim;
+}
+
+function updateSelected(key, val) {
+  if (!selected) return;
+  selected[key] = val;
+  if (key === 'volume' || key === 'cutoff') {
+    const {r,g,b} = hexToRgb(selected.color);
+    const brightness = (r*0.299 + g*0.587 + b*0.114) / 255;
+    selected.size = 20 + brightness * 30 + val * (key==='volume'?10:0);
+  }
+}
+
+function deleteSelected() {
+  if (!selected) return;
+  shapes = shapes.filter(s => s !== selected);
+  selected = null;
+  document.getElementById('info-panel').classList.remove('open');
+}
+
+function clearAll() {
+  shapes = [];
+  selected = null;
+  document.getElementById('info-panel').classList.remove('open');
+}
+
+const tips = [
+  'Click canvas to place shape · Click shape to edit · Drag to move',
+  '● Circle = sine (bass/pad) · ■ Square = buzz · ▲ Triangle = soft · ◆ Sawtooth = bright · ★ Star = percussion',
+  'Color hue → pitch · Brightness → size · Red channel → filter'
+];
+let tipI = 0;
+setInterval(() => { tipI=(tipI+1)%tips.length; document.getElementById('hint').textContent=tips[tipI]; }, 4000);
+</script>
