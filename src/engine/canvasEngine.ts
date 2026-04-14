@@ -13,7 +13,11 @@ import { sequencerActor } from '../machine/sequencerMachine'
 // ────────────────────────────────────────────────────────────────────
 
 /**
- * Map a canvas-space click coordinate to a grid cell.
+ * Map a logical-pixel click coordinate to a grid cell.
+ *
+ * ALL arguments must be in logical (CSS) pixels — do NOT pass DPR-scaled
+ * canvas-pixel values. Use getBoundingClientRect() dimensions for canvasW/H
+ * and (clientX - rect.left) / (clientY - rect.top) for the click position.
  *
  * Cell math contract (UI-SPEC Section 7, RESEARCH.md Grid Cell Math):
  *   cellSize = Math.floor(Math.min(canvasW, canvasH) / 4)

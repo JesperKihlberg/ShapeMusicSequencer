@@ -22,18 +22,18 @@ export function CanvasContainer() {
   }, []) // empty deps — mount once (D-04)
 
   // Translate mouse click to a grid cell and dispatch addShape to the store.
-  // DPR scaling: canvas.width / rect.width accounts for devicePixelRatio.
+  // cellAtPoint operates in logical (CSS) pixels — no DPR scaling needed here.
+  // rect dimensions from getBoundingClientRect are already in CSS pixels.
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
-    // Scale from CSS pixels to canvas pixels (DPR-aware)
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    const canvasX = (e.clientX - rect.left) * scaleX
-    const canvasY = (e.clientY - rect.top) * scaleY
-    // cellAtPoint works in canvas-pixel space; canvas dimensions already include DPR
-    const cell = cellAtPoint(canvasX, canvasY, canvas.width, canvas.height)
+    // Use logical (CSS) pixel coordinates — consistent with cellAtPoint's coordinate space
+    const logicalX = e.clientX - rect.left
+    const logicalY = e.clientY - rect.top
+    const logicalW = rect.width
+    const logicalH = rect.height
+    const cell = cellAtPoint(logicalX, logicalY, logicalW, logicalH)
     if (!cell) return
     shapeStore.getState().addShape(cell.col, cell.row)
   }
