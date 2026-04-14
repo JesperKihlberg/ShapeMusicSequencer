@@ -76,7 +76,8 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     const dpr = window.devicePixelRatio || 1
     canvas.width = container.clientWidth * dpr
     canvas.height = container.clientHeight * dpr
-    ctx.scale(dpr, dpr)
+    // Do NOT call ctx.scale here — render() sets the absolute transform each frame
+    // via ctx.setTransform to prevent scale accumulation across repeated resize calls
     dirty = true
   }
 
@@ -133,6 +134,9 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     const dpr = window.devicePixelRatio || 1
     const logicalW = canvas.width / dpr
     const logicalH = canvas.height / dpr
+    // Reset transform to identity then apply DPR scale — prevents accumulation
+    // across repeated resize calls (RESEARCH.md Pitfall 1 fix)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.fillStyle = '#111113'
     ctx.fillRect(0, 0, logicalW, logicalH)
     drawGrid(logicalW, logicalH)
