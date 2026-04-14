@@ -83,7 +83,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CANV-01 | Phase 1 | Pending |
+| CANV-01 | Phase 1 | In Progress (Plan 01 scaffold complete; Plans 02-04 implement store/engine/interaction) |
 | CANV-02 | Phase 3 | Pending |
 | CANV-03 | Phase 3 | Pending |
 | SHPE-01 | Phase 2 | Pending |

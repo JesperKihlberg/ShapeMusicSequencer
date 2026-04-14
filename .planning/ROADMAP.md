@@ -12,7 +12,7 @@ Build a client-only PoC web app where drawing geometric shapes on a grid canvas 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Scaffold** - React + TypeScript project with a rendered 4x4 grid canvas
+- [x] **Phase 1: Scaffold** - React + TypeScript project with a rendered 4x4 grid canvas (in progress — 1/4 plans complete)
 - [ ] **Phase 2: Audio Engine** - Oscillator-per-shape synthesis with color-to-audio parameter mapping
 - [ ] **Phase 3: Canvas Interaction** - Place, select, and remove shapes that create live audio voices
 - [ ] **Phase 4: Shape Panel & Animation** - Per-shape property editor and LFO amplitude modulation
@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Running the dev server opens a browser page showing a 4x4 grid canvas
   2. User can click an empty grid cell and a circle shape appears in that cell
   3. Shape placement snaps strictly to grid cells (no free-form positioning)
-**Plans**: TBD
+**Plans**: 4 (01-bootstrap, 02-shapeStore, 03-canvasEngine, 04-CanvasContainer)
 **UI hint**: yes
 
 ### Phase 2: Audio Engine
@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold | 0/? | Not started | - |
+| 1. Scaffold | 1/4 | In progress | - |
 | 2. Audio Engine | 0/? | Not started | - |
 | 3. Canvas Interaction | 0/? | Not started | - |
 | 4. Shape Panel & Animation | 0/? | Not started | - |
