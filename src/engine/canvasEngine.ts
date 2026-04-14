@@ -5,7 +5,7 @@
 // IMPORTANT: sequencerActor import is kept even though Phase 1 only reads idle state.
 //   canvas engine calls getSnapshot().value in the RAF loop (RESEARCH.md anti-patterns).
 //   This import makes tsc happy and prepares for Phase 2+ behavioral transitions.
-import { shapeStore, Shape } from '../store/shapeStore'
+import { shapeStore, type Shape } from "../store/shapeStore";
 import { sequencerActor } from '../machine/sequencerMachine'
 
 // ────────────────────────────────────────────────────────────────────
