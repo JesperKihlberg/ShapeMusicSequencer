@@ -43,9 +43,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Multiple shapes placed on the canvas all play simultaneously and independently
 **Plans**: 3 plans
 Plans:
-- [ ] 02-01-PLAN.md — Migrate Shape.color to ShapeColor struct, expand ShapeType union to 6 types, update canvas engine CSS string reconstruction
-- [ ] 02-02-PLAN.md — Build and TDD-test color-to-audio pure functions (colorToFrequency, makeDistortionCurve, lightnessToFilterCutoff, shapeTypeToWave)
-- [ ] 02-03-PLAN.md — Build audio voice lifecycle engine, wire into CanvasContainer, change sequencerMachine to playing state
+- [x] 02-01-PLAN.md — Migrate Shape.color to ShapeColor struct, expand ShapeType union to 6 types, update canvas engine CSS string reconstruction
+- [x] 02-02-PLAN.md — Build and TDD-test color-to-audio pure functions (colorToFrequency, makeDistortionCurve, lightnessToFilterCutoff, shapeTypeToWave)
+- [x] 02-03-PLAN.md — Build audio voice lifecycle engine, wire into CanvasContainer, change sequencerMachine to playing state
 
 ### Phase 3: Canvas Interaction
 **Goal**: Users can fully manage shapes on the canvas — placing, selecting, and removing them — with each action immediately reflected in the live audio
