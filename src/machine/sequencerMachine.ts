@@ -20,10 +20,10 @@ const sequencerMachine = setup({
   },
 }).createMachine({
   id: 'sequencer',
-  initial: 'idle',
+  initial: 'playing',  // Phase 2 default — Phase 5 will add idle/stopped state + PLAY/STOP transitions
   states: {
-    idle:            { on: {} }, // Phase 1: only state in use
-    playing:         { on: {} }, // Stub — Phase 2+
+    idle:            { on: {} }, // Deferred — Phase 5 adds STOP transition to reach this state
+    playing:         { on: {} }, // Phase 2+: boot state (D-13)
     selected:        { on: {} }, // Stub — Phase 3+
     dragging:        { on: {} }, // Stub — Phase 3+
     playingDragging: { on: {} }, // Stub — Phase 3+
