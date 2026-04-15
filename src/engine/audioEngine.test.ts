@@ -50,11 +50,14 @@ describe('makeDistortionCurve', () => {
     expect(curve[255]).toBeCloseTo(xEnd, 5)
   })
 
-  it('returns a non-linear (compressed) curve at saturation=100', () => {
+  it('returns a non-linear (soft-clipping) curve at saturation=100', () => {
     const curve = makeDistortionCurve(100)
-    // With k=200, curve[0] is compressed: |curve[0]| < 0.999 (not -1.0)
-    expect(Math.abs(curve[0])).toBeLessThan(0.999)
-    // The curve should still be negative at index 0 (negative input)
+    // The soft-clip formula ((PI+k)*x)/(PI+k*|x|) compresses mid-range values
+    // toward ±1.0. At i=64, x = -0.5 (identity), but the distorted output is
+    // pushed toward -1 (≈ -0.985), making it clearly > 0.9 in magnitude.
+    // This proves non-linearity: identity at -0.5 stays at -0.5; distorted does not.
+    expect(Math.abs(curve[64])).toBeGreaterThan(0.9)
+    // The curve should still be negative at index 0 (negative input preserves sign)
     expect(curve[0]).toBeLessThan(0)
   })
 
