@@ -45,7 +45,7 @@ describe('shapeStore', () => {
     expect(typeof shape?.id).toBe('string')
     expect(typeof shape?.col).toBe('number')
     expect(typeof shape?.row).toBe('number')
-    expect(typeof shape?.color).toBe('string')
+    expect(shape?.color).toEqual({ h: 220, s: 70, l: 60 })
     expect(shape?.type).toBe('circle')
   })
 
