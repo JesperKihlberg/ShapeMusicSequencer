@@ -41,7 +41,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Changing a shape's saturation produces a noticeable change in the reverb/wet depth of its tone
   4. Changing a shape's brightness produces a noticeable change in the filter brightness (cutoff) of its tone
   5. Multiple shapes placed on the canvas all play simultaneously and independently
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 02-01-PLAN.md — Migrate Shape.color to ShapeColor struct, expand ShapeType union to 6 types, update canvas engine CSS string reconstruction
+- [ ] 02-02-PLAN.md — Build and TDD-test color-to-audio pure functions (colorToFrequency, makeDistortionCurve, lightnessToFilterCutoff, shapeTypeToWave)
+- [ ] 02-03-PLAN.md — Build audio voice lifecycle engine, wire into CanvasContainer, change sequencerMachine to playing state
 
 ### Phase 3: Canvas Interaction
 **Goal**: Users can fully manage shapes on the canvas — placing, selecting, and removing them — with each action immediately reflected in the live audio
@@ -86,7 +90,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 3/4 | In progress | - |
-| 2. Audio Engine | 0/? | Not started | - |
+| 2. Audio Engine | 0/3 | Not started | - |
 | 3. Canvas Interaction | 0/? | Not started | - |
 | 4. Shape Panel & Animation | 0/? | Not started | - |
 | 5. Playback Controls | 0/? | Not started | - |
