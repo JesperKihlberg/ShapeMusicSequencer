@@ -6,19 +6,24 @@ import { useEffect, useRef } from 'react'
 import { initCanvasEngine } from '../engine/canvasEngine'
 import { cellAtPoint } from '../engine/canvasEngine'
 import { shapeStore } from '../store/shapeStore'
+import { initAudioEngine } from '../engine/audioEngine'
 
 export function CanvasContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Mount the canvas engine once after first render.
-  // Returned destroy() is called on unmount (React StrictMode fires twice in dev — OK).
+  // Mount the canvas engine and audio engine once after first render.
+  // Returned destroy functions called on unmount (React StrictMode fires twice in dev — OK).
   useEffect(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
-    const destroy = initCanvasEngine({ canvas, container })
-    return destroy
+    const destroyCanvas = initCanvasEngine({ canvas, container })
+    const destroyAudio = initAudioEngine()
+    return () => {
+      destroyCanvas()
+      destroyAudio()
+    }
   }, []) // empty deps — mount once (D-04)
 
   // Translate mouse click to a grid cell and dispatch addShape to the store.
