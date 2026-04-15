@@ -12,7 +12,9 @@ Any change to the visual canvas is an immediate, audible change to the music —
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Shape type determines oscillator waveform (circle=sine, triangle=triangle, square=square, star=sawtooth, diamond=pulse, blob=noise+sine) — Validated in Phase 02: audio-engine
+- [x] Shape color (hue) maps to pitch; saturation maps to distortion/timbre; lightness maps to filter cutoff — Validated in Phase 02: audio-engine
+- [x] Each shape plays continuously and independently as an audio voice — Validated in Phase 02: audio-engine (human-verified)
 
 ### Active
 
@@ -83,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 after initialization*
+*Last updated: 2026-04-15 after Phase 02 (audio-engine) completion*
