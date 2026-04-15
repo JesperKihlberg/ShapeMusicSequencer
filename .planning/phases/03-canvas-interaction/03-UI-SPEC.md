@@ -25,8 +25,7 @@ Phase 3 delivers full shape management on the canvas: clicking any cell (occupie
 | Token | Value | Use |
 |-------|-------|-----|
 | `--space-1` | 4px | Tight gaps inside panel (label-to-value gaps) |
-| `--space-2` | 8px | Panel internal padding, row gaps |
-| `--space-3` | 12px | Panel section internal padding |
+| `--space-2` | 8px | Panel internal padding, row gaps, panel section internal padding |
 | `--space-4` | 16px | Panel outer padding, section gaps |
 | `--space-6` | 24px | Between panel sections |
 | `--space-8` | 32px | Not used in Phase 3 |
@@ -99,8 +98,8 @@ Phase 3 delivers full shape management on the canvas: clicking any cell (occupie
 
 | Token | Value | Use |
 |-------|-------|-------------|
-| `--color-danger` | `#ef4444` | Remove button label color (resting state) |
-| `--color-bg-danger` | `rgba(239,68,68,0.10)` | Remove button background on hover |
+| `--color-danger` | `#ef4444` | Remove Shape button label color (resting state) |
+| `--color-bg-danger` | `rgba(239,68,68,0.10)` | Remove Shape button background on hover |
 
 - Source: Phase 1 UI-SPEC reserved these for "Phase 3+ Remove shape button."
 
@@ -112,7 +111,7 @@ Phase 3 delivers full shape management on the canvas: clicking any cell (occupie
 
 | Token | Value | Use |
 |-------|-------|-----|
-| `--radius-sm` | 4px | Panel buttons (Add Shape, Remove) |
+| `--radius-sm` | 4px | Panel buttons (Add Shape, Remove Shape) |
 | `--radius-md` | 6px | Panel container itself |
 | `--radius-lg` | 10px | Not used in Phase 3 |
 
@@ -179,7 +178,7 @@ Phase 3 adds a right sidebar panel alongside the canvas area. `App.tsx` gains a 
 |---------|-------------|--------|
 | Click empty cell | No selection | Panel opens showing "Empty — Add Shape" content |
 | Click empty cell | Different cell selected | Selection switches; panel updates to new cell |
-| Click occupied cell | No selection | Panel opens showing shape properties + Remove |
+| Click occupied cell | No selection | Panel opens showing shape properties + Remove Shape |
 | Click occupied cell | Different cell selected | Selection switches; panel updates to new shape |
 | Click same cell again | That cell selected | No change (selection already set) |
 | Press Escape | Any cell selected | Panel closes, selection clears |
@@ -189,12 +188,12 @@ Phase 3 adds a right sidebar panel alongside the canvas area. `App.tsx` gains a 
 ### Add Shape Action
 
 - Trigger: "Add Shape" button click inside panel when an empty cell is selected.
-- Result: Shape added to `shapeStore` at selected cell. Audio voice starts immediately (Phase 2 wiring). Panel content switches to occupied state (shape properties + Remove button) without closing.
+- Result: Shape added to `shapeStore` at selected cell. Audio voice starts immediately (Phase 2 wiring). Panel content switches to occupied state (shape properties + Remove Shape button) without closing.
 - The panel does NOT close on add — user sees immediate feedback and can then remove if needed.
 
 ### Remove Shape Action
 
-- Trigger: "Remove" button inside panel OR Delete/Backspace key while occupied cell selected.
+- Trigger: "Remove Shape" button inside panel OR Delete/Backspace key while occupied cell selected.
 - Result: Shape removed from `shapeStore`. Audio voice destroyed immediately. Panel closes. Selection clears. Canvas cell becomes empty.
 - No confirmation dialog — destructive action is immediately reversible via undo (zundo temporal store is already wired).
 
@@ -286,7 +285,7 @@ Content area (below header):
 │  Saturation 70               │
 │  Lightness 30                │
 ├──────────────────────────────┤
-│  [ Remove ]                  │  ← danger-styled button
+│  [ Remove Shape ]            │  ← danger-styled button
 └──────────────────────────────┘
 ```
 
@@ -302,10 +301,10 @@ Content area (below header):
 - `Saturation` → `color.s` integer value (e.g., `70`)
 - `Lightness` → `color.l` integer value (e.g., `30`)
 
-**Section divider between properties and Remove button:** `1px solid var(--color-border-tertiary)`, margin `var(--space-2)` top/bottom.
+**Section divider between properties and Remove Shape button:** `1px solid var(--color-border-tertiary)`, margin `var(--space-2)` top/bottom.
 
-**Remove button:**
-- Label: `Remove`
+**Remove Shape button:**
+- Label: `Remove Shape`
 - Width: `100%`
 - Height: `32px`
 - Background: transparent (resting)
@@ -326,7 +325,7 @@ Content area (below header):
 | Panel header | `Cell (col, row)` | Dynamic — e.g., `Cell (2, 1)`. Zero-indexed. |
 | Empty cell body | `This cell is empty.` | `--color-text-tertiary` |
 | Add Shape button | `+ Add Shape` | Plus sign is literal character, not icon |
-| Remove button | `Remove` | No icon; label only |
+| Remove Shape button | `Remove Shape` | No icon; label only |
 | Property label — type | `Type` | |
 | Property label — hue | `Hue` | |
 | Property label — saturation | `Saturation` | |
@@ -344,7 +343,7 @@ No async operations in Phase 3. No error states needed.
 
 ### Destructive Action Confirmation
 
-Remove action: **no confirmation dialog**. Rationale: zundo temporal undo is already wired in `shapeStore`; the action is recoverable. A confirmation dialog would break the "immediate audio feedback" core value — the shape must silence instantly on Remove trigger.
+Remove Shape action: **no confirmation dialog**. Rationale: zundo temporal undo is already wired in `shapeStore`; the action is recoverable. A confirmation dialog would break the "immediate audio feedback" core value — the shape must silence instantly on Remove Shape trigger.
 
 ---
 
@@ -359,9 +358,9 @@ Phase 3 adds no new animations. Selection highlight is static (no pulse or trans
 - `CellPanel`: `role="complementary"` or `role="region"` with `aria-label="Cell editor"`.
 - Panel header: `<h2>` element or `role="heading" aria-level="2"`.
 - Add Shape button: standard `<button>` element. When cell is empty, `aria-label="Add shape to cell column {col} row {row}"`.
-- Remove button: standard `<button>` element. `aria-label="Remove shape from cell column {col} row {row}"`.
+- Remove Shape button: standard `<button>` element. `aria-label="Remove shape from cell column {col} row {row}"`.
 - Keyboard: Escape and Delete/Backspace shortcuts are document-level — no ARIA needed beyond visible focus indicators.
-- Focus management: When panel opens, focus moves to the first interactive element in the panel (Add Shape or Remove button). When panel closes via Escape or Remove, focus returns to the canvas element.
+- Focus management: When panel opens, focus moves to the first interactive element in the panel (Add Shape or Remove Shape button). When panel closes via Escape or Remove Shape, focus returns to the canvas element.
 - Selection highlight on canvas is a visual-only affordance — panel text content is the accessible equivalent.
 - Color contrast: `--color-accent` (`#6366f1`) as button border on `--color-bg-secondary` (`#1a1a1e`) background — sufficient for WCAG AA large text; button label uses accent color directly which may not meet contrast requirements for small text. Acceptable for PoC; note for Phase 4 polish.
 
@@ -374,8 +373,8 @@ Phase 3 adds no new animations. Selection highlight is static (no pulse or trans
 ```css
 /* Activating in Phase 3 (defined in Phase 1, unused until now): */
 --color-accent:    #6366f1;   /* Cell selection ring, Add Shape button */
---color-danger:    #ef4444;   /* Remove button label */
---color-bg-danger: rgba(239, 68, 68, 0.10);  /* Remove button hover background */
+--color-danger:    #ef4444;   /* Remove Shape button label */
+--color-bg-danger: rgba(239, 68, 68, 0.10);  /* Remove Shape button hover background */
 ```
 
 Full token reference: see `src/styles/index.css` (source of truth, Phase 1 established).
@@ -412,8 +411,11 @@ Full token reference: see `src/styles/index.css` (source of truth, Phase 1 estab
 | No panel open/close animation | PoC scope; Claude's discretion |
 | Hint text updated | Phase 3 changes click model; old hint text is misleading |
 | No UI framework | CLAUDE.md constraint |
+| `--space-3` removed | UI checker: 12px not in standard 8-point scale; replaced with `--space-2` (8px) |
+| "Remove Shape" label | UI checker: single-word label replaced with verb + noun per copywriting convention |
 
 ---
 
 *Phase: 03-canvas-interaction*
 *UI-SPEC drafted: 2026-04-15*
+*UI-SPEC revised: 2026-04-15 — fixed spacing scale (removed --space-3) and copywriting (Remove → Remove Shape)*
