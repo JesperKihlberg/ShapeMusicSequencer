@@ -8,13 +8,19 @@ import { useStore } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { temporal } from 'zundo'
 
-export type ShapeType = 'circle'
+export interface ShapeColor {
+  h: number  // 0–360 (hue)
+  s: number  // 0–100 (saturation)
+  l: number  // 0–100 (lightness)
+}
+
+export type ShapeType = 'circle' | 'triangle' | 'square' | 'diamond' | 'star' | 'blob'
 
 export interface Shape {
   id: string
-  col: number    // 0-3
-  row: number    // 0-3
-  color: string  // hsl string e.g. 'hsl(220, 70%, 60%)'
+  col: number      // 0-3
+  row: number      // 0-3
+  color: ShapeColor
   type: ShapeType
 }
 
@@ -37,7 +43,7 @@ export const shapeStore = createStore<ShapeState>()(
               id: crypto.randomUUID(),
               col,
               row,
-              color: 'hsl(220, 70%, 60%)',
+              color: { h: 220, s: 70, l: 60 },
               type: 'circle',
             })
           }

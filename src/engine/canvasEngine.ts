@@ -124,12 +124,11 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
       // Fill at 0.85 opacity (UI-SPEC Section 6, source: prototype drawShape())
       ctx.beginPath()
       ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-      ctx.fillStyle = shape.color.startsWith('hsl(')
-        ? shape.color.replace('hsl(', 'hsla(').replace(')', ', 0.85)')
-        : shape.color
+      const cssColor = `hsl(${shape.color.h}, ${shape.color.s}%, ${shape.color.l}%)`
+      ctx.fillStyle = `hsla(${shape.color.h}, ${shape.color.s}%, ${shape.color.l}%, 0.85)`
       ctx.fill()
       // Stroke at 1.0 opacity
-      ctx.strokeStyle = shape.color
+      ctx.strokeStyle = cssColor
       ctx.lineWidth = 1.5
       ctx.stroke()
     }
