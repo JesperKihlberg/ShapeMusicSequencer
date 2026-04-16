@@ -6,9 +6,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { ShapeColor } from '../store/shapeStore'
 
-// Wave 0 stub: set to null until Wave 3 creates HsvSliders.tsx, then replace with:
-//   import { HsvSliders } from './HsvSliders'
-const HsvSliders: React.ComponentType<{ color: ShapeColor; onChange: (c: ShapeColor) => void }> | null = null
+import { HsvSliders } from './HsvSliders'
 
 const defaultColor: ShapeColor = { h: 220, s: 70, l: 30 }
 
@@ -65,7 +63,7 @@ describe('HsvSliders', () => {
   it('onChange fires with updated l when lightness slider changes', () => {
     if (!HsvSliders) return
     const onChange = vi.fn()
-    render(<HsvSliders color={defaultColor} onChange={() => {}} />)
+    render(<HsvSliders color={defaultColor} onChange={onChange} />)
     const lightInput = screen.getByLabelText(/Lightness, 0 to 100/i)
     fireEvent.change(lightInput, { target: { value: '60' } })
     expect(onChange).toHaveBeenCalledWith({ h: 220, s: 70, l: 60 })
