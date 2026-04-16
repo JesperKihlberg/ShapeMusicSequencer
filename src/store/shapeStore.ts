@@ -22,12 +22,15 @@ export interface Shape {
   row: number      // 0-3
   color: ShapeColor
   type: ShapeType
+  size: number      // 0–100, default 50 — controls canvas radius multiplier and audio gain (D-15)
+  animRate: number  // 0.1–10 Hz, default 1.0 — LFO animation rate (D-15)
 }
 
 export interface ShapeState {
   shapes: Shape[]
   addShape: (col: number, row: number) => void
   removeShape: (col: number, row: number) => void  // NEW (D-03, Phase 3)
+  updateShape: (id: string, patch: Partial<Shape>) => void  // NEW (D-16, Phase 4)
 }
 
 export const shapeStore = createStore<ShapeState>()(
@@ -46,6 +49,8 @@ export const shapeStore = createStore<ShapeState>()(
               row,
               color: { h: 220, s: 70, l: 30 },
               type: "circle",
+              size: 50,       // D-15: default 50 (maps to current canvas radius)
+              animRate: 1.0,  // D-15: default 1.0 Hz
             });
           }
         }),
@@ -54,6 +59,13 @@ export const shapeStore = createStore<ShapeState>()(
           const idx = state.shapes.findIndex((s) => s.col === col && s.row === row)
           if (idx !== -1) {
             state.shapes.splice(idx, 1)
+          }
+        }),
+      updateShape: (id: string, patch: Partial<Shape>) =>
+        set((state) => {
+          const shape = state.shapes.find((s) => s.id === id)
+          if (shape) {
+            Object.assign(shape, patch)  // Immer draft accepts Object.assign mutation
           }
         }),
     })),
