@@ -8,6 +8,7 @@
 import { shapeStore, type Shape } from "../store/shapeStore";
 import { sequencerActor } from "../machine/sequencerMachine";
 import { selectionStore } from "../store/selectionStore";
+import { drawShape } from './drawShape'
 
 // ────────────────────────────────────────────────────────────────────
 // Pure helper — exported for isolated unit testing (Plan 03, Task 1)
@@ -110,25 +111,20 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
 
   // ── Shape drawing ─────────────────────────────────────────────────
   function drawShapes(shapes: Shape[], logicalW: number, logicalH: number): void {
-    const size = Math.floor(Math.min(logicalW, logicalH) / 4);
-    const gridPx = size * 4;
-    const offsetX = Math.floor((logicalW - gridPx) / 2);
-    const offsetY = Math.floor((logicalH - gridPx) / 2);
-    const radius = Math.floor(size * 0.35);
-    if (!ctx) return; // Defensive check for TypeScript strictNullChecks
+    const cellSize = Math.floor(Math.min(logicalW, logicalH) / 4)  // renamed from 'size' to avoid shadowing shape.size
+    const gridPx = cellSize * 4
+    const offsetX = Math.floor((logicalW - gridPx) / 2)
+    const offsetY = Math.floor((logicalH - gridPx) / 2)
+    if (!ctx) return  // Defensive check for TypeScript strictNullChecks
+    const t = performance.now() / 1000  // seconds — for pulseScale formula (D-12)
     for (const shape of shapes) {
-      const cx = offsetX + shape.col * size + Math.floor(size / 2);
-      const cy = offsetY + shape.row * size + Math.floor(size / 2);
-      // Fill at 0.85 opacity (UI-SPEC Section 6, source: prototype drawShape())
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      const cssColor = `hsl(${shape.color.h}, ${shape.color.s}%, ${shape.color.l}%)`;
-      ctx.fillStyle = `hsla(${shape.color.h}, ${shape.color.s}%, ${shape.color.l}%, 0.85)`;
-      ctx.fill();
-      // Stroke at 1.0 opacity
-      ctx.strokeStyle = cssColor;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      const cx = offsetX + shape.col * cellSize + Math.floor(cellSize / 2)
+      const cy = offsetY + shape.row * cellSize + Math.floor(cellSize / 2)
+      // ANIM-01 + D-12: pulseScale oscillates between 0.6 and 1.4 at shape.animRate Hz
+      const pulseScale = 1 + 0.4 * Math.sin(2 * Math.PI * shape.animRate * t)
+      // D-05: shape.size=50 → (50/50)=1.0 → same radius as Phase 3 (no visual regression)
+      const radius = Math.floor(cellSize * 0.35 * (shape.size / 50) * pulseScale)
+      drawShape(ctx, cx, cy, radius, shape.type, shape.color)
     }
   }
 
@@ -156,6 +152,8 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
 
   // ── Render frame ──────────────────────────────────────────────────
   function render(): void {
+    // Always redraw when shapes exist — pulseScale changes every frame (UI-SPEC Pitfall 3 / RESEARCH.md Pattern 7)
+    if (shapeStore.getState().shapes.length > 0) dirty = true
     if (!dirty) return;
     dirty = false;
     const dpr = window.devicePixelRatio || 1;
