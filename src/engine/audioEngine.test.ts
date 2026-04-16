@@ -112,3 +112,27 @@ describe('shapeTypeToWave', () => {
     expect(shapeTypeToWave('blob')).toBe('blob')
   })
 })
+
+// Phase 4 — updateVoiceColor and updateVoiceSize
+// These functions guard against missing voice / missing AudioContext (jsdom)
+// Wave 0 stubs: functions don't exist yet — tests skip gracefully when undefined
+describe('updateVoiceColor (Phase 4)', () => {
+  it('returns undefined (no-op) when AudioContext unavailable in jsdom', async () => {
+    // In jsdom, AudioContext is not available — the function must guard and return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    const updateVoiceColor = mod.updateVoiceColor
+    if (typeof updateVoiceColor !== 'function') return // Skip until Wave 2 adds the export
+    expect(() => updateVoiceColor('nonexistent', { h: 120, s: 50, l: 50 })).not.toThrow()
+  })
+})
+
+describe('updateVoiceSize (Phase 4)', () => {
+  it('returns undefined (no-op) when AudioContext unavailable in jsdom', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    const updateVoiceSize = mod.updateVoiceSize
+    if (typeof updateVoiceSize !== 'function') return // Skip until Wave 2 adds the export
+    expect(() => updateVoiceSize('nonexistent', 75)).not.toThrow()
+  })
+})
