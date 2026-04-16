@@ -27,6 +27,7 @@ export interface Shape {
 export interface ShapeState {
   shapes: Shape[]
   addShape: (col: number, row: number) => void
+  removeShape: (col: number, row: number) => void  // NEW (D-03, Phase 3)
 }
 
 export const shapeStore = createStore<ShapeState>()(
@@ -43,9 +44,16 @@ export const shapeStore = createStore<ShapeState>()(
               id: crypto.randomUUID(),
               col,
               row,
-              color: { h: 220, s: 70, l: 60 },
-              type: 'circle',
-            })
+              color: { h: 220, s: 70, l: 30 },
+              type: "circle",
+            });
+          }
+        }),
+      removeShape: (col: number, row: number) =>
+        set((state) => {
+          const idx = state.shapes.findIndex((s) => s.col === col && s.row === row)
+          if (idx !== -1) {
+            state.shapes.splice(idx, 1)
           }
         }),
     })),

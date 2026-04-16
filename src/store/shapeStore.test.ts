@@ -65,3 +65,43 @@ describe('shapeStore', () => {
     expect(shapeStore.getState().shapes).toHaveLength(3)
   })
 })
+
+describe('shapeStore — removeShape', () => {
+  beforeEach(() => {
+    shapeStore.setState({ shapes: [] })
+    shapeStore.temporal.getState().clear()
+  })
+
+  it('removeShape removes a shape at the given cell', () => {
+    shapeStore.getState().addShape(0, 0)
+    expect(shapeStore.getState().shapes).toHaveLength(1)
+    shapeStore.getState().removeShape(0, 0)
+    expect(shapeStore.getState().shapes).toHaveLength(0)
+  })
+
+  it('removeShape is a no-op when cell is empty', () => {
+    shapeStore.getState().addShape(1, 1)
+    shapeStore.getState().removeShape(2, 2)  // no shape here
+    expect(shapeStore.getState().shapes).toHaveLength(1)
+  })
+
+  it('removeShape removes only the matching cell, not others', () => {
+    shapeStore.getState().addShape(0, 0)
+    shapeStore.getState().addShape(1, 1)
+    shapeStore.getState().addShape(2, 2)
+    shapeStore.getState().removeShape(1, 1)
+    const shapes = shapeStore.getState().shapes
+    expect(shapes).toHaveLength(2)
+    expect(shapes.some((s) => s.col === 1 && s.row === 1)).toBe(false)
+    expect(shapes.some((s) => s.col === 0 && s.row === 0)).toBe(true)
+    expect(shapes.some((s) => s.col === 2 && s.row === 2)).toBe(true)
+  })
+
+  it('cell is available for new shape after removeShape', () => {
+    shapeStore.getState().addShape(3, 3)
+    shapeStore.getState().removeShape(3, 3)
+    shapeStore.getState().addShape(3, 3)
+    expect(shapeStore.getState().shapes).toHaveLength(1)
+    expect(shapeStore.getState().shapes[0]).toMatchObject({ col: 3, row: 3 })
+  })
+})
