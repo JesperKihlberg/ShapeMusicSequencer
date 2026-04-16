@@ -91,10 +91,131 @@ body {
   color: var(--color-text-secondary);
 }
 
-/* Canvas area — flex: 1, fills remaining height (UI-SPEC Section 5) */
+/* Canvas area — flex row: canvas left, panel right (UI-SPEC Section 5, Phase 3) */
 .canvas-area {
+  display: flex;
+  flex-direction: row;
   flex: 1;
-  position: relative;
   overflow: hidden;
   background-color: var(--color-bg-primary);
+}
+
+/* Cell panel wrapper — 240px fixed sidebar (UI-SPEC Section 5) */
+/* display toggled by App.tsx inline style — display:none prevents layout shift (Pitfall 4) */
+.cell-panel-wrapper {
+  width: 240px;
+  flex-shrink: 0;
+  flex-direction: column;
+  border-left: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-secondary);
+  overflow-y: auto;
+}
+
+/* Cell panel component (UI-SPEC Section 9) */
+.cell-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cell-panel__header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border-tertiary);
+  flex-shrink: 0;
+}
+
+.cell-panel__title {
+  font-size: var(--text-title);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.cell-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  flex: 1;
+}
+
+/* Property rows (UI-SPEC Section 9 — occupied mode) */
+.cell-panel__props {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cell-panel__prop-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 24px;
+}
+
+.cell-panel__prop-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-secondary);
+  min-width: 80px;
+  flex: 0 0 auto;
+}
+
+.cell-panel__prop-value {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-tertiary);
+  flex: 1;
+  text-align: right;
+}
+
+/* Divider between properties and remove button */
+.cell-panel__divider {
+  border: none;
+  border-top: 1px solid var(--color-border-tertiary);
+  margin: 0;
+}
+
+/* Empty cell text */
+.cell-panel__empty-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* Buttons (UI-SPEC Section 9) */
+.btn {
+  width: 100%;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Accent button — Add Shape (UI-SPEC Section 9) */
+.btn--accent {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn--accent:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--color-accent);
+}
+
+/* Danger button — Remove Shape (UI-SPEC Section 9) */
+.btn--danger {
+  border-color: rgba(239, 68, 68, 0.40);
+  color: var(--color-danger);
+}
+
+.btn--danger:hover {
+  background: var(--color-bg-danger);
+  border-color: var(--color-danger);
 }
