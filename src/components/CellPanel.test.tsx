@@ -28,11 +28,9 @@ describe('CellPanel', () => {
     shapeStore.getState().addShape(0, 0)
     selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
     render(<CellPanel />)
-    expect(screen.getByText('Cell (0, 0)')).toBeTruthy()
-    expect(screen.getByText('Type')).toBeTruthy()
-    expect(screen.getByText('circle')).toBeTruthy()
-    expect(screen.getByText('Hue')).toBeTruthy()
-    expect(screen.getByText('Remove Shape')).toBeTruthy()
+    expect(screen.getByText('Cell (0, 0)')).toBeTruthy()           // header unchanged
+    expect(screen.getByLabelText(/Hue, 0 to 360/i)).toBeTruthy()  // HSV slider present
+    expect(screen.getByText('Remove Shape')).toBeTruthy()          // remove button still present
   })
 
   it('Add Shape button calls shapeStore.addShape', () => {

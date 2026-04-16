@@ -1,17 +1,18 @@
 // src/components/CellPanel.tsx
 // Right sidebar panel — shows cell content based on occupancy (D-06, CONTEXT.md)
-// Reads: selectionStore (selectedCell), shapeStore (shape at cell)
-// Writes: shapeStore.addShape, shapeStore.removeShape, selectionStore.setSelectedCell
+// Phase 4: occupied mode replaced with full interactive editor (PANL-01/02/03)
 import { useMemo } from 'react'
 import { useSelectionStore } from '../store/selectionStore'
 import { selectionStore } from '../store/selectionStore'
 import { useShapeStore } from '../store/shapeStore'
 import { shapeStore } from '../store/shapeStore'
+import type { Shape } from '../store/shapeStore'
 import { selectShapeAt } from '../store/selectors'
+import { HsvSliders } from './HsvSliders'
+import { ShapeTypeSelector } from './ShapeTypeSelector'
 
 export function CellPanel() {
   const selectedCell = useSelectionStore((s) => s.selectedCell)
-  // Memoize selector to avoid new function reference each render (RESEARCH.md open question)
   const shapeSelector = useMemo(
     () => selectedCell ? selectShapeAt(selectedCell.col, selectedCell.row) : () => undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -19,19 +20,22 @@ export function CellPanel() {
   )
   const shape = useShapeStore(shapeSelector)
 
-  // No cell selected — render nothing; display:none handled on wrapper in App.tsx
   if (!selectedCell) return null
 
   const { col, row } = selectedCell
 
   function handleAddShape(): void {
     shapeStore.getState().addShape(col, row)
-    // Panel stays open — useShapeStore re-renders with new shape (occupied mode)
   }
 
   function handleRemoveShape(): void {
     shapeStore.getState().removeShape(col, row)
-    selectionStore.getState().setSelectedCell(null)  // D-10: close panel after remove
+    selectionStore.getState().setSelectedCell(null)
+  }
+
+  function handleUpdateShape(patch: Partial<Shape>): void {
+    if (!shape) return
+    shapeStore.getState().updateShape(shape.id, patch)
   }
 
   return (
@@ -46,25 +50,80 @@ export function CellPanel() {
 
       {shape ? (
         <div className="cell-panel__body">
-          <div className="cell-panel__props">
-            <div className="cell-panel__prop-row">
-              <span className="cell-panel__prop-label">Type</span>
-              <span className="cell-panel__prop-value">{shape.type}</span>
+
+          {/* Color section — PANL-01 (D-01/02/03) */}
+          <p className="cell-panel__section-heading">Color</p>
+          <HsvSliders
+            color={shape.color}
+            onChange={(color) => handleUpdateShape({ color })}
+          />
+
+          <hr className="cell-panel__divider" />
+
+          {/* Size section — PANL-02 (D-04/05/06) */}
+          <p className="cell-panel__section-heading">Size</p>
+          <div className="control-group">
+            <div className="control-group__label-row">
+              <label className="control-group__label" htmlFor="slider-size">Size</label>
+              <span className="control-group__readout">{shape.size}%</span>
             </div>
-            <div className="cell-panel__prop-row">
-              <span className="cell-panel__prop-label">Hue</span>
-              <span className="cell-panel__prop-value">{shape.color.h}</span>
-            </div>
-            <div className="cell-panel__prop-row">
-              <span className="cell-panel__prop-label">Saturation</span>
-              <span className="cell-panel__prop-value">{shape.color.s}</span>
-            </div>
-            <div className="cell-panel__prop-row">
-              <span className="cell-panel__prop-label">Lightness</span>
-              <span className="cell-panel__prop-value">{shape.color.l}</span>
+            <div className="slider-wrap">
+              <div
+                className="slider-wrap__track"
+                style={{ background: 'var(--color-bg-tertiary)' }}
+              />
+              <input
+                id="slider-size"
+                type="range"
+                min={0}
+                max={100}
+                value={shape.size}
+                onChange={(e) => handleUpdateShape({ size: Number(e.target.value) })}
+                aria-label="Size, 0 to 100"
+              />
             </div>
           </div>
+
           <hr className="cell-panel__divider" />
+
+          {/* Shape type section — D-07/08 */}
+          <p className="cell-panel__section-heading">Shape</p>
+          <ShapeTypeSelector
+            currentType={shape.type}
+            shapeColor={shape.color}
+            onChange={(type) => handleUpdateShape({ type })}
+          />
+
+          <hr className="cell-panel__divider" />
+
+          {/* Animation section — PANL-03 (D-11/14) */}
+          <p className="cell-panel__section-heading">Animation</p>
+          <div className="control-group">
+            <div className="control-group__label-row">
+              <label className="control-group__label" htmlFor="slider-anim-rate">Rate</label>
+              <span className="control-group__readout">{shape.animRate.toFixed(1)} Hz</span>
+            </div>
+            <div className="slider-wrap">
+              <div
+                className="slider-wrap__track"
+                style={{ background: 'var(--color-bg-tertiary)' }}
+              />
+              <input
+                id="slider-anim-rate"
+                type="range"
+                min={0.1}
+                max={10}
+                step={0.1}
+                value={shape.animRate}
+                onChange={(e) => handleUpdateShape({ animRate: Number(e.target.value) })}
+                aria-label="Animation rate, 0.1 to 10 Hz"
+              />
+            </div>
+          </div>
+
+          <hr className="cell-panel__divider" />
+
+          {/* Remove Shape — unchanged from Phase 3 */}
           <button
             className="btn btn--danger"
             onClick={handleRemoveShape}
@@ -72,6 +131,7 @@ export function CellPanel() {
           >
             Remove Shape
           </button>
+
         </div>
       ) : (
         <div className="cell-panel__body">

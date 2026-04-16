@@ -6,13 +6,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { ShapeType, ShapeColor } from '../store/shapeStore'
 
-// Wave 0 stub: set to null until Wave 3 creates ShapeTypeSelector.tsx, then replace with:
-//   import { ShapeTypeSelector } from './ShapeTypeSelector'
-const ShapeTypeSelector: React.ComponentType<{
-  currentType: ShapeType
-  shapeColor: ShapeColor
-  onChange: (type: ShapeType) => void
-}> | null = null
+import { ShapeTypeSelector } from './ShapeTypeSelector'
 
 const ALL_TYPES: ShapeType[] = ['circle', 'triangle', 'square', 'diamond', 'star', 'blob']
 const defaultColor: ShapeColor = { h: 220, s: 70, l: 30 }
