@@ -18,10 +18,10 @@ export function App() {
       {/* Canvas area — flex row: canvas + cell panel (D-06, UI-SPEC Section 5) */}
       <main className="canvas-area">
         <CanvasContainer />
-        {/* Panel wrapper: display:none when no selection prevents layout shift (Pitfall 4) */}
+        {/* Panel wrapper: visibility:hidden keeps 240px reserved so canvas never resizes */}
         <div
           className="cell-panel-wrapper"
-          style={{ display: selectedCell ? 'flex' : 'none' }}
+          style={{ visibility: selectedCell ? 'visible' : 'hidden' }}
         >
           <CellPanel />
         </div>

@@ -76,7 +76,7 @@ export function CanvasContainer() {
         onClick={handleClick}
         role="application"
         aria-label="Shape music sequencer canvas"
-        style={{ display: 'block', width: '100%', height: '70vh' }}
+        style={{ display: 'block', width: '100%', height: '100%' }}
       />
       {/* Hint text — updated for Phase 3 click model (UI-SPEC Section 10) */}
       <span

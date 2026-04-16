@@ -103,9 +103,10 @@ body {
 /* Cell panel wrapper — 240px fixed sidebar (UI-SPEC Section 5) */
 /* display toggled by App.tsx inline style — display:none prevents layout shift (Pitfall 4) */
 .cell-panel-wrapper {
+  display: flex;
+  flex-direction: column;
   width: 240px;
   flex-shrink: 0;
-  flex-direction: column;
   border-left: 1px solid var(--color-border-secondary);
   background: var(--color-bg-secondary);
   overflow-y: auto;
