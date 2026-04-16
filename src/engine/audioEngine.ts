@@ -274,30 +274,146 @@ function createVoice(shape: Shape): void {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// updateVoiceColor — glitch-free color parameter update on a live voice (D-13)
+// Uses setTargetAtTime (τ=0.015s) for smooth transitions (Pattern 2)
+// WaveShaper.curve is NOT an AudioParam — direct assignment is correct (Pitfall 2)
+// ─────────────────────────────────────────────────────────────────────────────
+export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
+  const voice = voices.get(shapeId)
+  const ctx = getAudioContext()
+  if (!voice || !ctx) return
+  // Frequency — only OscillatorNode has frequency AudioParam (not blob's BufferSource)
+  if (voice.oscillator instanceof OscillatorNode) {
+    voice.oscillator.frequency.setTargetAtTime(colorToFrequency(color), ctx.currentTime, 0.015)
+  }
+  // Filter cutoff — always present
+  voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(color.l), ctx.currentTime, 0.015)
+  // Distortion curve — direct assignment (WaveShaper.curve is not an AudioParam)
+  voice.waveshaper.curve = makeDistortionCurve(color.s)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updateVoiceSize — glitch-free gain update on a live voice (D-13)
+// Updates dcOffset.offset (base gain) and lfoGain.gain (LFO amplitude) together
+// to maintain ±40% modulation depth at new size level (D-10)
+// ─────────────────────────────────────────────────────────────────────────────
+export function updateVoiceSize(shapeId: string, size: number): void {
+  const voice = voices.get(shapeId)
+  const ctx = getAudioContext()
+  if (!voice || !ctx) return
+  const newBase = (size / 100) * 0.8
+  // Update DC offset (base gain level)
+  voice.dcOffset.offset.setTargetAtTime(newBase, ctx.currentTime, 0.015)
+  // Update LFO amplitude to maintain ±40% of new base
+  voice.lfoGain.gain.setTargetAtTime(newBase * 0.4, ctx.currentTime, 0.015)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// recreateLfo — destroys and re-creates LFO oscillator only (D-14)
+// Called when shape.animRate changes. Cannot update a running oscillator's
+// frequency and also safely reconnect AudioParam — simpler to rebuild.
+// ─────────────────────────────────────────────────────────────────────────────
+function recreateLfo(shapeId: string, animRate: number): void {
+  const voice = voices.get(shapeId)
+  const ctx = getAudioContext()
+  if (!voice || !ctx) return
+
+  // Stop and disconnect old LFO
+  try { voice.lfoOscillator.stop() } catch { /* already stopped */ }
+  voice.lfoGain.disconnect()
+  voice.lfoOscillator.disconnect()
+
+  // Get current base gain from dcOffset
+  const baseGain = voice.dcOffset.offset.value
+
+  // Create new LFO at new rate
+  const newLfoOsc = ctx.createOscillator()
+  newLfoOsc.type = 'sine'
+  newLfoOsc.frequency.value = animRate
+  const newLfoGain = ctx.createGain()
+  newLfoGain.gain.value = baseGain * 0.4
+
+  newLfoOsc.connect(newLfoGain)
+  newLfoGain.connect(voice.gainNode.gain)
+  newLfoOsc.start()
+
+  // Update voice in-place
+  voice.lfoOscillator = newLfoOsc
+  voice.lfoGain = newLfoGain
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // initAudioEngine — call once from CanvasContainer useEffect (mirrors initCanvasEngine)
 // Returns destroy() for React useEffect cleanup
 // ─────────────────────────────────────────────────────────────────────────────
 export function initAudioEngine(): () => void {
-  let prevShapeIds = new Set<string>()
+  let prevShapes = new Map<string, Shape>()  // tracks previous shape values for change detection
 
   const unsubscribe = shapeStore.subscribe((state) => {
     const curr = state.shapes
     const currIds = new Set(curr.map((s) => s.id))
+    const ctx = getAudioContext()  // may be null in jsdom
 
     // Detect additions — create voice for any shape not yet in voices Map
     for (const shape of curr) {
       if (!voices.has(shape.id)) {
         createVoice(shape)
+        prevShapes.set(shape.id, shape)
+      }
+    }
+
+    // Detect property changes on existing voices (Phase 4 — color, size, animRate, type)
+    for (const shape of curr) {
+      const prev = prevShapes.get(shape.id)
+      if (prev && voices.has(shape.id)) {
+        // Color change — update frequency, filter, distortion (D-13)
+        if (shape.color.h !== prev.color.h ||
+            shape.color.s !== prev.color.s ||
+            shape.color.l !== prev.color.l) {
+          updateVoiceColor(shape.id, shape.color)
+        }
+        // Size change — update gain (D-13)
+        if (shape.size !== prev.size) {
+          updateVoiceSize(shape.id, shape.size)
+        }
+        // animRate change — destroy + recreate LFO oscillator only (D-14)
+        if (shape.animRate !== prev.animRate) {
+          recreateLfo(shape.id, shape.animRate)
+        }
+        // Type change — destroy entire voice, re-create with new waveform (D-08)
+        if (shape.type !== prev.type) {
+          const voice = voices.get(shape.id)
+          if (voice && ctx) {
+            voice.gainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+            const idToRecreate = shape.id
+            const shapeSnapshot: Shape = { ...shape }
+            setTimeout(() => {
+              const v = voices.get(idToRecreate)
+              if (v) {
+                try { v.oscillator.stop() } catch { /* already stopped */ }
+                if (v.noiseSource) try { v.noiseSource.stop() } catch { /* already stopped */ }
+                try { v.lfoOscillator.stop() } catch { /* already stopped */ }
+                try { v.dcOffset.stop() } catch { /* already stopped */ }
+                v.gainNode.disconnect()
+                v.lfoGain.disconnect()
+                v.dcOffset.disconnect()
+                voices.delete(idToRecreate)
+                createVoice(shapeSnapshot)  // re-create with new type's waveform
+                prevShapes.set(idToRecreate, shapeSnapshot)
+              }
+            }, 60)
+          }
+        }
+        prevShapes.set(shape.id, shape)
       }
     }
 
     // Detect removals — ramp gain to 0 then stop/disconnect (Phase 3, CANV-03)
     // Gain ramp-out prevents audible click artifact (RESEARCH.md Pitfall 2, Pattern 5)
-    for (const id of prevShapeIds) {
+    for (const id of prevShapes.keys()) {
       if (!currIds.has(id)) {
         const voice = voices.get(id)
         if (voice) {
-          const ctx = getAudioContext()
           if (ctx) {
             // Ramp gain to 0 in τ=0.015s to eliminate click artifact (4τ ≈ 60ms)
             voice.gainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
@@ -317,11 +433,9 @@ export function initAudioEngine(): () => void {
             voices.delete(id)
           }, 60)  // 60ms = ~4 time constants at τ=0.015s → gain < 2% of original
         }
+        prevShapes.delete(id)
       }
     }
-
-    // Update prevShapeIds for next subscription fire
-    prevShapeIds = new Set(currIds)
   })
 
   return function destroy(): void {
@@ -336,6 +450,7 @@ export function initAudioEngine(): () => void {
       try { voice.dcOffset.stop() } catch { /* already stopped */ }
     })
     voices.clear()
+    prevShapes.clear()
     cachedPulseWave = null
     if (audioCtx) {
       void audioCtx.close()
