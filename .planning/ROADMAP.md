@@ -72,7 +72,13 @@ Plans:
   2. The panel size slider changes the shape's visual size and audibly changes its volume
   3. The panel animation rate slider changes the speed of the shape's size oscillation
   4. The shape visibly pulses in size at the configured rate, and the audio amplitude audibly follows that pulsing
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [x] 04-00-PLAN.md — Wave 0: test infrastructure — extend vitest.setup.ts with roundRect mock; scaffold test files for drawShape, HsvSliders, ShapeTypeSelector, store, CellPanel, audioEngine
+- [x] 04-01-PLAN.md — Wave 1: data layer — extend Shape interface with size/animRate; add updateShape action; create drawShape pure helper for all 6 shape types
+- [x] 04-02-PLAN.md — Wave 2a: canvas engine — import drawShape helper, add pulseScale formula, fix dirty-flag for continuous animation
+- [x] 04-03-PLAN.md — Wave 2b: audio engine — LFO per voice (ConstantSourceNode + OscillatorNode), updateVoiceColor, updateVoiceSize, enhanced change detection subscription
+- [x] 04-04-PLAN.md — Wave 3: UI layer — create HsvSliders and ShapeTypeSelector components; replace CellPanel occupied mode; add CSS classes; human-verify checkpoint
 **UI hint**: yes
 
 ### Phase 5: Playback Controls
@@ -97,5 +103,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Scaffold | 3/4 | In progress | - |
 | 2. Audio Engine | 0/3 | Not started | - |
 | 3. Canvas Interaction | 3/4 | In Progress|  |
-| 4. Shape Panel & Animation | 0/? | Not started | - |
+| 4. Shape Panel & Animation | 0/5 | Not started | - |
 | 5. Playback Controls | 0/? | Not started | - |

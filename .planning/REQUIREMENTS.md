@@ -34,9 +34,9 @@ Requirements for initial PoC release. Each maps to roadmap phases.
 
 ### Shape Panel
 
-- [ ] **PANL-01**: Shape edit panel exposes HSV color picker (hue = pitch, saturation = reverb, value = filter)
-- [ ] **PANL-02**: Shape edit panel exposes size slider (controls base amplitude/loudness)
-- [ ] **PANL-03**: Shape edit panel exposes animation rate slider (controls LFO speed)
+- [x] **PANL-01**: Shape edit panel exposes HSV color picker (hue = pitch, saturation = reverb, value = filter)
+- [x] **PANL-02**: Shape edit panel exposes size slider (controls base amplitude/loudness)
+- [x] **PANL-03**: Shape edit panel exposes animation rate slider (controls LFO speed)
 
 ### Playback
 
@@ -93,9 +93,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUDI-01 | Phase 2 | Pending |
 | AUDI-02 | Phase 2 | Pending |
 | ANIM-01 | Phase 4 | Pending |
-| PANL-01 | Phase 4 | Pending |
-| PANL-02 | Phase 4 | Pending |
-| PANL-03 | Phase 4 | Pending |
+| PANL-01 | Phase 4 | Complete |
+| PANL-02 | Phase 4 | Complete |
+| PANL-03 | Phase 4 | Complete |
 | PLAY-01 | Phase 5 | Pending |
 | PLAY-02 | Phase 5 | Pending |
 | PLAY-03 | Phase 5 | Pending |
