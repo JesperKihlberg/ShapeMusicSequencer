@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-04-16T05:35:08.076Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-04-16T05:39:29.053Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 9
+  completed_plans: 10
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 03 (canvas-interaction) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -57,6 +57,7 @@ Progress: [██░░░░░░░░] 25%
 | Phase 01-scaffold P03 | 3 | 2 tasks | 4 files |
 | Phase 03-canvas-interaction P01 | 2 | 2 tasks | 4 files |
 | Phase 03-canvas-interaction P02 | 3 min | 2 tasks | 4 files |
+| Phase 03-canvas-interaction P03 | 2 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 03-canvas-interaction]: removeShape uses Immer findIndex+splice mutation matching existing shapeStore patterns
 - [Phase 03-canvas-interaction]: useMemo wraps selectShapeAt selector in CellPanel to stabilize function reference across renders
 - [Phase 03-canvas-interaction]: display:none on cell-panel-wrapper (not conditional rendering) prevents canvas layout shift per UI-SPEC Pitfall 4
+- [Phase 03-canvas-interaction]: Click handler routes to selectionStore.setSelectedCell instead of shapeStore.addShape — decouples input from shape creation
+- [Phase 03-canvas-interaction]: gain.setTargetAtTime(τ=0.015) + setTimeout(60ms) for voice removal prevents audible click artifact
 
 ### Pending Todos
 
@@ -92,6 +95,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:35:08.072Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-04-16T05:39:29.050Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None
