@@ -10,8 +10,8 @@ Requirements for initial PoC release. Each maps to roadmap phases.
 ### Canvas
 
 - [ ] **CANV-01**: User can place a shape on any empty grid cell (4x4 grid, up to 16 cells)
-- [ ] **CANV-02**: User can click a placed shape to open the property edit panel
-- [ ] **CANV-03**: User can remove a placed shape from the canvas
+- [x] **CANV-02**: User can click a placed shape to open the property edit panel
+- [x] **CANV-03**: User can remove a placed shape from the canvas
 
 ### Shapes
 
@@ -84,8 +84,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CANV-01 | Phase 1 | In Progress (Plan 01 scaffold complete; Plans 02-04 implement store/engine/interaction) |
-| CANV-02 | Phase 3 | Pending |
-| CANV-03 | Phase 3 | Pending |
+| CANV-02 | Phase 3 | Complete |
+| CANV-03 | Phase 3 | Complete |
 | SHPE-01 | Phase 2 | Pending |
 | COLR-01 | Phase 2 | Pending |
 | COLR-02 | Phase 2 | Pending |

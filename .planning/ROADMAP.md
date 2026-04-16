@@ -57,7 +57,7 @@ Plans:
   3. After removing a shape, its grid cell becomes available for a new shape
 **Plans**: 4 plans
 Plans:
-- [ ] 03-01-PLAN.md — Fix pre-existing shapeStore test failure; add removeShape to shapeStore; create selectionStore + tests
+- [x] 03-01-PLAN.md — Fix pre-existing shapeStore test failure; add removeShape to shapeStore; create selectionStore + tests
 - [ ] 03-02-PLAN.md — Create CellPanel React component (empty/occupied modes, Add Shape, Remove Shape); update App.tsx layout and CSS
 - [ ] 03-03-PLAN.md — Refactor CanvasContainer click routing to selectionStore; add Escape/Delete/Backspace keyboard handler; extend audioEngine voice removal
 - [ ] 03-04-PLAN.md — Add selectionStore subscription and drawSelection highlight to canvasEngine; human-verify checkpoint
@@ -96,6 +96,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 3/4 | In progress | - |
 | 2. Audio Engine | 0/3 | Not started | - |
-| 3. Canvas Interaction | 0/4 | Not started | - |
+| 3. Canvas Interaction | 1/4 | In Progress|  |
 | 4. Shape Panel & Animation | 0/? | Not started | - |
 | 5. Playback Controls | 0/? | Not started | - |
