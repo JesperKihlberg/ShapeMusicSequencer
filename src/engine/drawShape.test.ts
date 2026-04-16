@@ -1,7 +1,7 @@
 // src/engine/drawShape.test.ts
-// Wave 0 scaffold — drawShape tests are stubs until Wave 1 creates src/engine/drawShape.ts
-// pulseScale formula tests are pure math and pass immediately
+// Wave 1 — drawShape.ts now exists; import the real function
 import { describe, it, expect } from 'vitest'
+import { drawShape as importedDrawShape } from './drawShape'
 
 // drawShape is a pure canvas function — use a mock ctx object
 const makeMockCtx = () => ({
@@ -22,16 +22,15 @@ const makeMockCtx = () => ({
 type ShapeType = 'circle' | 'square' | 'triangle' | 'diamond' | 'star' | 'blob'
 interface ShapeColor { h: number; s: number; l: number }
 
-// Wave 0 stub: drawShape will be imported from './drawShape' once Wave 1 creates the file.
-// Until then, tests use a no-op that allows the test file to load without errors.
-let drawShape: ((
+// Wave 1: drawShape.ts now exists — use the real import.
+const drawShape: ((
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
   radius: number,
   type: ShapeType,
   color: ShapeColor,
-) => void) | null = null
+) => void) | null = importedDrawShape
 
 describe('drawShape', () => {
   // These tests will be RED (drawShape is null) until Wave 1 creates src/engine/drawShape.ts
