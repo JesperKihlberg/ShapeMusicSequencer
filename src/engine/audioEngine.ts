@@ -90,6 +90,9 @@ export interface AudioVoice {
   filter: BiquadFilterNode
   gainNode: GainNode
   noiseSource?: AudioBufferSourceNode  // blob only
+  lfoOscillator: OscillatorNode         // Phase 4 — LFO for amplitude modulation (D-09)
+  lfoGain: GainNode                     // Phase 4 — scales LFO amplitude (D-10)
+  dcOffset: ConstantSourceNode          // Phase 4 — DC base gain (avoids AudioParam sum confusion)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -148,10 +151,47 @@ function createNoiseBuffer(ctx: AudioContext): AudioBuffer {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// createLfo — builds a ConstantSourceNode (DC offset) + OscillatorNode (LFO)
+// topology for one voice's gainNode.gain AudioParam.
+// DC offset: ramps from 0 to baseGain in 10ms (click-free ramp-in).
+// LFO: swings ±40% of baseGain at animRate Hz (D-10).
+// Both sources connect additively to gainNode.gain (gainNode.gain.value = 0).
+// ─────────────────────────────────────────────────────────────────────────────
+function createLfo(
+  ctx: AudioContext,
+  gainNode: GainNode,
+  shape: Shape,
+): { lfoOscillator: OscillatorNode; lfoGain: GainNode; dcOffset: ConstantSourceNode } {
+  const baseGain = (shape.size / 100) * 0.8  // size=50 → 0.4 (matches Phase 3 ramp-in target)
+  gainNode.gain.value = 0  // All gain comes from dcOffset + lfoGain
+
+  // DC offset: ConstantSourceNode provides base gain level
+  const dcOffset = ctx.createConstantSource()
+  dcOffset.offset.setValueAtTime(0, ctx.currentTime)
+  dcOffset.offset.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)
+  dcOffset.connect(gainNode.gain)
+  dcOffset.start()  // CRITICAL — ConstantSourceNode must be started (Pitfall 6)
+
+  // LFO oscillator: sine wave at animRate Hz, modulates ±40% of baseGain
+  const lfoOscillator = ctx.createOscillator()
+  lfoOscillator.type = 'sine'
+  lfoOscillator.frequency.value = shape.animRate
+
+  const lfoGain = ctx.createGain()
+  lfoGain.gain.value = baseGain * 0.4  // ±40% swing amplitude (D-10)
+
+  lfoOscillator.connect(lfoGain)
+  lfoGain.connect(gainNode.gain)  // additive with dcOffset
+  lfoOscillator.start()
+
+  return { lfoOscillator, lfoGain, dcOffset }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // createVoice — builds the signal chain for one shape (D-09, Pattern 4)
 // Signal path (standard): OscillatorNode → WaveShaperNode → BiquadFilterNode → GainNode → masterGain
 // Signal path (blob):      [noiseSource + sineOsc] → mixer GainNode → WaveShaperNode → BiquadFilterNode → GainNode → masterGain
-// Gain ramp-in: start at 0, ramp to 0.4 in 10ms to avoid click artifact (Pitfall 2)
+// Gain: ConstantSourceNode (DC offset) + LFO oscillator drive gainNode.gain (Phase 4 D-09, D-10)
 // ─────────────────────────────────────────────────────────────────────────────
 function createVoice(shape: Shape): void {
   const ctx = getAudioContext()
@@ -168,9 +208,8 @@ function createVoice(shape: Shape): void {
   filter.Q.value = 1
 
   const gainNode = ctx.createGain()
-  // Ramp from 0 to 0.4 to avoid click artifact (Pitfall 2)
-  gainNode.gain.setValueAtTime(0, ctx.currentTime)
-  gainNode.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 0.01)
+  // LFO topology — DC offset + LFO oscillator (Phase 4 D-09, D-10)
+  // gainNode.gain is driven by dcOffset + lfoGain instead of direct value assignment
 
   const waveDesc = shapeTypeToWave(shape.type)
   const freq = colorToFrequency(shape.color)
@@ -209,7 +248,8 @@ function createVoice(shape: Shape): void {
     noiseSource.start()
     sineOsc.start()
 
-    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, noiseSource })
+    const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
+    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, noiseSource, lfoOscillator, lfoGain, dcOffset })
   } else {
     // Standard oscillator path (circle, triangle, square, star, diamond)
     const osc = ctx.createOscillator()
@@ -227,7 +267,9 @@ function createVoice(shape: Shape): void {
     gainNode.connect(mg)
 
     osc.start()
-    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode })
+
+    const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
+    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, lfoOscillator, lfoGain, dcOffset })
   }
 }
 
@@ -265,6 +307,12 @@ export function initAudioEngine(): () => void {
             if (voice.noiseSource) {
               try { voice.noiseSource.stop() } catch { /* already stopped */ }
             }
+            // Stop and disconnect LFO nodes (Phase 4)
+            try { voice.lfoOscillator.stop() } catch { /* already stopped */ }
+            voice.lfoGain.disconnect()
+            voice.lfoOscillator.disconnect()
+            try { voice.dcOffset.stop() } catch { /* already stopped */ }
+            voice.dcOffset.disconnect()
             voice.gainNode.disconnect()
             voices.delete(id)
           }, 60)  // 60ms = ~4 time constants at τ=0.015s → gain < 2% of original
@@ -284,6 +332,8 @@ export function initAudioEngine(): () => void {
       if (voice.noiseSource) {
         try { voice.noiseSource.stop() } catch { /* already stopped */ }
       }
+      try { voice.lfoOscillator.stop() } catch { /* already stopped */ }
+      try { voice.dcOffset.stop() } catch { /* already stopped */ }
     })
     voices.clear()
     cachedPulseWave = null
