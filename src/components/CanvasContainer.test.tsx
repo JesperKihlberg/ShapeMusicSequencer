@@ -1,16 +1,12 @@
-// Integration tests for CanvasContainer — Plan 04 (CANV-01)
-// Covers: click-to-place flow end-to-end: mouse event → cellAtPoint → shapeStore.addShape
+// Integration tests for CanvasContainer — Phase 3 (CANV-02, CANV-03)
+// Covers: click-to-select, Escape clear, Delete/Backspace remove
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, fireEvent } from '@testing-library/react'
 import { CanvasContainer } from './CanvasContainer'
+import { selectionStore } from '../store/selectionStore'
 import { shapeStore } from '../store/shapeStore'
 
-// Helper: set up canvas dimensions for jsdom (defaults to 0x0)
-function setCanvasSize(
-  canvas: HTMLCanvasElement,
-  width: number,
-  height: number
-) {
+function setCanvasSize(canvas: HTMLCanvasElement, width: number, height: number): void {
   Object.defineProperty(canvas, 'width', { value: width, configurable: true })
   Object.defineProperty(canvas, 'height', { value: height, configurable: true })
   canvas.getBoundingClientRect = () => ({
@@ -19,8 +15,9 @@ function setCanvasSize(
   })
 }
 
-describe('CanvasContainer integration — click-to-place', () => {
+describe('CanvasContainer — click-to-select (Phase 3)', () => {
   beforeEach(() => {
+    selectionStore.setState({ selectedCell: null })
     shapeStore.setState({ shapes: [] })
   })
 
@@ -28,40 +25,103 @@ describe('CanvasContainer integration — click-to-place', () => {
     vi.restoreAllMocks()
   })
 
-  it('clicking an empty cell calls shapeStore.addShape with correct col/row', () => {
+  it('clicking a cell sets selectionStore.selectedCell', () => {
     const { container } = render(<CanvasContainer />)
     const canvas = container.querySelector('canvas')!
-
     // 400x400: cellSize=100, no offset. Click at (50,50) → col=0, row=0
     setCanvasSize(canvas, 400, 400)
-
-    // Spy AFTER render so we intercept the actual state object the component uses
-    const state = shapeStore.getState()
-    const addShapeSpy = vi.spyOn(state, 'addShape')
-    // Replace the state object so the component's getState() returns our spied version
-    shapeStore.setState(state)
-
     fireEvent.click(canvas, { clientX: 50, clientY: 50 })
+    expect(selectionStore.getState().selectedCell).toEqual({ col: 0, row: 0 })
+  })
 
-    expect(shapeStore.getState().shapes).toHaveLength(1)
-    expect(shapeStore.getState().shapes[0]).toMatchObject({ col: 0, row: 0 })
+  it('clicking a cell does NOT call shapeStore.addShape directly', () => {
+    const { container } = render(<CanvasContainer />)
+    const canvas = container.querySelector('canvas')!
+    setCanvasSize(canvas, 400, 400)
+    const addShapeSpy = vi.spyOn(shapeStore.getState(), 'addShape')
+    shapeStore.setState(shapeStore.getState())
+    fireEvent.click(canvas, { clientX: 50, clientY: 50 })
+    expect(addShapeSpy).not.toHaveBeenCalled()
+    expect(shapeStore.getState().shapes).toHaveLength(0)
     addShapeSpy.mockRestore()
   })
 
-  it('clicking an occupied cell does not add a second shape', () => {
-    // Pre-place a shape at col=0, row=0
-    shapeStore.getState().addShape(0, 0)
-    expect(shapeStore.getState().shapes).toHaveLength(1)
-
+  it('clicking the same cell twice is a no-op on the second click', () => {
     const { container } = render(<CanvasContainer />)
     const canvas = container.querySelector('canvas')!
-
     setCanvasSize(canvas, 400, 400)
-
-    // Click the same occupied cell
+    const setSelectedSpy = vi.spyOn(selectionStore.getState(), 'setSelectedCell')
+    selectionStore.setState(selectionStore.getState())
     fireEvent.click(canvas, { clientX: 50, clientY: 50 })
+    fireEvent.click(canvas, { clientX: 50, clientY: 50 })  // same cell
+    // setSelectedCell should only be called once (second click is same cell → no-op)
+    expect(setSelectedSpy).toHaveBeenCalledTimes(1)
+    setSelectedSpy.mockRestore()
+  })
 
-    // Store still has only 1 shape — occupied cell guard in addShape
+  it('clicking outside grid bounds does not change selection', () => {
+    // Use 600x400: cellSize=100, gridPx=400, offsetX=100 — clicks at x=10 are in gutter
+    const { container } = render(<CanvasContainer />)
+    const canvas = container.querySelector('canvas')!
+    setCanvasSize(canvas, 600, 400)
+    selectionStore.setState({ selectedCell: null })
+    fireEvent.click(canvas, { clientX: 10, clientY: 200 })  // x=10 is in left gutter (offsetX=100)
+    expect(selectionStore.getState().selectedCell).toBeNull()
+  })
+
+  it('hint text says "Click any cell to select it"', () => {
+    const { container } = render(<CanvasContainer />)
+    expect(container.textContent).toContain('Click any cell to select it')
+  })
+})
+
+describe('CanvasContainer — keyboard shortcuts (Phase 3)', () => {
+  beforeEach(() => {
+    selectionStore.setState({ selectedCell: null })
+    shapeStore.setState({ shapes: [] })
+  })
+
+  it('Escape clears selection', () => {
+    render(<CanvasContainer />)
+    selectionStore.setState({ selectedCell: { col: 1, row: 1 } })
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(selectionStore.getState().selectedCell).toBeNull()
+  })
+
+  it('Delete while occupied cell selected removes shape and clears selection', () => {
+    shapeStore.getState().addShape(2, 2)
+    selectionStore.setState({ selectedCell: { col: 2, row: 2 } })
+    render(<CanvasContainer />)
+    fireEvent.keyDown(document, { key: 'Delete' })
+    expect(shapeStore.getState().shapes).toHaveLength(0)
+    expect(selectionStore.getState().selectedCell).toBeNull()
+  })
+
+  it('Backspace while occupied cell selected removes shape and clears selection', () => {
+    shapeStore.getState().addShape(0, 3)
+    selectionStore.setState({ selectedCell: { col: 0, row: 3 } })
+    render(<CanvasContainer />)
+    fireEvent.keyDown(document, { key: 'Backspace' })
+    expect(shapeStore.getState().shapes).toHaveLength(0)
+    expect(selectionStore.getState().selectedCell).toBeNull()
+  })
+
+  it('Delete while empty cell selected is a no-op', () => {
+    selectionStore.setState({ selectedCell: { col: 1, row: 1 } })
+    render(<CanvasContainer />)
+    fireEvent.keyDown(document, { key: 'Delete' })
+    // Cell is empty, nothing to remove
+    expect(shapeStore.getState().shapes).toHaveLength(0)
+    // Selection cleared only when a shape is present; empty cell + Delete = no-op
+    // (RESEARCH.md Pattern 7: shape is undefined → if(shape) guard)
+    expect(selectionStore.getState().selectedCell).toEqual({ col: 1, row: 1 })
+  })
+
+  it('keyboard shortcuts do nothing when no cell is selected', () => {
+    render(<CanvasContainer />)
+    shapeStore.getState().addShape(0, 0)
+    // No selection — Delete should not remove the shape
+    fireEvent.keyDown(document, { key: 'Delete' })
     expect(shapeStore.getState().shapes).toHaveLength(1)
   })
 })

@@ -1,10 +1,10 @@
 // src/components/CanvasContainer.tsx
 // React wrapper that mounts the canvas engine after the DOM is ready.
-// Pattern: useEffect with empty deps → mount once; return destroy as cleanup.
-// (RESEARCH.md Pattern 4, Pitfall 5 — static import, not dynamic)
+// Phase 3: handleClick routes to selectionStore (not addShape directly — D-02).
+//   Keyboard handler: Escape clears selection; Delete/Backspace removes shape (D-08, D-09).
 import { useEffect, useRef } from 'react'
-import { initCanvasEngine } from '../engine/canvasEngine'
-import { cellAtPoint } from '../engine/canvasEngine'
+import { initCanvasEngine, cellAtPoint } from '../engine/canvasEngine'
+import { selectionStore } from '../store/selectionStore'
 import { shapeStore } from '../store/shapeStore'
 import { initAudioEngine } from '../engine/audioEngine'
 
@@ -12,8 +12,7 @@ export function CanvasContainer() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Mount the canvas engine and audio engine once after first render.
-  // Returned destroy functions called on unmount (React StrictMode fires twice in dev — OK).
+  // Mount canvas engine and audio engine once after first render.
   useEffect(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
@@ -24,38 +23,62 @@ export function CanvasContainer() {
       destroyCanvas()
       destroyAudio()
     }
-  }, []) // empty deps — mount once (D-04)
+  }, [])
 
-  // Translate mouse click to a grid cell and dispatch addShape to the store.
-  // cellAtPoint operates in logical (CSS) pixels — no DPR scaling needed here.
-  // rect dimensions from getBoundingClientRect are already in CSS pixels.
+  // Document-level keyboard handler (D-08, D-09, UI-SPEC Section 7)
+  // Reads selectionStore synchronously — no stale closure (RESEARCH.md Pitfall 1)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent): void {
+      const selected = selectionStore.getState().selectedCell
+      if (!selected) return  // no selection — all shortcuts are no-ops
+
+      if (e.key === 'Escape') {
+        selectionStore.getState().setSelectedCell(null)
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        const shape = shapeStore.getState().shapes.find(
+          (s) => s.col === selected.col && s.row === selected.row,
+        )
+        if (shape) {
+          shapeStore.getState().removeShape(selected.col, selected.row)
+          selectionStore.getState().setSelectedCell(null)  // D-10: close panel after remove
+        }
+        // Empty cell selected + Delete → no-op (shape is undefined)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])  // mount once — reads store synchronously, no stale closure issue
+
+  // Click handler — routes to selectionStore, NOT addShape (Phase 3 refactor, D-01, D-02)
+  // cellAtPoint operates in logical (CSS) pixels — getBoundingClientRect dimensions used.
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
-    // Use logical (CSS) pixel coordinates — consistent with cellAtPoint's coordinate space
-    const logicalX = e.clientX - rect.left
-    const logicalY = e.clientY - rect.top
-    const logicalW = rect.width
-    const logicalH = rect.height
-    const cell = cellAtPoint(logicalX, logicalY, logicalW, logicalH)
+    const cell = cellAtPoint(
+      e.clientX - rect.left,
+      e.clientY - rect.top,
+      rect.width,
+      rect.height,
+    )
     if (!cell) return
-    shapeStore.getState().addShape(cell.col, cell.row)
+    // Same-cell click is a no-op (D-08: clicking same cell leaves selection as-is)
+    const current = selectionStore.getState().selectedCell
+    if (current?.col === cell.col && current?.row === cell.row) return
+    selectionStore.getState().setSelectedCell(cell)
   }
 
   return (
-    <div
-      ref={containerRef}
-      style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
-    >
+    <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
       <canvas
         ref={canvasRef}
         onClick={handleClick}
         role="application"
         aria-label="Shape music sequencer canvas"
-        style={{ display: 'block', width: '100%', height: '100%' }}
+        style={{ display: 'block', width: '100%', height: '70vh' }}
       />
-      {/* Hint text overlay — bottom-left, pointer-events: none (UI-SPEC Section 9) */}
+      {/* Hint text — updated for Phase 3 click model (UI-SPEC Section 10) */}
       <span
         style={{
           position: 'absolute',
@@ -67,7 +90,7 @@ export function CanvasContainer() {
           userSelect: 'none',
         }}
       >
-        Click an empty cell to place a shape
+        Click any cell to select it
       </span>
     </div>
   )
