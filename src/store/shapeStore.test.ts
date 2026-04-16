@@ -105,3 +105,52 @@ describe('shapeStore — removeShape', () => {
     expect(shapeStore.getState().shapes[0]).toMatchObject({ col: 3, row: 3 })
   })
 })
+
+describe('shapeStore — Phase 4 fields and updateShape', () => {
+  beforeEach(() => {
+    shapeStore.setState({ shapes: [] })
+    shapeStore.temporal.getState().clear()
+  })
+
+  it('addShape creates shape with size=50 by default', () => {
+    shapeStore.getState().addShape(0, 0)
+    const shape = shapeStore.getState().shapes[0]
+    expect(shape?.size).toBe(50)
+  })
+
+  it('addShape creates shape with animRate=1.0 by default', () => {
+    shapeStore.getState().addShape(0, 0)
+    const shape = shapeStore.getState().shapes[0]
+    expect(shape?.animRate).toBe(1.0)
+  })
+
+  it('updateShape patches color on existing shape', () => {
+    shapeStore.getState().addShape(0, 0)
+    const id = shapeStore.getState().shapes[0]!.id
+    shapeStore.getState().updateShape(id, { color: { h: 180, s: 50, l: 60 } })
+    const shape = shapeStore.getState().shapes[0]
+    expect(shape?.color).toEqual({ h: 180, s: 50, l: 60 })
+  })
+
+  it('updateShape patches size on existing shape', () => {
+    shapeStore.getState().addShape(0, 0)
+    const id = shapeStore.getState().shapes[0]!.id
+    shapeStore.getState().updateShape(id, { size: 75 })
+    expect(shapeStore.getState().shapes[0]?.size).toBe(75)
+  })
+
+  it('updateShape patches animRate on existing shape', () => {
+    shapeStore.getState().addShape(0, 0)
+    const id = shapeStore.getState().shapes[0]!.id
+    shapeStore.getState().updateShape(id, { animRate: 5.0 })
+    expect(shapeStore.getState().shapes[0]?.animRate).toBe(5.0)
+  })
+
+  it('updateShape is a no-op when id not found', () => {
+    shapeStore.getState().addShape(0, 0)
+    const before = shapeStore.getState().shapes[0]?.color
+    shapeStore.getState().updateShape('non-existent-id', { size: 99 })
+    expect(shapeStore.getState().shapes[0]?.color).toEqual(before)
+    expect(shapeStore.getState().shapes).toHaveLength(1)
+  })
+})

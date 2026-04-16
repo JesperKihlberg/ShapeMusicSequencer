@@ -28,6 +28,7 @@ HTMLCanvasElement.prototype.getContext = function () {
     strokeRect: () => {},
     fill: () => {},
     arc: () => {},
+    roundRect: () => {},
     scale: () => {},
     rotate: () => {},
     translate: () => {},
