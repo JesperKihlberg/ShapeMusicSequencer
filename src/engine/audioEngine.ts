@@ -240,14 +240,40 @@ export function initAudioEngine(): () => void {
 
   const unsubscribe = shapeStore.subscribe((state) => {
     const curr = state.shapes
+    const currIds = new Set(curr.map((s) => s.id))
+
     // Detect additions — create voice for any shape not yet in voices Map
     for (const shape of curr) {
       if (!voices.has(shape.id)) {
         createVoice(shape)
       }
     }
-    // Update prevShapeIds tracking for future removal detection (Phase 3)
-    prevShapeIds = new Set(curr.map((s) => s.id))
+
+    // Detect removals — ramp gain to 0 then stop/disconnect (Phase 3, CANV-03)
+    // Gain ramp-out prevents audible click artifact (RESEARCH.md Pitfall 2, Pattern 5)
+    for (const id of prevShapeIds) {
+      if (!currIds.has(id)) {
+        const voice = voices.get(id)
+        if (voice) {
+          const ctx = getAudioContext()
+          if (ctx) {
+            // Ramp gain to 0 in τ=0.015s to eliminate click artifact (4τ ≈ 60ms)
+            voice.gainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.015)
+          }
+          setTimeout(() => {
+            try { voice.oscillator.stop() } catch { /* already stopped */ }
+            if (voice.noiseSource) {
+              try { voice.noiseSource.stop() } catch { /* already stopped */ }
+            }
+            voice.gainNode.disconnect()
+            voices.delete(id)
+          }, 60)  // 60ms = ~4 time constants at τ=0.015s → gain < 2% of original
+        }
+      }
+    }
+
+    // Update prevShapeIds for next subscription fire
+    prevShapeIds = new Set(currIds)
   })
 
   return function destroy(): void {
