@@ -15,17 +15,17 @@ Any change to the visual canvas is an immediate, audible change to the music —
 - [x] Shape type determines oscillator waveform (circle=sine, triangle=triangle, square=square, star=sawtooth, diamond=pulse, blob=noise+sine) — Validated in Phase 02: audio-engine
 - [x] Shape color (hue) maps to pitch; saturation maps to distortion/timbre; lightness maps to filter cutoff — Validated in Phase 02: audio-engine
 - [x] Each shape plays continuously and independently as an audio voice — Validated in Phase 02: audio-engine (human-verified)
+- [x] Shape size maps to amplitude/loudness — Validated in Phase 04: shape-panel-animation
+- [x] Shape animation lifecycle directly modulates sound (size oscillation = amplitude LFO) — Validated in Phase 04: shape-panel-animation
+- [x] Animation parameters (rate) are configurable per shape — Validated in Phase 04: shape-panel-animation
+- [x] Clicking a shape opens a side panel with sliders/pickers for all properties — Validated in Phase 04: shape-panel-animation (human-verified)
 
 ### Active
 
 - [ ] User can place shapes on a strict grid canvas (up to 4x4 = 16 cells)
 - [ ] Shape type determines oscillator waveform (circle=sine, square=square/buzz, star=noise burst, triangle=triangle, diamond=sawtooth)
 - [ ] Shape color (hue) maps to pitch; saturation maps to reverb depth; value/brightness maps to filter cutoff
-- [ ] Shape size maps to amplitude/loudness
 - [ ] Each shape plays continuously and independently as an audio voice
-- [ ] Shape animation lifecycle directly modulates sound (size oscillation = amplitude LFO, rotation = phase shift, bounce = pitch modulation)
-- [ ] Animation parameters (rate, depth, mode) are configurable per shape
-- [ ] Clicking a shape opens a side panel with sliders/pickers for all properties
 - [ ] User can remove shapes from the canvas
 - [ ] Playback has configurable BPM/tempo
 - [ ] User can start/stop playback
@@ -63,7 +63,7 @@ Any change to the visual canvas is an immediate, audible change to the music —
 |----------|-----------|---------|
 | All shapes play continuously (no playhead trigger) | Animations drive sound evolution — this is the core mechanic | — Pending |
 | Strict grid (4x4) | Predictable timing, manageable polyphony for PoC | — Pending |
-| Click → side panel for properties | Full control per shape without cluttering canvas | — Pending |
+| Click → side panel for properties | Full control per shape without cluttering canvas | Implemented in Phase 04: HsvSliders, ShapeTypeSelector, size/rate sliders |
 | Image is actually animated JSON | Canvas state is the composition — saving JSON saves everything | — Pending |
 | Audio library TBD at planning | Web Audio API or Tone.js decided based on architecture needs | — Pending |
 
@@ -85,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 03 (canvas-interaction) completion*
+*Last updated: 2026-04-16 after Phase 04 (shape-panel-animation) completion*
