@@ -60,7 +60,7 @@ Plans:
 - [x] 03-01-PLAN.md — Fix pre-existing shapeStore test failure; add removeShape to shapeStore; create selectionStore + tests
 - [x] 03-02-PLAN.md — Create CellPanel React component (empty/occupied modes, Add Shape, Remove Shape); update App.tsx layout and CSS
 - [x] 03-03-PLAN.md — Refactor CanvasContainer click routing to selectionStore; add Escape/Delete/Backspace keyboard handler; extend audioEngine voice removal
-- [ ] 03-04-PLAN.md — Add selectionStore subscription and drawSelection highlight to canvasEngine; human-verify checkpoint
+- [x] 03-04-PLAN.md — Add selectionStore subscription and drawSelection highlight to canvasEngine; human-verify checkpoint
 **UI hint**: yes
 
 ### Phase 4: Shape Panel & Animation
