@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-04-16T05:30:03.320Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-04-16T05:35:08.076Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 8
+  completed_plans: 9
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 03 (canvas-interaction) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-16
 
@@ -56,6 +56,7 @@ Progress: [██░░░░░░░░] 25%
 | Phase 01-scaffold P02 | 2 | 2 tasks | 4 files |
 | Phase 01-scaffold P03 | 3 | 2 tasks | 4 files |
 | Phase 03-canvas-interaction P01 | 2 | 2 tasks | 4 files |
+| Phase 03-canvas-interaction P02 | 3 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Recent decisions affecting current work:
 - [Phase 01-scaffold]: void sequencerActor preserves import for Phase 2+ without triggering noUnusedLocals
 - [Phase 03-canvas-interaction]: selectionStore uses createStore from zustand/vanilla — required for canvasEngine non-React subscription
 - [Phase 03-canvas-interaction]: removeShape uses Immer findIndex+splice mutation matching existing shapeStore patterns
+- [Phase 03-canvas-interaction]: useMemo wraps selectShapeAt selector in CellPanel to stabilize function reference across renders
+- [Phase 03-canvas-interaction]: display:none on cell-panel-wrapper (not conditional rendering) prevents canvas layout shift per UI-SPEC Pitfall 4
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:30:03.314Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-04-16T05:35:08.072Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
