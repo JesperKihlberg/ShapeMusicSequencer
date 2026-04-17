@@ -34,11 +34,13 @@ decisions:
   - Start/Stop button label defaults to "Stop" because isPlaying defaults true (D-14 preserved auto-start behavior)
   - beat-selector__btn--active visually mirrors type-selector__btn--active exactly (same border-color + background tokens)
   - computeLfoHz(shape.animRate, bpm) used for Hz readout — live BPM from playbackStore via usePlaybackStore hook
+  - computeLfoHz formula inverted: denominator used as multiplier (fraction * bpm/60) so 1/16 plays fastest
+  - BPM input uses local bpmInput string state; store updated only on blur or +/- click to avoid mid-type clamping
 metrics:
-  duration: "4 min"
+  duration: "25 min"
   completed_date: "2026-04-17"
-  tasks_completed: 2
-  files_modified: 4
+  tasks_completed: 3
+  files_modified: 5
 ---
 
 # Phase 05 Plan 04: PlaybackControls UI + Beat-Fraction Selector Summary
@@ -51,6 +53,7 @@ metrics:
 |------|------|--------|-------|
 | 1 | Create PlaybackControls component and add CSS, mount in App.tsx | a085468 | src/components/PlaybackControls.tsx, src/styles/index.css, src/App.tsx |
 | 2 | Replace animRate Hz slider in CellPanel with beat-fraction selector | c49bcd9 | src/components/CellPanel.tsx |
+| 3 (checkpoint) | Human verification — bug fixes applied post-approval | 14685f7 | src/components/PlaybackControls.tsx, src/store/playbackStore.ts |
 
 ## What Was Built
 
@@ -102,7 +105,21 @@ New classes in Phase 5 section:
 
 ## Deviations from Plan
 
-None — plan executed exactly as written. Both task implementations followed the plan's action blocks precisely with no surprises.
+### Auto-fixed Issues
+
+**1. [Rule 1 - Bug] Inverted computeLfoHz formula — 1/16 played slowest instead of fastest**
+- **Found during:** Human verification (Task 3 checkpoint)
+- **Issue:** The formula `(bpm/60) * (1/fraction)` made higher denominators produce lower Hz values, so the "1/16" button played the slowest animation instead of the fastest — the opposite of the visual label's intent.
+- **Fix:** Changed formula to `(bpm/60) * fraction` so the denominator value acts as a speed multiplier (1=slowest, 16=fastest). This matches the user expectation that "1/16" (sixteenth note) is the fastest subdivision.
+- **Files modified:** src/store/playbackStore.ts
+- **Commit:** 14685f7
+
+**2. [Rule 1 - Bug] BPM input snapped mid-type values — typing "50" before "500" was impossible**
+- **Found during:** Human verification (Task 3 checkpoint)
+- **Issue:** The BPM `onChange` handler called `setBpm(Number(e.target.value))` on every keystroke. Since the store clamps 60–180, typing "5" caused the store to immediately snap to 60 and React re-rendered the input with "60", preventing the user from ever typing "50" or "150".
+- **Fix:** Added local `bpmInput` string state to `PlaybackControls`. The local state holds the raw typed string; `setBpm` is only called on blur or when the +/− buttons are clicked. The input `value` is bound to `bpmInput`, not the store value directly.
+- **Files modified:** src/components/PlaybackControls.tsx
+- **Commit:** 14685f7
 
 ## Known Stubs
 
@@ -119,7 +136,9 @@ Files exist:
 - FOUND: src/components/CellPanel.tsx (modified)
 - FOUND: src/App.tsx (modified)
 - FOUND: src/styles/index.css (modified)
+- FOUND: src/store/playbackStore.ts (modified by bug fix)
 
 Commits:
 - FOUND: a085468 (feat(05-04): create PlaybackControls component and mount in toolbar)
 - FOUND: c49bcd9 (feat(05-04): replace animRate Hz slider in CellPanel with beat-fraction selector)
+- FOUND: 14685f7 (fix(05-04): invert computeLfoHz formula and fix BPM input mid-type reset)
