@@ -1,6 +1,7 @@
 // src/components/PlaybackControls.tsx
 // Toolbar control group: BPM widget + Volume slider + Start/Stop button (D-09, D-10)
 // Order (left to right): BPM → Volume → Start/Stop
+import { useState } from 'react'
 import { usePlaybackStore, playbackStore } from '../store/playbackStore'
 
 export function PlaybackControls() {
@@ -8,33 +9,36 @@ export function PlaybackControls() {
   const bpm = usePlaybackStore((s) => s.bpm)
   const volume = usePlaybackStore((s) => s.volume)
 
+  // Local string state keeps the input stable while the user is mid-type.
+  // Store only updates on blur/button-click, preventing store-driven re-renders
+  // from overwriting partially-typed values (e.g. typing "5" before "50").
+  const [bpmInput, setBpmInput] = useState<string | null>(null)
+  const displayBpm = bpmInput ?? String(bpm)
+
   function handleTogglePlayback(): void {
     playbackStore.getState().setIsPlaying(!isPlaying)
   }
 
   function handleDecrementBpm(): void {
     playbackStore.getState().setBpm(bpm - 1)
+    setBpmInput(null)
   }
 
   function handleIncrementBpm(): void {
     playbackStore.getState().setBpm(bpm + 1)
+    setBpmInput(null)
   }
 
   function handleBpmChange(e: React.ChangeEvent<HTMLInputElement>): void {
-    const v = Number(e.target.value)
-    if (!isNaN(v)) {
-      playbackStore.getState().setBpm(v)
-    }
+    setBpmInput(e.target.value)
   }
 
-  function handleBpmBlur(e: React.FocusEvent<HTMLInputElement>): void {
-    // Snap out-of-range or empty values to nearest bound on blur (UI-SPEC BPM Bounds)
-    const v = Number(e.target.value)
-    if (isNaN(v) || e.target.value === '') {
-      playbackStore.getState().setBpm(bpm)  // restore previous valid value
-    } else {
-      playbackStore.getState().setBpm(v)    // store clamps to 60-180 range
+  function handleBpmBlur(): void {
+    const v = Number(bpmInput)
+    if (bpmInput !== null && !isNaN(v) && bpmInput.trim() !== '') {
+      playbackStore.getState().setBpm(v)
     }
+    setBpmInput(null)
   }
 
   function handleVolumeChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -61,7 +65,7 @@ export function PlaybackControls() {
             min={60}
             max={180}
             step={1}
-            value={bpm}
+            value={displayBpm}
             aria-label="BPM"
             onChange={handleBpmChange}
             onBlur={handleBpmBlur}
