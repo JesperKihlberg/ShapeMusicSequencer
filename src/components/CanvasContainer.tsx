@@ -29,6 +29,18 @@ export function CanvasContainer() {
   // Reads selectionStore synchronously — no stale closure (RESEARCH.md Pitfall 1)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent): void {
+      // Guard: ignore keyboard shortcuts when focus is on a form element.
+      // Prevents Backspace in BPM input from deleting the selected shape.
+      const target = e.target as HTMLElement
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target.isContentEditable
+      ) {
+        return
+      }
+
       const selected = selectionStore.getState().selectedCell
       if (!selected) return  // no selection — all shortcuts are no-ops
 

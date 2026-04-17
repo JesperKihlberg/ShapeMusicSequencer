@@ -125,3 +125,57 @@ describe('CanvasContainer — keyboard shortcuts (Phase 3)', () => {
     expect(shapeStore.getState().shapes).toHaveLength(1)
   })
 })
+
+describe('CanvasContainer — input-element guard (quick-260417-klm)', () => {
+  beforeEach(() => {
+    selectionStore.setState({ selectedCell: null })
+    shapeStore.setState({ shapes: [] })
+  })
+
+  it('Backspace with non-input target (div) removes selected shape', () => {
+    shapeStore.getState().addShape(1, 1)
+    selectionStore.setState({ selectedCell: { col: 1, row: 1 } })
+    render(<CanvasContainer />)
+    const div = document.createElement('div')
+    document.body.appendChild(div)
+    div.focus()
+    fireEvent.keyDown(document, { key: 'Backspace', target: div })
+    expect(shapeStore.getState().shapes).toHaveLength(0)
+    document.body.removeChild(div)
+  })
+
+  it('Backspace with HTMLInputElement as target does NOT remove selected shape', () => {
+    shapeStore.getState().addShape(1, 1)
+    selectionStore.setState({ selectedCell: { col: 1, row: 1 } })
+    render(<CanvasContainer />)
+    const input = document.createElement('input')
+    document.body.appendChild(input)
+    input.focus()
+    fireEvent.keyDown(input, { key: 'Backspace' })
+    expect(shapeStore.getState().shapes).toHaveLength(1)
+    document.body.removeChild(input)
+  })
+
+  it('Delete with HTMLTextAreaElement as target does NOT remove selected shape', () => {
+    shapeStore.getState().addShape(2, 0)
+    selectionStore.setState({ selectedCell: { col: 2, row: 0 } })
+    render(<CanvasContainer />)
+    const textarea = document.createElement('textarea')
+    document.body.appendChild(textarea)
+    textarea.focus()
+    fireEvent.keyDown(textarea, { key: 'Delete' })
+    expect(shapeStore.getState().shapes).toHaveLength(1)
+    document.body.removeChild(textarea)
+  })
+
+  it('Escape with HTMLInputElement as target does NOT clear selection', () => {
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+    render(<CanvasContainer />)
+    const input = document.createElement('input')
+    document.body.appendChild(input)
+    input.focus()
+    fireEvent.keyDown(input, { key: 'Escape' })
+    expect(selectionStore.getState().selectedCell).toEqual({ col: 0, row: 0 })
+    document.body.removeChild(input)
+  })
+})
