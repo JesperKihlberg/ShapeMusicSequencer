@@ -118,10 +118,10 @@ describe('shapeStore — Phase 4 fields and updateShape', () => {
     expect(shape?.size).toBe(50)
   })
 
-  it('addShape creates shape with animRate=1.0 by default', () => {
+  it('addShape creates shape with animRate=2 by default (BeatFraction denominator, D-06)', () => {
     shapeStore.getState().addShape(0, 0)
     const shape = shapeStore.getState().shapes[0]
-    expect(shape?.animRate).toBe(1.0)
+    expect(shape?.animRate).toBe(2)
   })
 
   it('updateShape patches color on existing shape', () => {
@@ -142,8 +142,8 @@ describe('shapeStore — Phase 4 fields and updateShape', () => {
   it('updateShape patches animRate on existing shape', () => {
     shapeStore.getState().addShape(0, 0)
     const id = shapeStore.getState().shapes[0]!.id
-    shapeStore.getState().updateShape(id, { animRate: 5.0 })
-    expect(shapeStore.getState().shapes[0]?.animRate).toBe(5.0)
+    shapeStore.getState().updateShape(id, { animRate: 4 })
+    expect(shapeStore.getState().shapes[0]?.animRate).toBe(4)
   })
 
   it('updateShape is a no-op when id not found', () => {

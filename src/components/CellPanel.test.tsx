@@ -100,11 +100,26 @@ describe('CellPanel — Phase 4 occupied mode controls', () => {
     expect(screen.queryByLabelText(/Size, 0 to 100/i)).toBeTruthy()
   })
 
-  it('renders animation rate slider in occupied mode', () => {
+  it('renders animation rate beat-fraction selector in occupied mode (D-13)', () => {
     shapeStore.getState().addShape(0, 0)
     selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
     render(<CellPanel />)
-    expect(screen.queryByLabelText(/Animation rate/i)).toBeTruthy()
+    expect(screen.queryByRole('group', { name: /Animation rate/i })).toBeTruthy()
+  })
+
+  it('renders 5 beat-fraction buttons in animation rate selector (D-13)', () => {
+    shapeStore.getState().addShape(0, 0)
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+    render(<CellPanel />)
+    const group = screen.queryByRole('group', { name: /Animation rate/i })
+    expect(group).toBeTruthy()
+    const buttons = group?.querySelectorAll('button') ?? []
+    expect(buttons.length).toBe(5)
+    // Labels: 1/1, 1/2, 1/4, 1/8, 1/16
+    const labels = Array.from(buttons).map(b => b.textContent)
+    expect(labels).toContain('1/1')
+    expect(labels).toContain('1/4')
+    expect(labels).toContain('1/16')
   })
 
   it('renders 6 shape type buttons in occupied mode', () => {
