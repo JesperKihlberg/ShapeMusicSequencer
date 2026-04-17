@@ -88,9 +88,15 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User can press a Start button and all placed shapes begin playing audio simultaneously
   2. User can press a Stop button and all audio immediately silences
-  3. Changing the BPM control updates the tempo of the BPM-synced visual playhead
+  3. Changing the BPM control updates the BPM-synced LFO rate of all shape animations
   4. Changing the master volume control audibly scales the output level of all voices
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 05-00-PLAN.md — Wave 0: test infrastructure — scaffold playbackStore.test.ts, PlaybackControls.test.tsx; update shapeStore and CellPanel tests for BeatFraction animRate
+- [ ] 05-01-PLAN.md — Wave 1: data layer — create playbackStore (BeatFraction type + computeLfoHz + isPlaying/bpm/volume); migrate Shape.animRate from number to BeatFraction
+- [ ] 05-02-PLAN.md — Wave 2a: audio engine — wire playbackStore subscription (suspend/resume/volume/BPM LFO update); update createLfo and recreateLfo for BeatFraction
+- [ ] 05-03-PLAN.md — Wave 2b: canvas engine — wire playbackStore subscription (isPlaying pulseScale gate + dirty flag); update pulseScale formula with computeLfoHz
+- [ ] 05-04-PLAN.md — Wave 3: UI layer — create PlaybackControls component (BPM widget + Volume slider + Start/Stop button); replace CellPanel animRate slider with beat-fraction selector; human-verify checkpoint
 **UI hint**: yes
 
 ## Progress
@@ -104,4 +110,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Audio Engine | 0/3 | Not started | - |
 | 3. Canvas Interaction | 3/4 | In Progress|  |
 | 4. Shape Panel & Animation | 0/5 | Not started | - |
-| 5. Playback Controls | 0/? | Not started | - |
+| 5. Playback Controls | 0/5 | Not started | - |
