@@ -281,7 +281,9 @@ function createVoice(shape: Shape): void {
 // ─────────────────────────────────────────────────────────────────────────────
 export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
   const voice = voices.get(shapeId)
-  const ctx = getAudioContext()
+  const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
+  // getAudioContext() resumes a suspended context, overriding the user's Stop action.
+  // setTargetAtTime is safe on a suspended context — values are buffered.
   if (!voice || !ctx) return
   // Frequency — only OscillatorNode has frequency AudioParam (not blob's BufferSource)
   if (voice.oscillator instanceof OscillatorNode) {
@@ -300,7 +302,9 @@ export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
 // ─────────────────────────────────────────────────────────────────────────────
 export function updateVoiceSize(shapeId: string, size: number): void {
   const voice = voices.get(shapeId)
-  const ctx = getAudioContext()
+  const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
+  // getAudioContext() resumes a suspended context, overriding the user's Stop action.
+  // setTargetAtTime is safe on a suspended context — values are buffered.
   if (!voice || !ctx) return
   const newBase = (size / 100) * 0.8
   // Update DC offset (base gain level)
@@ -354,7 +358,10 @@ export function initAudioEngine(): () => void {
   const unsubscribe = shapeStore.subscribe((state) => {
     const curr = state.shapes
     const currIds = new Set(curr.map((s) => s.id))
-    const ctx = getAudioContext()  // may be null in jsdom
+    const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
+    // getAudioContext() resumes a suspended context, overriding the user's Stop action.
+    // Voices are still created correctly: createVoice() calls getAudioContext() itself,
+    // which is fine for new additions (user just clicked a cell = user gesture).
 
     // Detect additions — create voice for any shape not yet in voices Map
     for (const shape of curr) {
@@ -400,7 +407,12 @@ export function initAudioEngine(): () => void {
                 v.lfoGain.disconnect()
                 v.dcOffset.disconnect()
                 voices.delete(idToRecreate)
-                createVoice(shapeSnapshot)  // re-create with new type's waveform
+                // Only recreate if context is running — do NOT call createVoice when suspended;
+                // createVoice() calls getAudioContext() which resumes the context, overriding Stop.
+                // The voice will be absent until the user resumes playback; that is acceptable.
+                if (audioCtx && audioCtx.state === 'running') {
+                  createVoice(shapeSnapshot)
+                }
                 prevShapes.set(idToRecreate, shapeSnapshot)
               }
             }, 60)
