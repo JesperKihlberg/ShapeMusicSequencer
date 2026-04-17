@@ -106,6 +106,7 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260417-jwd | there is a bug when changing properties of a cell, the loop starts playing even if stopped in the main control | 2026-04-17 | 05dfe7f | [260417-jwd-there-is-a-bug-when-changing-properties-](./quick/260417-jwd-there-is-a-bug-when-changing-properties-/) |
+| 260417-klm | Fix the bug: when I add a shape to the grid and change bmp to 0, the grid is cleared | 2026-04-17 | dc50484 | [260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr](./quick/260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr/) |
 
 ## Session Continuity
 
