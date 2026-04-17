@@ -101,6 +101,12 @@ None.
 
 - Audio library choice (Web Audio API vs Tone.js) must be resolved before Phase 2 execution begins
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260417-jwd | there is a bug when changing properties of a cell, the loop starts playing even if stopped in the main control | 2026-04-17 | 05dfe7f | [260417-jwd-there-is-a-bug-when-changing-properties-](./quick/260417-jwd-there-is-a-bug-when-changing-properties-/) |
+
 ## Session Continuity
 
 Last session: 2026-04-17T07:30:42.713Z
