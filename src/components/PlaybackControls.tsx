@@ -35,10 +35,18 @@ export function PlaybackControls() {
 
   function handleBpmBlur(): void {
     const v = Number(bpmInput)
-    if (bpmInput !== null && !isNaN(v) && bpmInput.trim() !== '') {
+    if (bpmInput !== null && !isNaN(v) && v >= 60 && v <= 180) {
       playbackStore.getState().setBpm(v)
     }
     setBpmInput(null)
+  }
+
+  function handleBpmKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleBpmBlur()
+      ;(e.target as HTMLInputElement).blur()
+    }
   }
 
   function handleVolumeChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -69,6 +77,7 @@ export function PlaybackControls() {
             aria-label="BPM"
             onChange={handleBpmChange}
             onBlur={handleBpmBlur}
+            onKeyDown={handleBpmKeyDown}
           />
           <button
             className="bpm-widget__btn"
