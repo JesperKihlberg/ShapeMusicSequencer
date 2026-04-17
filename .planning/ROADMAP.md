@@ -92,11 +92,11 @@ Plans:
   4. Changing the master volume control audibly scales the output level of all voices
 **Plans**: 5 plans
 Plans:
-- [ ] 05-00-PLAN.md — Wave 0: test infrastructure — scaffold playbackStore.test.ts, PlaybackControls.test.tsx; update shapeStore and CellPanel tests for BeatFraction animRate
-- [ ] 05-01-PLAN.md — Wave 1: data layer — create playbackStore (BeatFraction type + computeLfoHz + isPlaying/bpm/volume); migrate Shape.animRate from number to BeatFraction
-- [ ] 05-02-PLAN.md — Wave 2a: audio engine — wire playbackStore subscription (suspend/resume/volume/BPM LFO update); update createLfo and recreateLfo for BeatFraction
-- [ ] 05-03-PLAN.md — Wave 2b: canvas engine — wire playbackStore subscription (isPlaying pulseScale gate + dirty flag); update pulseScale formula with computeLfoHz
-- [ ] 05-04-PLAN.md — Wave 3: UI layer — create PlaybackControls component (BPM widget + Volume slider + Start/Stop button); replace CellPanel animRate slider with beat-fraction selector; human-verify checkpoint
+- [x] 05-00-PLAN.md — Wave 0: test infrastructure — scaffold playbackStore.test.ts, PlaybackControls.test.tsx; update shapeStore and CellPanel tests for BeatFraction animRate
+- [x] 05-01-PLAN.md — Wave 1: data layer — create playbackStore (BeatFraction type + computeLfoHz + isPlaying/bpm/volume); migrate Shape.animRate from number to BeatFraction
+- [x] 05-02-PLAN.md — Wave 2a: audio engine — wire playbackStore subscription (suspend/resume/volume/BPM LFO update); update createLfo and recreateLfo for BeatFraction
+- [x] 05-03-PLAN.md — Wave 2b: canvas engine — wire playbackStore subscription (isPlaying pulseScale gate + dirty flag); update pulseScale formula with computeLfoHz
+- [x] 05-04-PLAN.md — Wave 3: UI layer — create PlaybackControls component (BPM widget + Volume slider + Start/Stop button); replace CellPanel animRate slider with beat-fraction selector; human-verify checkpoint
 **UI hint**: yes
 
 ## Progress
