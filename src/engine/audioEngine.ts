@@ -5,6 +5,7 @@
 // SHPE-01: shape type → waveform descriptor
 import type { ShapeColor, ShapeType, Shape } from '../store/shapeStore'
 import { shapeStore } from '../store/shapeStore'
+import { playbackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
 
 // Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
 // 'pulse' → createPeriodicWave (square-ish with PWM)
@@ -175,7 +176,7 @@ function createLfo(
   // LFO oscillator: sine wave at animRate Hz, modulates ±40% of baseGain
   const lfoOscillator = ctx.createOscillator()
   lfoOscillator.type = 'sine'
-  lfoOscillator.frequency.value = shape.animRate
+  lfoOscillator.frequency.value = computeLfoHz(shape.animRate as BeatFraction, playbackStore.getState().bpm)
 
   const lfoGain = ctx.createGain()
   lfoGain.gain.value = baseGain * 0.4  // ±40% swing amplitude (D-10)
@@ -313,7 +314,7 @@ export function updateVoiceSize(shapeId: string, size: number): void {
 // Called when shape.animRate changes. Cannot update a running oscillator's
 // frequency and also safely reconnect AudioParam — simpler to rebuild.
 // ─────────────────────────────────────────────────────────────────────────────
-function recreateLfo(shapeId: string, animRate: number): void {
+function recreateLfo(shapeId: string, animRate: BeatFraction): void {
   const voice = voices.get(shapeId)
   const ctx = getAudioContext()
   if (!voice || !ctx) return
@@ -329,7 +330,7 @@ function recreateLfo(shapeId: string, animRate: number): void {
   // Create new LFO at new rate
   const newLfoOsc = ctx.createOscillator()
   newLfoOsc.type = 'sine'
-  newLfoOsc.frequency.value = animRate
+  newLfoOsc.frequency.value = computeLfoHz(animRate, playbackStore.getState().bpm)
   const newLfoGain = ctx.createGain()
   newLfoGain.gain.value = baseGain * 0.4
 
