@@ -9,6 +9,7 @@ import { shapeStore, type Shape } from "../store/shapeStore";
 import { sequencerActor } from "../machine/sequencerMachine";
 import { selectionStore } from "../store/selectionStore";
 import { drawShape } from './drawShape'
+import { playbackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
 
 // ────────────────────────────────────────────────────────────────────
 // Pure helper — exported for isolated unit testing (Plan 03, Task 1)
@@ -120,8 +121,14 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     for (const shape of shapes) {
       const cx = offsetX + shape.col * cellSize + Math.floor(cellSize / 2)
       const cy = offsetY + shape.row * cellSize + Math.floor(cellSize / 2)
-      // ANIM-01 + D-12: pulseScale oscillates between 0.6 and 1.4 at shape.animRate Hz
-      const pulseScale = 1 + 0.4 * Math.sin(2 * Math.PI * shape.animRate * t)
+      // ANIM-01 + D-12/D-16: pulseScale oscillates at BPM-synced rate when playing,
+      // freezes at 1.0 when stopped (D-02/D-16).
+      // playbackStore is read synchronously in RAF loop — no React hook, no subscription.
+      const isPlaying = playbackStore.getState().isPlaying
+      const lfoHz = computeLfoHz(shape.animRate as BeatFraction, playbackStore.getState().bpm)
+      const pulseScale = isPlaying
+        ? 1 + 0.4 * Math.sin(2 * Math.PI * lfoHz * t)
+        : 1.0
       // D-05: shape.size=50 → (50/50)=1.0 → same radius as Phase 3 (no visual regression)
       const radius = Math.floor(cellSize * 0.35 * (shape.size / 50) * pulseScale)
       drawShape(ctx, cx, cy, radius, shape.type, shape.color)
@@ -180,6 +187,8 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
   // Subscribe to shape and selection stores — either change sets dirty flag
   const unsubscribeShape = shapeStore.subscribe(() => { dirty = true })
   const unsubscribeSelection = selectionStore.subscribe(() => { dirty = true })
+  // Phase 5: subscribe to playbackStore — isPlaying/bpm/volume changes trigger redraw
+  const unsubscribePlayback = playbackStore.subscribe(() => { dirty = true })
 
   // Observe container resize — DPR-aware canvas sizing
   const resizeObserver = new ResizeObserver(() => {
@@ -196,6 +205,7 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     if (rafId !== null) cancelAnimationFrame(rafId)
     unsubscribeShape()
     unsubscribeSelection()
+    unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
     resizeObserver.disconnect()
   }
 }
