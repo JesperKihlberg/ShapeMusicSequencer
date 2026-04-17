@@ -27,8 +27,8 @@ Any change to the visual canvas is an immediate, audible change to the music —
 - [ ] Shape color (hue) maps to pitch; saturation maps to reverb depth; value/brightness maps to filter cutoff
 - [ ] Each shape plays continuously and independently as an audio voice
 - [ ] User can remove shapes from the canvas
-- [ ] Playback has configurable BPM/tempo
-- [ ] User can start/stop playback
+- [x] Playback has configurable BPM/tempo — Validated in Phase 05: playback-controls (human-verified)
+- [x] User can start/stop playback — Validated in Phase 05: playback-controls (human-verified)
 - [ ] Canvas can be saved and loaded as JSON
 - [ ] Composition can be shared via URL
 
