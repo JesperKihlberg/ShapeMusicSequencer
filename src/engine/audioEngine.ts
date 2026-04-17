@@ -316,7 +316,8 @@ export function updateVoiceSize(shapeId: string, size: number): void {
 // ─────────────────────────────────────────────────────────────────────────────
 function recreateLfo(shapeId: string, animRate: BeatFraction): void {
   const voice = voices.get(shapeId)
-  const ctx = getAudioContext()
+  const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
+  // getAudioContext() resumes a suspended context, overriding the user's Stop action
   if (!voice || !ctx) return
 
   // Stop and disconnect old LFO
