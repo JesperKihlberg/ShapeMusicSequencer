@@ -439,8 +439,54 @@ export function initAudioEngine(): () => void {
     }
   })
 
+  // Phase 5: subscribe to playbackStore for isPlaying, volume, and bpm changes (D-15)
+  // CRITICAL: do NOT call getAudioContext() here — only act if audioCtx already exists
+  // (i.e., user has already placed a shape). Calling getAudioContext() in subscribe
+  // would create AudioContext outside a user gesture. (RESEARCH.md Pitfall 1)
+  let prevIsPlaying = playbackStore.getState().isPlaying
+  let prevVolume = playbackStore.getState().volume
+  let prevBpm = playbackStore.getState().bpm
+
+  const unsubscribePlayback = playbackStore.subscribe((state) => {
+    const ctx = audioCtx  // Direct module-level null check — do NOT use getAudioContext()
+    if (!ctx) return
+
+    // isPlaying changed → suspend or resume AudioContext (D-01)
+    if (state.isPlaying !== prevIsPlaying) {
+      prevIsPlaying = state.isPlaying
+      if (state.isPlaying) {
+        void ctx.resume()
+      } else {
+        void ctx.suspend()
+      }
+    }
+
+    // volume changed → ramp masterGain with τ=0.05s for smooth fade (D-11, Pitfall 6)
+    // volume * 0.15 preserves the 16-voice headroom ceiling set in getAudioContext()
+    if (state.volume !== prevVolume) {
+      prevVolume = state.volume
+      if (masterGain) {
+        masterGain.gain.setTargetAtTime(state.volume * 0.15, ctx.currentTime, 0.05)
+      }
+    }
+
+    // bpm changed → update all live LFO frequencies in-place via setTargetAtTime
+    // (no full rebuild — OscillatorNode.frequency is an AudioParam; RESEARCH.md Code Examples)
+    if (state.bpm !== prevBpm) {
+      prevBpm = state.bpm
+      for (const [shapeId, voice] of voices) {
+        const shape = shapeStore.getState().shapes.find((s) => s.id === shapeId)
+        if (shape) {
+          const newHz = computeLfoHz(shape.animRate, state.bpm)
+          voice.lfoOscillator.frequency.setTargetAtTime(newHz, ctx.currentTime, 0.015)
+        }
+      }
+    }
+  })
+
   return function destroy(): void {
     unsubscribe()
+    unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
     // Stop all voices on cleanup (e.g., React StrictMode double-invoke)
     voices.forEach((voice) => {
       try { voice.oscillator.stop() } catch { /* already stopped */ }
