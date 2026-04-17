@@ -363,9 +363,13 @@ export function initAudioEngine(): () => void {
     // Voices are still created correctly: createVoice() calls getAudioContext() itself,
     // which is fine for new additions (user just clicked a cell = user gesture).
 
-    // Detect additions — create voice for any shape not yet in voices Map
+    // Detect additions — create voice for any shape not yet in voices Map.
+    // Guard: skip createVoice when context is suspended — createVoice() calls getAudioContext()
+    // which resumes a suspended context, overriding the user's Stop action.
+    // Voiceless shapes added while stopped are caught by the resume path in unsubscribePlayback.
+    const contextAllowsCreate = !audioCtx || audioCtx.state === 'running'
     for (const shape of curr) {
-      if (!voices.has(shape.id)) {
+      if (!voices.has(shape.id) && contextAllowsCreate) {
         createVoice(shape)
         prevShapes.set(shape.id, shape)
       }
@@ -469,6 +473,13 @@ export function initAudioEngine(): () => void {
       prevIsPlaying = state.isPlaying
       if (state.isPlaying) {
         void ctx.resume()
+        // Create voices for shapes added while the context was suspended
+        for (const shape of shapeStore.getState().shapes) {
+          if (!voices.has(shape.id)) {
+            createVoice(shape)
+            prevShapes.set(shape.id, shape)
+          }
+        }
       } else {
         void ctx.suspend()
       }
