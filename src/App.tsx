@@ -1,6 +1,7 @@
 import './styles/index.css'
 import { CanvasContainer } from './components/CanvasContainer'
 import { CellPanel } from './components/CellPanel'
+import { PlaybackControls } from './components/PlaybackControls'
 import { useSelectionStore } from './store/selectionStore'
 
 export function App() {
@@ -13,6 +14,7 @@ export function App() {
         <span role="heading" aria-level={1} className="toolbar__title">
           Shape Music Sequencer
         </span>
+        <PlaybackControls />
       </header>
 
       {/* Canvas area — flex row: canvas + cell panel (D-06, UI-SPEC Section 5) */}

@@ -353,3 +353,168 @@ body {
   width: 32px;
   height: 32px;
 }
+
+/* ── Phase 5: Playback Controls ────────────────────────────────────── */
+
+/* Toolbar controls group — right-side flex group (D-09, D-10) */
+/* margin-left:auto pushes the group to the right after the title */
+.toolbar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+/* Individual control wrapper — label above + input below */
+.toolbar-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.toolbar-control__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-regular);
+  line-height: 1;
+}
+
+/* BPM Widget — − input + row (D-12) */
+.bpm-widget {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1);
+  height: 28px;
+}
+
+.bpm-widget__btn {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.bpm-widget__btn:hover {
+  border-color: var(--color-border-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bpm-widget__input {
+  width: 48px;
+  height: 28px;
+  text-align: center;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+  /* Hide native spinner arrows — custom +/− buttons replace them (Pitfall 1) */
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+.bpm-widget__input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Remove spinner arrows in Webkit (Chrome, Safari) */
+.bpm-widget__input::-webkit-inner-spin-button,
+.bpm-widget__input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Toolbar slider — compact 80px width for toolbar density */
+.toolbar-slider {
+  width: 80px;
+}
+
+/* Start/Stop button (D-03) — inline button, not full-width like .btn */
+.btn--start-stop {
+  width: auto;
+  min-width: 72px;
+  height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stopped state (label "Start") — accent outline (UI-SPEC) */
+.btn--start-stop:not([aria-pressed="true"]) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: transparent;
+}
+
+.btn--start-stop:not([aria-pressed="true"]):hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+/* Playing state (label "Stop") — subtle surface (UI-SPEC) */
+.btn--start-stop[aria-pressed="true"] {
+  border-color: var(--color-border-primary);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.btn--start-stop[aria-pressed="true"]:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.btn--start-stop:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Beat-fraction selector — replaces animRate Hz slider in CellPanel (D-13) */
+.beat-selector {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.beat-selector__btn {
+  flex: 1;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  cursor: pointer;
+  padding: 0;
+}
+
+.beat-selector__btn:hover {
+  border-color: var(--color-border-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Active state — mirrors .type-selector__btn--active exactly (UI-SPEC) */
+.beat-selector__btn--active {
+  border-color: var(--color-accent);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--color-text-primary);
+}
