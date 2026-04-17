@@ -1,6 +1,7 @@
 // src/components/CellPanel.tsx
 // Right sidebar panel — shows cell content based on occupancy (D-06, CONTEXT.md)
 // Phase 4: occupied mode replaced with full interactive editor (PANL-01/02/03)
+// Phase 5: animRate section replaced with beat-fraction selector (D-06, D-13)
 import { useMemo } from 'react'
 import { useSelectionStore } from '../store/selectionStore'
 import { selectionStore } from '../store/selectionStore'
@@ -10,9 +11,19 @@ import type { Shape } from '../store/shapeStore'
 import { selectShapeAt } from '../store/selectors'
 import { HsvSliders } from './HsvSliders'
 import { ShapeTypeSelector } from './ShapeTypeSelector'
+import { usePlaybackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
+
+const FRACTIONS: { value: BeatFraction; label: string; ariaLabel: string }[] = [
+  { value: 1,  label: '1/1',  ariaLabel: 'One bar' },
+  { value: 2,  label: '1/2',  ariaLabel: 'Half note' },
+  { value: 4,  label: '1/4',  ariaLabel: 'Quarter note' },
+  { value: 8,  label: '1/8',  ariaLabel: 'Eighth note' },
+  { value: 16, label: '1/16', ariaLabel: 'Sixteenth note' },
+]
 
 export function CellPanel() {
   const selectedCell = useSelectionStore((s) => s.selectedCell)
+  const bpm = usePlaybackStore((s) => s.bpm)
   const shapeSelector = useMemo(
     () => selectedCell ? selectShapeAt(selectedCell.col, selectedCell.row) : () => undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,28 +107,31 @@ export function CellPanel() {
 
           <hr className="cell-panel__divider" />
 
-          {/* Animation section — PANL-03 (D-11/14) */}
+          {/* Animation section — Phase 5: beat-fraction selector (D-06, D-13) */}
           <p className="cell-panel__section-heading">Animation</p>
           <div className="control-group">
             <div className="control-group__label-row">
-              <label className="control-group__label" htmlFor="slider-anim-rate">Rate</label>
-              <span className="control-group__readout">{shape.animRate.toFixed(1)} Hz</span>
+              <label className="control-group__label">Rate</label>
+              <span className="control-group__readout">
+                {computeLfoHz(shape.animRate, bpm).toFixed(1)} Hz
+              </span>
             </div>
-            <div className="slider-wrap">
-              <div
-                className="slider-wrap__track"
-                style={{ background: 'var(--color-bg-tertiary)' }}
-              />
-              <input
-                id="slider-anim-rate"
-                type="range"
-                min={0.1}
-                max={10}
-                step={0.1}
-                value={shape.animRate}
-                onChange={(e) => handleUpdateShape({ animRate: Number(e.target.value) })}
-                aria-label="Animation rate, 0.1 to 10 Hz"
-              />
+            <div
+              className="beat-selector"
+              role="group"
+              aria-label="Animation rate"
+            >
+              {FRACTIONS.map((frac) => (
+                <button
+                  key={frac.value}
+                  className={`beat-selector__btn${shape.animRate === frac.value ? ' beat-selector__btn--active' : ''}`}
+                  aria-pressed={shape.animRate === frac.value}
+                  aria-label={frac.ariaLabel}
+                  onClick={() => handleUpdateShape({ animRate: frac.value })}
+                >
+                  {frac.label}
+                </button>
+              ))}
             </div>
           </div>
 
