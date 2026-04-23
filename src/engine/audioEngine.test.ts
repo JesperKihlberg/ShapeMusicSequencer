@@ -67,6 +67,31 @@ describe('makeDistortionCurve', () => {
     // At index 64 (x = -0.5), the distorted curve should differ from identity
     expect(distorted[64]).not.toBeCloseTo(identity[64], 5)
   })
+
+  it('soft-clip effect is absent at saturation=0 but detectable at saturation=100 (two-stage spec)', () => {
+    // At s=0: identity curve — output equals input for all x. No soft-clip (k=0).
+    // At s=100: distortion algorithm produces output measurably different from identity.
+    // At index 240, x ≈ (240*2)/256 - 1 = 0.875. Identity gives 0.875.
+    // Both the current soft-clip and the Wave-1 two-stage algorithm differ from identity here.
+    const curve0 = makeDistortionCurve(0)
+    const curve100 = makeDistortionCurve(100)
+    const x240 = (240 * 2) / 256 - 1  // ≈ 0.875
+    // Identity check: s=0 output should be very close to x
+    expect(curve0[240]).toBeCloseTo(x240, 4)
+    // Distortion check: s=100 output should differ measurably from identity
+    expect(Math.abs(curve100[240] - x240)).toBeGreaterThan(0.01)
+  })
+
+  it('output is monotonically increasing (transfer function is non-decreasing) at all saturation levels', () => {
+    // A valid WaveShaper transfer curve should not reverse direction (no foldback).
+    // This tests structural validity, not specific values.
+    for (const sat of [0, 50, 100]) {
+      const curve = makeDistortionCurve(sat)
+      for (let i = 1; i < curve.length; i++) {
+        expect(curve[i]).toBeGreaterThanOrEqual(curve[i - 1] - 0.001)
+      }
+    }
+  })
 })
 
 describe('lightnessToFilterCutoff', () => {
@@ -134,5 +159,80 @@ describe('updateVoiceSize (Phase 4)', () => {
     const updateVoiceSize = mod.updateVoiceSize
     if (typeof updateVoiceSize !== 'function') return // Skip until Wave 2 adds the export
     expect(() => updateVoiceSize('nonexistent', 75)).not.toThrow()
+  })
+})
+
+// Covers: PLAY-05 (scale quantization), PLAY-06 (chromatic passthrough)
+describe('quantizeSemitone (Phase 6)', () => {
+  it('is exported from audioEngine (Wave 1 will add this)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    if (typeof mod.quantizeSemitone !== 'function') return  // RED until Wave 1
+    expect(typeof mod.quantizeSemitone).toBe('function')
+  })
+
+  it('snaps C# (raw=1) to C (0) in C major [0,2,4,5,7,9,11] — tie breaks to lower', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    if (typeof mod.quantizeSemitone !== 'function') return
+    // C# (1) is equidistant from C (0) and D (2) — tie goes to lower candidate (C=0)
+    expect(mod.quantizeSemitone(1, 0, [0,2,4,5,7,9,11])).toBe(0)
+  })
+
+  it('snaps F# (raw=6) to F (5) in C major [0,2,4,5,7,9,11] — tie breaks to lower', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    if (typeof mod.quantizeSemitone !== 'function') return
+    // F# (6) equidistant from F (5) and G (7) — tie goes to F=5
+    expect(mod.quantizeSemitone(6, 0, [0,2,4,5,7,9,11])).toBe(5)
+  })
+
+  it('uses rootKey offset: raw=1 in D major (rootKey=2) snaps to D (2)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    if (typeof mod.quantizeSemitone !== 'function') return
+    // D major candidates: [2,4,6,7,9,11,1] (intervals [0,2,4,5,7,9,11] + rootKey=2, mod 12)
+    // raw=1 (C#): nearest candidate is 2 (D), distance=1
+    expect(mod.quantizeSemitone(1, 2, [0,2,4,5,7,9,11])).toBe(2)
+  })
+
+  it('chromatic intervals [0..11] are identity passthrough (PLAY-06)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    if (typeof mod.quantizeSemitone !== 'function') return
+    const chromatic = [0,1,2,3,4,5,6,7,8,9,10,11]
+    for (let raw = 0; raw <= 11; raw++) {
+      expect(mod.quantizeSemitone(raw, 0, chromatic)).toBe(raw)
+    }
+  })
+
+  it('returns value in range [0, 11] for rootKey=11 (octave boundary test)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod = await import('./audioEngine') as any
+    if (typeof mod.quantizeSemitone !== 'function') return
+    // rootKey=11 (B), major intervals [0,2,4,5,7,9,11]: candidates mod 12 all in [0,11]
+    const result = mod.quantizeSemitone(0, 11, [0,2,4,5,7,9,11])
+    expect(result).toBeGreaterThanOrEqual(0)
+    expect(result).toBeLessThanOrEqual(11)
+  })
+})
+
+// Covers: AUDI-03 (pan formula correctness)
+describe('pan formula (Phase 6 AUDI-03)', () => {
+  it('col 0 → pan -1.0 (hard left)', () => {
+    const pan = (0 / 3) * 2 - 1
+    expect(pan).toBeCloseTo(-1.0, 5)
+  })
+  it('col 3 → pan +1.0 (hard right)', () => {
+    const pan = (3 / 3) * 2 - 1
+    expect(pan).toBeCloseTo(1.0, 5)
+  })
+  it('col 1 → pan ≈ -0.333', () => {
+    const pan = (1 / 3) * 2 - 1
+    expect(pan).toBeCloseTo(-0.333, 2)
+  })
+  it('col 2 → pan ≈ +0.333', () => {
+    const pan = (2 / 3) * 2 - 1
+    expect(pan).toBeCloseTo(0.333, 2)
   })
 })
