@@ -138,7 +138,7 @@ Plans:
 - [ ] 07-01-PLAN.md — Wave 1: data layer — create animationStore.ts (SplineCurve/setCurve/removeCurve/clearShape); remove animRate from shapeStore; wire clearShape on removeShape
 - [ ] 07-02-PLAN.md — Wave 2a: audio engine — remove LFO (createLfo/recreateLfo/AudioVoice fields); add animationStore setInterval modulation loop; export evalCurveAtBeat
 - [ ] 07-03-PLAN.md — Wave 2b: canvas engine — remove pulseScale; add animationStore-driven visual size modulation via evalCurveAtBeat
-- [ ] 07-04-PLAN.md — Wave 3: UI layer — update CellPanel (Animate button); create AnimationPanel component (drag handle, header, lane list with canvas); update App.tsx + CSS; human-verify checkpoint
+- [x] 07-04-PLAN.md — Wave 3: UI layer — update CellPanel (Animate button); create AnimationPanel component (drag handle, header, lane list with canvas); update App.tsx + CSS; human-verify checkpoint
 **UI hint**: yes
 
 ## Progress
@@ -154,4 +154,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Shape Panel & Animation | 0/5 | Not started | - |
 | 5. Playback Controls | 0/5 | Not started | - |
 | 6. Full Visual Language | 0/4 | Not started | - |
-| 7. Composition Tools | 0/5 | Not started | - |
+| 7. Composition Tools | 4/5 | In Progress | - |
