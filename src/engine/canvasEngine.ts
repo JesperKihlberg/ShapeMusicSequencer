@@ -9,7 +9,9 @@ import { shapeStore, type Shape } from "../store/shapeStore";
 import { sequencerActor } from "../machine/sequencerMachine";
 import { selectionStore } from "../store/selectionStore";
 import { drawShape } from './drawShape'
-import { playbackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
+import { playbackStore } from '../store/playbackStore'
+import { animationStore } from '../store/animationStore'
+import type { SplineCurve } from '../store/animationStore'
 
 // ────────────────────────────────────────────────────────────────────
 // Pure helper — exported for isolated unit testing (Plan 03, Task 1)
@@ -45,6 +47,36 @@ export function cellAtPoint(canvasX: number, canvasY: number, canvasW: number, c
     col: Math.min(3, Math.floor(localX / cellSize)),
     row: Math.min(3, Math.floor(localY / cellSize)),
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// evalCurveAtBeat — evaluate a SplineCurve at a given beat position (looping).
+// Linear interpolation between the two nearest in-window control points.
+// Points with beat > duration are excluded (outside the loop window).
+// Mirrors the implementation in audioEngine.ts — kept separate to avoid
+// cross-engine imports. Both engines are standalone (D-04 three-layer arch).
+// ─────────────────────────────────────────────────────────────────────────────
+function evalCurveAtBeat(curve: SplineCurve, beatPos: number): number {
+  const pos = curve.duration > 0 ? beatPos % curve.duration : 0
+  const active = curve.points
+    .filter((p) => p.beat <= curve.duration)
+    .sort((a, b) => a.beat - b.beat)
+  if (active.length === 0) return 0
+  if (active.length === 1) return active[0].value
+  let lo = active[active.length - 1]
+  let hi = active[0]
+  for (let i = 0; i < active.length - 1; i++) {
+    if (active[i].beat <= pos && pos < active[i + 1].beat) {
+      lo = active[i]
+      hi = active[i + 1]
+      break
+    }
+  }
+  if (lo.beat === hi.beat) return lo.value
+  const segLength = hi.beat - lo.beat
+  if (segLength <= 0) return lo.value
+  const t = (pos - lo.beat) / segLength
+  return lo.value + t * (hi.value - lo.value)
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -117,20 +149,27 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     const offsetX = Math.floor((logicalW - gridPx) / 2)
     const offsetY = Math.floor((logicalH - gridPx) / 2)
     if (!ctx) return  // Defensive check for TypeScript strictNullChecks
-    const t = performance.now() / 1000  // seconds — for pulseScale formula (D-12)
+    // D-03/D-04 (Phase 7): pulseScale removed — shapes render at base size unless
+    // an animationStore size curve is active for this shape.
+    // Beat position for curve evaluation: (t_seconds * bpm) / 60
+    const t = performance.now() / 1000
+    const { bpm, isPlaying } = playbackStore.getState()
+    const beatPos = (t * bpm) / 60
+    const curves = animationStore.getState().curves
+
     for (const shape of shapes) {
       const cx = offsetX + shape.col * cellSize + Math.floor(cellSize / 2)
       const cy = offsetY + shape.row * cellSize + Math.floor(cellSize / 2)
-      // ANIM-01 + D-12/D-16: pulseScale oscillates at BPM-synced rate when playing,
-      // freezes at 1.0 when stopped (D-02/D-16).
-      // playbackStore is read synchronously in RAF loop — no React hook, no subscription.
-      const isPlaying = playbackStore.getState().isPlaying
-      const lfoHz = computeLfoHz(shape.animRate as BeatFraction, playbackStore.getState().bpm)
-      const pulseScale = isPlaying
-        ? 1 + 0.4 * Math.sin(2 * Math.PI * lfoHz * t)
-        : 1.0
-      // D-05: shape.size=50 → (50/50)=1.0 → same radius as Phase 3 (no visual regression)
-      const radius = Math.floor(cellSize * 0.35 * (shape.size / 50) * pulseScale)
+
+      // Determine effective size: base size OR spline-modulated size if curve present
+      let effectiveSize = shape.size
+      const shapeCurves = curves[shape.id]
+      if (shapeCurves?.size && isPlaying) {
+        effectiveSize = evalCurveAtBeat(shapeCurves.size, beatPos)
+      }
+
+      // D-05: shape.size=50 → (50/50)=1.0 → same base radius as Phase 3
+      const radius = Math.floor(cellSize * 0.35 * (effectiveSize / 50))
       drawShape(ctx, cx, cy, radius, shape.type, shape.color)
     }
   }
@@ -159,7 +198,7 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
 
   // ── Render frame ──────────────────────────────────────────────────
   function render(): void {
-    // Always redraw when shapes exist — pulseScale changes every frame (UI-SPEC Pitfall 3 / RESEARCH.md Pattern 7)
+    // Always redraw when shapes exist — animationStore curves change shape size every frame (UI-SPEC Pitfall 3 / RESEARCH.md Pattern 7)
     if (shapeStore.getState().shapes.length > 0) dirty = true
     if (!dirty) return;
     dirty = false;
@@ -189,6 +228,8 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
   const unsubscribeSelection = selectionStore.subscribe(() => { dirty = true })
   // Phase 5: subscribe to playbackStore — isPlaying/bpm/volume changes trigger redraw
   const unsubscribePlayback = playbackStore.subscribe(() => { dirty = true })
+  // Phase 7: subscribe to animationStore — curve changes trigger redraw
+  const unsubscribeAnimation = animationStore.subscribe(() => { dirty = true })
 
   // Observe container resize — DPR-aware canvas sizing
   const resizeObserver = new ResizeObserver(() => {
@@ -206,6 +247,7 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     unsubscribeShape()
     unsubscribeSelection()
     unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
+    unsubscribeAnimation()  // Phase 7: clean up animationStore subscription
     resizeObserver.disconnect()
   }
 }
