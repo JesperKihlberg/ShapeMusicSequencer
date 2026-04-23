@@ -6,6 +6,7 @@
 import type { ShapeColor, ShapeType, Shape } from '../store/shapeStore'
 import { shapeStore } from '../store/shapeStore'
 import { playbackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
+import { scaleStore, SCALE_INTERVALS } from '../store/scaleStore'
 
 // Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
 // 'pulse' → createPeriodicWave (square-ish with PWM)
@@ -37,23 +38,45 @@ export function colorToFrequency(color: ShapeColor): number {
 }
 
 // COLR-02: saturation → WaveShaper distortion curve (Float32Array, 256 samples)
+// Two-stage algorithm (Phase 6 CONTEXT.md):
+//   Stage 1 (s 0–50): Chebyshev T2/T3 harmonic blend — warm 2nd/3rd harmonics
+//   Stage 2 (s 50–100): soft-clip limiter — increasingly compressed character
 // saturation=0 → identity (linear passthrough, no distortion)
-// saturation=100 → soft-clip (k=200, heavy overdrive)
-// Formula: curve[i] = ((PI + k) * x) / (PI + k * |x|), k = (sat/100) * 200
+// saturation=100 → full harmonic stack + soft-clip
 export function makeDistortionCurve(saturation: number): Float32Array {
   const SAMPLES = 256
   const curve = new Float32Array(SAMPLES)
-  const intensity = Math.max(0, Math.min(100, saturation)) / 100
-  const k = intensity * 200  // drive: 0 at clean, 200 at full distortion
+  const t = Math.max(0, Math.min(100, saturation)) / 100
+
+  // Stage 1: Chebyshev T2/T3 harmonic blend
+  // blend=0 at s=0 (pure fundamental — identity), blend=1 at s=50 (full harmonic stack)
+  const blend = Math.min(1, t / 0.5)
+
+  // Stage 2: soft-clip strength
+  // k=0 at s≤50 (no clip), k=50 at s=100 (full character soft-clip)
+  const k = Math.max(0, (t - 0.5) / 0.5) * 50
+
+  const softClip = (x: number): number => {
+    if (k === 0) return x
+    return ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x))
+  }
+
   for (let i = 0; i < SAMPLES; i++) {
     const x = (i * 2) / SAMPLES - 1  // maps [0, SAMPLES) → [-1.0, ~+1.0)
-    if (intensity < 0.01) {
-      curve[i] = x  // identity passthrough
-    } else {
-      // Soft-clip (RESEARCH.md Pattern 6): bounded to (-1, +1), non-linear
-      curve[i] = ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x))
-    }
+
+    // Chebyshev T1 (fundamental), T2 (2nd harmonic), T3 (3rd harmonic)
+    const T1 = x
+    const T2 = 2 * x * x - 1
+    const T3 = x * (4 * x * x - 3)
+
+    // Normalise: at blend=0 weight is 1.0 so T1/1.0 = x (identity).
+    // At blend=1 weight is 1.8 (T2 weight 0.5, T3 weight 0.3).
+    const harmonicWeight = 1.0 + blend * (0.5 + 0.3)
+    const chebyshev = (T1 + blend * 0.5 * T2 + blend * 0.3 * T3) / harmonicWeight
+
+    curve[i] = Math.max(-1, Math.min(1, softClip(chebyshev)))
   }
+
   return curve
 }
 
@@ -119,6 +142,7 @@ export interface AudioVoice {
   waveshaper: WaveShaperNode
   filter: BiquadFilterNode
   gainNode: GainNode
+  panner: StereoPannerNode               // Phase 6 AUDI-03: column → stereo position
   noiseSource?: AudioBufferSourceNode  // blob only
   lfoOscillator: OscillatorNode         // Phase 4 — LFO for amplitude modulation (D-09)
   lfoGain: GainNode                     // Phase 4 — scales LFO amplitude (D-10)
@@ -273,13 +297,16 @@ function createVoice(shape: Shape): void {
     mixer.connect(waveshaper)
     waveshaper.connect(filter)
     filter.connect(gainNode)
-    gainNode.connect(mg)
+    const panner = ctx.createStereoPanner()
+    panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0 (hard left), col 3 → +1.0 (hard right)
+    gainNode.connect(panner)
+    panner.connect(mg)
 
     noiseSource.start()
     sineOsc.start()
 
     const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
-    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, noiseSource, lfoOscillator, lfoGain, dcOffset })
+    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, panner, noiseSource, lfoOscillator, lfoGain, dcOffset })
   } else {
     // Standard oscillator path (circle, triangle, square, star, diamond)
     const osc = ctx.createOscillator()
@@ -294,12 +321,15 @@ function createVoice(shape: Shape): void {
     osc.connect(waveshaper)
     waveshaper.connect(filter)
     filter.connect(gainNode)
-    gainNode.connect(mg)
+    const panner = ctx.createStereoPanner()
+    panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0, col 3 → +1.0
+    gainNode.connect(panner)
+    panner.connect(mg)
 
     osc.start()
 
     const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
-    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, lfoOscillator, lfoGain, dcOffset })
+    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, panner, lfoOscillator, lfoGain, dcOffset })
   }
 }
 
@@ -316,7 +346,15 @@ export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
   if (!voice || !ctx) return
   // Frequency — only OscillatorNode has frequency AudioParam (not blob's BufferSource)
   if (voice.oscillator instanceof OscillatorNode) {
-    voice.oscillator.frequency.setTargetAtTime(colorToFrequency(color), ctx.currentTime, 0.015)
+    const { rootKey, scale } = scaleStore.getState()
+    const rawSemitone = hueToSemitone(color.h)
+    const quantized = quantizeSemitone(rawSemitone, rootKey, SCALE_INTERVALS[scale])
+    // Back-convert quantized semitone to hue (semitone × 30 = hue).
+    // hueToSemitone(quantized * 30) == quantized exactly (30° per semitone, no rounding error).
+    const quantizedHue = quantized * 30
+    voice.oscillator.frequency.setTargetAtTime(
+      colorToFrequency({ ...color, h: quantizedHue }), ctx.currentTime, 0.015
+    )
   }
   // Filter cutoff — always present
   voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(color.l), ctx.currentTime, 0.015)
@@ -437,6 +475,7 @@ export function initAudioEngine(): () => void {
                 try { v.lfoOscillator.stop() } catch { /* already stopped */ }
                 try { v.dcOffset.stop() } catch { /* already stopped */ }
                 v.gainNode.disconnect()
+                v.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak
                 v.lfoGain.disconnect()
                 v.dcOffset.disconnect()
                 voices.delete(idToRecreate)
@@ -477,6 +516,7 @@ export function initAudioEngine(): () => void {
             try { voice.dcOffset.stop() } catch { /* already stopped */ }
             voice.dcOffset.disconnect()
             voice.gainNode.disconnect()
+            voice.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak
             voices.delete(id)
           }, 60)  // 60ms = ~4 time constants at τ=0.015s → gain < 2% of original
         }
@@ -537,9 +577,27 @@ export function initAudioEngine(): () => void {
     }
   })
 
+  let prevRootKey = scaleStore.getState().rootKey
+  let prevScale = scaleStore.getState().scale
+
+  const unsubscribeScale = scaleStore.subscribe((state) => {
+    const ctx = audioCtx  // Direct module-level null check — do NOT use getAudioContext()
+    if (!ctx) return
+    if (state.rootKey !== prevRootKey || state.scale !== prevScale) {
+      prevRootKey = state.rootKey
+      prevScale = state.scale
+      // Re-pitch all active voices with new scale/key
+      for (const [shapeId] of voices) {
+        const shape = shapeStore.getState().shapes.find((s) => s.id === shapeId)
+        if (shape) updateVoiceColor(shapeId, shape.color)
+      }
+    }
+  })
+
   return function destroy(): void {
     unsubscribe()
     unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
+    unsubscribeScale()     // Phase 6: clean up scale subscription
     // Stop all voices on cleanup (e.g., React StrictMode double-invoke)
     voices.forEach((voice) => {
       try { voice.oscillator.stop() } catch { /* already stopped */ }
