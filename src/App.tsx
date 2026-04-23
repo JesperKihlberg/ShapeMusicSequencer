@@ -2,6 +2,7 @@ import './styles/index.css'
 import { CanvasContainer } from './components/CanvasContainer'
 import { CellPanel } from './components/CellPanel'
 import { PlaybackControls } from './components/PlaybackControls'
+import { ScaleSelector } from './components/ScaleSelector'
 import { useSelectionStore } from './store/selectionStore'
 
 export function App() {
@@ -14,7 +15,11 @@ export function App() {
         <span role="heading" aria-level={1} className="toolbar__title">
           Shape Music Sequencer
         </span>
-        <PlaybackControls />
+        {/* Toolbar controls group — right-aligned; order: Scale | BPM | Volume | Start/Stop */}
+        <div className="toolbar__controls">
+          <ScaleSelector />
+          <PlaybackControls />
+        </div>
       </header>
 
       {/* Canvas area — flex row: canvas + cell panel (D-06, UI-SPEC Section 5) */}
