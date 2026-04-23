@@ -54,7 +54,7 @@ export function PlaybackControls() {
   }
 
   return (
-    <div className="toolbar__controls">
+    <>
 
       {/* BPM Widget (D-12) */}
       <div className="toolbar-control">
@@ -119,7 +119,7 @@ export function PlaybackControls() {
         {isPlaying ? 'Stop' : 'Start'}
       </button>
 
-    </div>
+    </>
   )
 }
 
