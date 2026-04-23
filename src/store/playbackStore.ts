@@ -9,6 +9,8 @@
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 
+// TODO(Phase 7 Wave 2a): remove BeatFraction and computeLfoHz after audioEngine LFO removal
+// TODO(Phase 7 Wave 3): remove after CellPanel animRate section removal
 // D-07: BeatFraction represents the denominator of 1/N (e.g., 4 = quarter note).
 // Stored as numeric denominator so the formula is clean: (bpm / 60) * (1 / fraction).
 // Values correspond to: 1/1 (one bar), 1/2 (half note), 1/4 (quarter note),

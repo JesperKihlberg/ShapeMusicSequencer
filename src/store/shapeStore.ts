@@ -7,7 +7,7 @@ import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { temporal } from 'zundo'
-import { type BeatFraction } from './playbackStore'
+import { animationStore } from './animationStore'
 
 export interface ShapeColor {
   h: number  // 0–360 (hue)
@@ -24,7 +24,6 @@ export interface Shape {
   color: ShapeColor
   type: ShapeType
   size: number      // 0–100, default 50 — controls canvas radius multiplier and audio gain (D-15)
-  animRate: BeatFraction  // beat-fraction denominator (1|2|4|8|16), default 2 (1/2 note ≈ 1 Hz @ 120 BPM) — Phase 5 D-07
 }
 
 export interface ShapeState {
@@ -51,7 +50,6 @@ export const shapeStore = createStore<ShapeState>()(
               color: { h: 220, s: 70, l: 30 },
               type: "circle",
               size: 50,       // D-15: default 50 (maps to current canvas radius)
-              animRate: 2,  // D-07/Phase 5: default 1/2 note (≈ 1 Hz at 120 BPM)
             });
           }
         }),
@@ -59,7 +57,9 @@ export const shapeStore = createStore<ShapeState>()(
         set((state) => {
           const idx = state.shapes.findIndex((s) => s.col === col && s.row === row)
           if (idx !== -1) {
+            const removedId = state.shapes[idx].id
             state.shapes.splice(idx, 1)
+            animationStore.getState().clearShape(removedId)
           }
         }),
       updateShape: (id: string, patch: Partial<Shape>) =>

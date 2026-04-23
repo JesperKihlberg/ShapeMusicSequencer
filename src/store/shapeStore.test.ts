@@ -118,10 +118,10 @@ describe('shapeStore — Phase 4 fields and updateShape', () => {
     expect(shape?.size).toBe(50)
   })
 
-  it('addShape creates shape with animRate=2 by default (BeatFraction denominator, D-06)', () => {
+  it('addShape creates shape without animRate field (Phase 7 D-03: animRate removed)', () => {
     shapeStore.getState().addShape(0, 0)
     const shape = shapeStore.getState().shapes[0]
-    expect(shape?.animRate).toBe(2)
+    expect(shape).not.toHaveProperty('animRate')
   })
 
   it('updateShape patches color on existing shape', () => {
