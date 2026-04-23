@@ -119,6 +119,7 @@ export interface AudioVoice {
   waveshaper: WaveShaperNode
   filter: BiquadFilterNode
   gainNode: GainNode
+  panner: StereoPannerNode               // Phase 6 AUDI-03: column → stereo position
   noiseSource?: AudioBufferSourceNode  // blob only
   lfoOscillator: OscillatorNode         // Phase 4 — LFO for amplitude modulation (D-09)
   lfoGain: GainNode                     // Phase 4 — scales LFO amplitude (D-10)
@@ -273,13 +274,16 @@ function createVoice(shape: Shape): void {
     mixer.connect(waveshaper)
     waveshaper.connect(filter)
     filter.connect(gainNode)
-    gainNode.connect(mg)
+    const panner = ctx.createStereoPanner()
+    panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0 (hard left), col 3 → +1.0 (hard right)
+    gainNode.connect(panner)
+    panner.connect(mg)
 
     noiseSource.start()
     sineOsc.start()
 
     const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
-    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, noiseSource, lfoOscillator, lfoGain, dcOffset })
+    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, panner, noiseSource, lfoOscillator, lfoGain, dcOffset })
   } else {
     // Standard oscillator path (circle, triangle, square, star, diamond)
     const osc = ctx.createOscillator()
@@ -294,12 +298,15 @@ function createVoice(shape: Shape): void {
     osc.connect(waveshaper)
     waveshaper.connect(filter)
     filter.connect(gainNode)
-    gainNode.connect(mg)
+    const panner = ctx.createStereoPanner()
+    panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0, col 3 → +1.0
+    gainNode.connect(panner)
+    panner.connect(mg)
 
     osc.start()
 
     const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
-    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, lfoOscillator, lfoGain, dcOffset })
+    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, panner, lfoOscillator, lfoGain, dcOffset })
   }
 }
 
@@ -437,6 +444,7 @@ export function initAudioEngine(): () => void {
                 try { v.lfoOscillator.stop() } catch { /* already stopped */ }
                 try { v.dcOffset.stop() } catch { /* already stopped */ }
                 v.gainNode.disconnect()
+                v.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak
                 v.lfoGain.disconnect()
                 v.dcOffset.disconnect()
                 voices.delete(idToRecreate)
@@ -477,6 +485,7 @@ export function initAudioEngine(): () => void {
             try { voice.dcOffset.stop() } catch { /* already stopped */ }
             voice.dcOffset.disconnect()
             voice.gainNode.disconnect()
+            voice.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak
             voices.delete(id)
           }, 60)  // 60ms = ~4 time constants at τ=0.015s → gain < 2% of original
         }
