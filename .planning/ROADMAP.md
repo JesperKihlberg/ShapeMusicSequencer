@@ -122,16 +122,24 @@ Plans:
 **UI hint**: yes
 
 ### Phase 7: Composition Tools
-**Goal**: Undo/redo, PNG export, and spline animation curve system replacing LFO
+**Goal**: Spline animation curve system replacing LFO (COMP-01 undo/redo and COMP-02 PNG export deferred per D-01/D-02)
 **Depends on**: Phase 6
-**Requirements**: COMP-01, COMP-02, ANIM-02, ANIM-03, ANIM-04, ANIM-05, ANIM-06
+**Requirements**: COMP-01 (deferred), COMP-02 (deferred), ANIM-02, ANIM-03, ANIM-04, ANIM-05, ANIM-06
 **Success Criteria** (what must be TRUE):
-  1. Ctrl+Z/Ctrl+Y undo/redo with 50-step depth
-  2. Export button produces PNG that visually encodes the full composition
-  3. Animation panel opens for selected cell with per-property spline lanes
-  4. Spline curves loop with free-float beat duration; polyrhythm visible across lanes
-  5. Draggable divider adjusts canvas/panel split
-**Decision**: LFO deprecated via staged migration to spline curves. Existing shapes auto-convert animRate BeatFraction to sine spline on first panel open. See INGEST-CONFLICTS.md Bucket 2 for full rationale.
+  1. Animation panel opens for selected cell with per-property spline lanes (ANIM-05)
+  2. Spline curves loop with free-float beat duration; polyrhythm visible across lanes (ANIM-04)
+  3. Draggable divider adjusts canvas/panel split (ANIM-06)
+  4. All four animatable properties (size, hue, saturation, lightness) can have independent curves (ANIM-03)
+  5. Shapes render at base size when no size curve is active (LFO removed, D-04)
+**Decision**: LFO deprecated completely — animRate removed from Shape, createLfo/recreateLfo removed from audioEngine, pulseScale removed from canvasEngine. No LFO-to-spline migration (D-05). COMP-01 and COMP-02 deferred to a later phase (D-01, D-02).
+**Plans**: 5 plans
+Plans:
+- [ ] 07-00-PLAN.md — Wave 0: test infrastructure — scaffold animationStore.test.ts (RED), AnimationPanel.test.tsx (RED), update CellPanel.test.tsx with Phase 7 RED tests
+- [ ] 07-01-PLAN.md — Wave 1: data layer — create animationStore.ts (SplineCurve/setCurve/removeCurve/clearShape); remove animRate from shapeStore; wire clearShape on removeShape
+- [ ] 07-02-PLAN.md — Wave 2a: audio engine — remove LFO (createLfo/recreateLfo/AudioVoice fields); add animationStore setInterval modulation loop; export evalCurveAtBeat
+- [ ] 07-03-PLAN.md — Wave 2b: canvas engine — remove pulseScale; add animationStore-driven visual size modulation via evalCurveAtBeat
+- [ ] 07-04-PLAN.md — Wave 3: UI layer — update CellPanel (Animate button); create AnimationPanel component (drag handle, header, lane list with canvas); update App.tsx + CSS; human-verify checkpoint
+**UI hint**: yes
 
 ## Progress
 
@@ -146,4 +154,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Shape Panel & Animation | 0/5 | Not started | - |
 | 5. Playback Controls | 0/5 | Not started | - |
 | 6. Full Visual Language | 0/4 | Not started | - |
-| 7. Composition Tools | - | Not started | - |
+| 7. Composition Tools | 0/5 | Not started | - |
