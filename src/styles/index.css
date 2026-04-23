@@ -543,3 +543,241 @@ body {
   outline: none;
   box-shadow: 0 0 0 2px var(--color-accent);
 }
+
+/* ── Phase 7: Animation Panel ─────────────────────────────────────────────── */
+
+/* Host container — third flex child of .app-shell, below .canvas-area */
+.animation-panel-host {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-secondary);
+  overflow: hidden;
+}
+
+/* Drag handle — 8px strip on top edge, ns-resize cursor (D-12, UI-SPEC Pitfall 3) */
+.animation-panel__drag-handle {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-tertiary);
+  cursor: ns-resize;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.animation-panel__drag-handle:hover {
+  border-top-color: var(--color-border-secondary);
+}
+
+/* Panel header — "Animation" title + shape label + Add Curve button */
+.animation-panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--color-bg-secondary);
+  flex-shrink: 0;
+  height: 36px;
+}
+
+.animation-panel__title {
+  font-size: var(--text-title);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.animation-panel__shape-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-left: var(--space-1);
+}
+
+/* + Add Curve button — smaller than full .btn (toolbar density) */
+.animation-panel__add-btn {
+  width: auto;
+  height: 24px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.animation-panel__add-btn:hover {
+  border-color: var(--color-border-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.animation-panel__add-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Lanes list — scrollable body below header */
+.animation-panel__lanes {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Empty state */
+.animation-panel__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: var(--space-4);
+}
+
+.animation-panel__empty-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* Property picker dropdown (inline, not modal) */
+.anim-property-picker {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) 0;
+  min-width: 120px;
+  z-index: 10;
+}
+
+.anim-property-picker__item {
+  display: block;
+  width: 100%;
+  padding: var(--space-1) var(--space-3);
+  text-align: left;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.anim-property-picker__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary);
+}
+
+/* Individual lane row */
+.anim-lane {
+  display: flex;
+  flex-direction: row;
+  min-height: 56px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  position: relative;
+}
+
+/* Lane label column — fixed 60px (D-15) */
+.anim-lane__label-col {
+  width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-2);
+  border-right: 1px solid var(--color-border-tertiary);
+  gap: var(--space-1);
+}
+
+.anim-lane__prop-name {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-regular);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anim-lane__duration-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Duration number input — matches .bpm-widget__input spinner suppression pattern */
+.anim-lane__duration-input {
+  width: 36px;
+  height: 18px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+.anim-lane__duration-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Remove spinner arrows in Webkit (Chrome, Safari) */
+.anim-lane__duration-input::-webkit-inner-spin-button,
+.anim-lane__duration-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.anim-lane__duration-unit {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Remove curve button — danger color, ghost (no fill) */
+.anim-lane__remove-btn {
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.anim-lane__remove-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.anim-lane__remove-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Lane canvas column — flex: 1, overflow hidden for ResizeObserver sizing */
+.anim-lane__canvas-col {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lane canvas — sized by ResizeObserver (UI-SPEC Pitfall 2) */
+.anim-lane__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
