@@ -1,7 +1,7 @@
 // src/components/CellPanel.tsx
 // Right sidebar panel — shows cell content based on occupancy (D-06, CONTEXT.md)
 // Phase 4: occupied mode replaced with full interactive editor (PANL-01/02/03)
-// Phase 5: animRate section replaced with beat-fraction selector (D-06, D-13)
+// Phase 7: animRate beat-fraction selector replaced with Animate button (D-11)
 import { useMemo } from 'react'
 import { useSelectionStore } from '../store/selectionStore'
 import { selectionStore } from '../store/selectionStore'
@@ -11,19 +11,13 @@ import type { Shape } from '../store/shapeStore'
 import { selectShapeAt } from '../store/selectors'
 import { HsvSliders } from './HsvSliders'
 import { ShapeTypeSelector } from './ShapeTypeSelector'
-import { usePlaybackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
 
-const FRACTIONS: { value: BeatFraction; label: string; ariaLabel: string }[] = [
-  { value: 1,  label: '1/1',  ariaLabel: 'One bar' },
-  { value: 2,  label: '1/2',  ariaLabel: 'Half note' },
-  { value: 4,  label: '1/4',  ariaLabel: 'Quarter note' },
-  { value: 8,  label: '1/8',  ariaLabel: 'Eighth note' },
-  { value: 16, label: '1/16', ariaLabel: 'Sixteenth note' },
-]
+interface CellPanelProps {
+  onAnimate?: () => void
+}
 
-export function CellPanel() {
+export function CellPanel({ onAnimate }: CellPanelProps = {}) {
   const selectedCell = useSelectionStore((s) => s.selectedCell)
-  const bpm = usePlaybackStore((s) => s.bpm)
   const shapeSelector = useMemo(
     () => selectedCell ? selectShapeAt(selectedCell.col, selectedCell.row) : () => undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,33 +101,15 @@ export function CellPanel() {
 
           <hr className="cell-panel__divider" />
 
-          {/* Animation section — Phase 5: beat-fraction selector (D-06, D-13) */}
+          {/* Animation section — Phase 7: Animate button (D-11) */}
           <p className="cell-panel__section-heading">Animation</p>
-          <div className="control-group">
-            <div className="control-group__label-row">
-              <label className="control-group__label">Rate</label>
-              <span className="control-group__readout">
-                {computeLfoHz(shape.animRate, bpm).toFixed(1)} Hz
-              </span>
-            </div>
-            <div
-              className="beat-selector"
-              role="group"
-              aria-label="Animation rate"
-            >
-              {FRACTIONS.map((frac) => (
-                <button
-                  key={frac.value}
-                  className={`beat-selector__btn${shape.animRate === frac.value ? ' beat-selector__btn--active' : ''}`}
-                  aria-pressed={shape.animRate === frac.value}
-                  aria-label={frac.ariaLabel}
-                  onClick={() => handleUpdateShape({ animRate: frac.value })}
-                >
-                  {frac.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <button
+            className="btn btn--accent"
+            aria-label="Open animation panel for this shape"
+            onClick={onAnimate}
+          >
+            Animate
+          </button>
 
           <hr className="cell-panel__divider" />
 
