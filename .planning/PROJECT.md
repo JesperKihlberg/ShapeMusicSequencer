@@ -24,7 +24,7 @@ Any change to the visual canvas is an immediate, audible change to the music —
 
 - [ ] User can place shapes on a strict grid canvas (up to 4x4 = 16 cells)
 - [ ] Shape type determines oscillator waveform (circle=sine, square=square/buzz, star=noise burst, triangle=triangle, diamond=sawtooth)
-- [ ] Shape color (hue) maps to pitch; saturation maps to reverb depth; value/brightness maps to filter cutoff
+- [ ] Shape color (hue) maps to pitch; saturation maps to harmonic richness (WaveShaper); value/brightness maps to filter cutoff
 - [ ] Each shape plays continuously and independently as an audio voice
 - [ ] User can remove shapes from the canvas
 - [x] Playback has configurable BPM/tempo — Validated in Phase 05: playback-controls (human-verified)
@@ -66,6 +66,8 @@ Any change to the visual canvas is an immediate, audible change to the music —
 | Click → side panel for properties | Full control per shape without cluttering canvas | Implemented in Phase 04: HsvSliders, ShapeTypeSelector, size/rate sliders |
 | Image is actually animated JSON | Canvas state is the composition — saving JSON saves everything | — Pending |
 | Audio library TBD at planning | Web Audio API or Tone.js decided based on architecture needs | — Pending |
+| Saturation → WaveShaper harmonic richness (not reverb) | HSV saturation = colour richness/purity; WaveShaper is the honest metaphor. Per-voice reverb causes mud at 32 voices; makeDistortionCurve already exists from Phase 2 | Decided 2026-04-22; implement in Phase 6 |
+| Animation: LFO → spline curves (staged migration) | Two subsystems is a maintenance trap; LFO is a degenerate spline case. BeatFraction already maps to spline loop duration. Auto-convert on first panel open — lossless migration | Decided 2026-04-22; implement in Phase 7 |
 
 ## Evolution
 
@@ -85,4 +87,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 04 (shape-panel-animation) completion*
+*Last updated: 2026-04-22 — ingested PRD-visual-sequencer.md v1.1; resolved saturation→WaveShaper and LFO→spline decisions*

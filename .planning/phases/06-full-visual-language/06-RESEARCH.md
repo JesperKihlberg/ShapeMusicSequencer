@@ -620,22 +620,22 @@ import { scaleStore, SCALE_INTERVALS } from '../store/scaleStore'
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Harmonic weights for two-stage makeDistortionCurve**
    - What we know: CONTEXT.md specifies blend parameter structure and soft-clip formula but leaves exact T2/T3 weights to Claude's discretion
    - What's unclear: The specific weight values (T2: 0.5, T3: 0.3 used in examples above) are a starting point; the final sound quality depends on listening tests
-   - Recommendation: Implement with the example weights, then the user can tune during human-verify checkpoint
+   - RESOLVED: Implement with T2 weight 0.5, T3 weight 0.3 as initial values. User can tune during the Wave 3 human-verify checkpoint.
 
 2. **updateVoiceColor: refactor colorToFrequency vs. hue back-conversion**
    - What we know: Two approaches are equivalent (back-convert semitone to hue, or add a semitoneOverride param)
    - What's unclear: Whether a signature change to `colorToFrequency` is desirable for clarity
-   - Recommendation: Use hue back-conversion (`quantizedHue = quantized * 30`) — no signature change, simpler, and the existing tests for `colorToFrequency` are unaffected
+   - RESOLVED: Use hue back-conversion (`quantizedHue = quantized * 30`) — no signature change to `colorToFrequency`, simpler, and existing tests for `colorToFrequency` are unaffected.
 
 3. **Scale display labels in ScaleSelector dropdown**
    - What we know: The scale names are slugs like `'pentatonic-major'`; user-facing labels should be readable
    - What's unclear: Exact label strings (e.g., "Pentatonic Major" vs "Penta. Major" for compactness)
-   - Recommendation: Use title-cased display strings in a lookup map inside ScaleSelector, keeping the slug as the store value
+   - RESOLVED: Use title-cased display strings in a `SCALE_LABELS` lookup map inside ScaleSelector, keeping the slug as the store value. Labels: "Major", "Natural Minor", "Pentatonic Major", "Pentatonic Minor", "Dorian", "Mixolydian", "Chromatic".
 
 ---
 
