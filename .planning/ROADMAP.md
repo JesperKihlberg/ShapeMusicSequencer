@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Canvas Interaction** - Place, select, and remove shapes that create live audio voices
 - [ ] **Phase 4: Shape Panel & Animation** - Per-shape property editor and LFO amplitude modulation
 - [ ] **Phase 5: Playback Controls** - Start/stop, BPM, and master volume controls
-- [ ] **Phase 6: Full Visual Language** - Complete visual-to-audio mapping: WaveShaper timbre, stereo pan, star percussion, key/scale selector, multi-shape cells
+- [x] **Phase 6: Full Visual Language** - Complete visual-to-audio mapping: WaveShaper timbre, stereo pan, star percussion, key/scale selector, multi-shape cells (2026-04-23)
 - [ ] **Phase 7: Composition Tools** - Undo/redo, PNG export, and spline animation curve system replacing LFO
 
 ## Phase Details
@@ -115,10 +115,10 @@ Plans:
 **Note**: Star percussion (SHPE-04) and multi-shape per cell (SHPE-06) deferred to Phase 7 per CONTEXT.md.
 **Plans**: 4 plans
 Plans:
-- [ ] 06-00-PLAN.md — Wave 0: test infrastructure — fix failing makeDistortionCurve monotonicity test; scaffold scaleStore.test.ts and ScaleSelector.test.tsx in RED state; add quantizeSemitone and pan formula RED tests to audioEngine.test.ts
-- [ ] 06-01-PLAN.md — Wave 1: data layer — create scaleStore.ts (ScaleName, SCALE_INTERVALS, scaleStore, useScaleStore); add quantizeSemitone export to audioEngine.ts
-- [ ] 06-02-PLAN.md — Wave 2: audio engine — StereoPannerNode per voice (AudioVoice interface + createVoice + teardown); replace makeDistortionCurve with two-stage algorithm; wire quantizeSemitone in updateVoiceColor; add scaleStore.subscribe
-- [ ] 06-03-PLAN.md — Wave 3: UI layer — create ScaleSelector component; refactor PlaybackControls to fragment; update App.tsx toolbar; add CSS; human-verify checkpoint
+- [x] 06-00-PLAN.md — Wave 0: test infrastructure — fix failing makeDistortionCurve monotonicity test; scaffold scaleStore.test.ts and ScaleSelector.test.tsx in RED state; add quantizeSemitone and pan formula RED tests to audioEngine.test.ts
+- [x] 06-01-PLAN.md — Wave 1: data layer — create scaleStore.ts (ScaleName, SCALE_INTERVALS, scaleStore, useScaleStore); add quantizeSemitone export to audioEngine.ts
+- [x] 06-02-PLAN.md — Wave 2: audio engine — StereoPannerNode per voice (AudioVoice interface + createVoice + teardown); replace makeDistortionCurve with two-stage algorithm; wire quantizeSemitone in updateVoiceColor; add scaleStore.subscribe
+- [x] 06-03-PLAN.md — Wave 3: UI layer — create ScaleSelector component; refactor PlaybackControls to fragment; update App.tsx toolbar; add CSS; human-verify checkpoint
 **UI hint**: yes
 
 ### Phase 7: Composition Tools
