@@ -57,6 +57,35 @@ export function makeDistortionCurve(saturation: number): Float32Array {
   return curve
 }
 
+// PLAY-05, PLAY-06: snap a raw semitone (0–11 from hueToSemitone) to the nearest
+// in-scale semitone. Returns a value in [0, 11].
+//
+// Algorithm: build absolute candidate set (scaleIntervals shifted by rootKey, mod 12),
+// find the candidate with minimum circular distance. Tie-breaking: lower candidate wins
+// (because candidates are generated in ascending interval order and < is strict).
+//
+// Chromatic passthrough: when scaleIntervals = [0,1,...,11], every semitone is a candidate
+// so the function returns rawSemitone unchanged — no special case needed.
+export function quantizeSemitone(
+  rawSemitone: number,
+  rootKey: number,
+  scaleIntervals: number[],
+): number {
+  // Build absolute semitone candidates: shift each interval by rootKey, wrap mod 12
+  const candidates = scaleIntervals.map((i) => (i + rootKey) % 12)
+  let best = candidates[0]
+  let bestDist = 13  // sentinel larger than max possible circular distance (6)
+  for (const c of candidates) {
+    // Circular (pitch-class) distance: semitones are mod-12 so B(11) and C(0) are 1 apart
+    const dist = Math.min(Math.abs(rawSemitone - c), 12 - Math.abs(rawSemitone - c))
+    if (dist < bestDist) {  // strict < → ties go to first (lower) candidate encountered
+      bestDist = dist
+      best = c
+    }
+  }
+  return best
+}
+
 // COLR-03: lightness → filter cutoff frequency (Hz)
 // Exponential mapping: minHz=100, maxHz=8000
 // Formula: 100 * (8000/100)^t where t = l/100
