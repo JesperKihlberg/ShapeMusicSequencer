@@ -7,6 +7,7 @@ import {
   makeDistortionCurve,
   lightnessToFilterCutoff,
   shapeTypeToWave,
+  quantizeSemitone,
 } from './audioEngine'
 
 describe('colorToFrequency', () => {
@@ -164,54 +165,31 @@ describe('updateVoiceSize (Phase 4)', () => {
 
 // Covers: PLAY-05 (scale quantization), PLAY-06 (chromatic passthrough)
 describe('quantizeSemitone (Phase 6)', () => {
-  it('is exported from audioEngine (Wave 1 will add this)', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = await import('./audioEngine') as any
-    if (typeof mod.quantizeSemitone !== 'function') return  // RED until Wave 1
-    expect(typeof mod.quantizeSemitone).toBe('function')
+  it('snaps C# (raw=1) to C (0) in C major — tie breaks to lower', () => {
+    expect(quantizeSemitone(1, 0, [0,2,4,5,7,9,11])).toBe(0)
   })
 
-  it('snaps C# (raw=1) to C (0) in C major [0,2,4,5,7,9,11] — tie breaks to lower', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = await import('./audioEngine') as any
-    if (typeof mod.quantizeSemitone !== 'function') return
-    // C# (1) is equidistant from C (0) and D (2) — tie goes to lower candidate (C=0)
-    expect(mod.quantizeSemitone(1, 0, [0,2,4,5,7,9,11])).toBe(0)
+  it('snaps F# (raw=6) to F (5) in C major — tie breaks to lower', () => {
+    expect(quantizeSemitone(6, 0, [0,2,4,5,7,9,11])).toBe(5)
   })
 
-  it('snaps F# (raw=6) to F (5) in C major [0,2,4,5,7,9,11] — tie breaks to lower', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = await import('./audioEngine') as any
-    if (typeof mod.quantizeSemitone !== 'function') return
-    // F# (6) equidistant from F (5) and G (7) — tie goes to F=5
-    expect(mod.quantizeSemitone(6, 0, [0,2,4,5,7,9,11])).toBe(5)
+  it('uses rootKey offset: raw=3 in D major (rootKey=2) snaps to D (2)', () => {
+    // D major candidates: intervals [0,2,4,5,7,9,11] + rootKey=2, mod 12 = [2,4,6,7,9,11,1]
+    // raw=3 (D#/Eb): nearest candidate is 2 (D, dist=1) vs 4 (E, dist=1) — tie to lower (2)
+    // Note: raw=1 (C#) IS in D major as the 7th degree (interval 11 + 2 = 1 mod 12),
+    // so that input would return 1 (distance 0), not 2.
+    expect(quantizeSemitone(3, 2, [0,2,4,5,7,9,11])).toBe(2)
   })
 
-  it('uses rootKey offset: raw=1 in D major (rootKey=2) snaps to D (2)', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = await import('./audioEngine') as any
-    if (typeof mod.quantizeSemitone !== 'function') return
-    // D major candidates: [2,4,6,7,9,11,1] (intervals [0,2,4,5,7,9,11] + rootKey=2, mod 12)
-    // raw=1 (C#): nearest candidate is 2 (D), distance=1
-    expect(mod.quantizeSemitone(1, 2, [0,2,4,5,7,9,11])).toBe(2)
-  })
-
-  it('chromatic intervals [0..11] are identity passthrough (PLAY-06)', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = await import('./audioEngine') as any
-    if (typeof mod.quantizeSemitone !== 'function') return
+  it('chromatic intervals are identity passthrough (PLAY-06)', () => {
     const chromatic = [0,1,2,3,4,5,6,7,8,9,10,11]
     for (let raw = 0; raw <= 11; raw++) {
-      expect(mod.quantizeSemitone(raw, 0, chromatic)).toBe(raw)
+      expect(quantizeSemitone(raw, 0, chromatic)).toBe(raw)
     }
   })
 
-  it('returns value in range [0, 11] for rootKey=11 (octave boundary test)', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mod = await import('./audioEngine') as any
-    if (typeof mod.quantizeSemitone !== 'function') return
-    // rootKey=11 (B), major intervals [0,2,4,5,7,9,11]: candidates mod 12 all in [0,11]
-    const result = mod.quantizeSemitone(0, 11, [0,2,4,5,7,9,11])
+  it('returns value in range [0, 11] for rootKey=11 (B major)', () => {
+    const result = quantizeSemitone(0, 11, [0,2,4,5,7,9,11])
     expect(result).toBeGreaterThanOrEqual(0)
     expect(result).toBeLessThanOrEqual(11)
   })
