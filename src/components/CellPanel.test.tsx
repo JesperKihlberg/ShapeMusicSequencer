@@ -138,3 +138,41 @@ describe('CellPanel — Phase 4 occupied mode controls', () => {
     expect(screen.getByText('Remove Shape')).toBeTruthy()
   })
 })
+
+// Phase 7: beat-selector removal + Animate button (D-03, D-11)
+describe('CellPanel — Phase 7: Animate button replaces beat-fraction selector', () => {
+  beforeEach(() => {
+    selectionStore.setState({ selectedCell: null })
+    shapeStore.setState({ shapes: [] })
+  })
+
+  it('renders "Animate" button in occupied mode (D-11)', () => {
+    shapeStore.getState().addShape(0, 0)
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+    render(<CellPanel />)
+    expect(screen.getByLabelText('Open animation panel for this shape')).toBeTruthy()
+  })
+
+  it('"Animate" button has text content "Animate"', () => {
+    shapeStore.getState().addShape(0, 0)
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+    render(<CellPanel />)
+    expect(screen.getByText('Animate')).toBeTruthy()
+  })
+
+  it('does NOT render beat-fraction selector in occupied mode (D-03)', () => {
+    shapeStore.getState().addShape(0, 0)
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+    render(<CellPanel />)
+    expect(screen.queryByRole('group', { name: /Animation rate/i })).toBeNull()
+  })
+
+  it('does NOT render beat-fraction buttons (1/1, 1/4, 1/16) in occupied mode (D-03)', () => {
+    shapeStore.getState().addShape(0, 0)
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+    render(<CellPanel />)
+    expect(screen.queryByText('1/1')).toBeNull()
+    expect(screen.queryByText('1/4')).toBeNull()
+    expect(screen.queryByText('1/16')).toBeNull()
+  })
+})
