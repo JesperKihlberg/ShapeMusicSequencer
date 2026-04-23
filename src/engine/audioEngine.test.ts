@@ -8,6 +8,7 @@ import {
   lightnessToFilterCutoff,
   shapeTypeToWave,
   quantizeSemitone,
+  evalCurveAtBeat,
 } from './audioEngine'
 
 describe('colorToFrequency', () => {
@@ -213,5 +214,20 @@ describe('pan formula (Phase 6 AUDI-03)', () => {
   it('col 2 → pan ≈ +0.333', () => {
     const pan = (2 / 3) * 2 - 1
     expect(pan).toBeCloseTo(0.333, 2)
+  })
+})
+
+describe('evalCurveAtBeat (ANIM-04 looping)', () => {
+  it('returns exact point value when beat aligns with a control point', () => {
+    const curve = { duration: 4, points: [{ beat: 0, value: 50 }, { beat: 4, value: 80 }] }
+    expect(evalCurveAtBeat(curve, 0)).toBe(50)
+  })
+  it('interpolates linearly between two points', () => {
+    const curve = { duration: 4, points: [{ beat: 0, value: 0 }, { beat: 4, value: 100 }] }
+    expect(evalCurveAtBeat(curve, 2)).toBeCloseTo(50, 1)
+  })
+  it('loops — beat position > duration wraps back to start', () => {
+    const curve = { duration: 4, points: [{ beat: 0, value: 10 }, { beat: 4, value: 10 }] }
+    expect(evalCurveAtBeat(curve, 6)).toBeCloseTo(evalCurveAtBeat(curve, 2), 1)
   })
 })

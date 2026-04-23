@@ -5,7 +5,9 @@
 // SHPE-01: shape type → waveform descriptor
 import type { ShapeColor, ShapeType, Shape } from '../store/shapeStore'
 import { shapeStore } from '../store/shapeStore'
-import { playbackStore, computeLfoHz, type BeatFraction } from '../store/playbackStore'
+import { playbackStore } from '../store/playbackStore'
+import { animationStore } from '../store/animationStore'
+import type { AnimatableProperty, SplineCurve } from '../store/animationStore'
 import { scaleStore, SCALE_INTERVALS } from '../store/scaleStore'
 
 // Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
@@ -136,6 +138,7 @@ export function shapeTypeToWave(type: ShapeType): WaveDescriptor {
 // ─────────────────────────────────────────────────────────────────────────────
 // AudioVoice — nodes owned by one shape's voice (D-09)
 // noiseSource is only present for blob shapes
+// Phase 7: LFO nodes removed — gain driven directly (no dcOffset/lfoOscillator/lfoGain)
 // ─────────────────────────────────────────────────────────────────────────────
 export interface AudioVoice {
   oscillator: OscillatorNode | AudioBufferSourceNode  // OscillatorNode for all types except blob
@@ -144,9 +147,6 @@ export interface AudioVoice {
   gainNode: GainNode
   panner: StereoPannerNode               // Phase 6 AUDI-03: column → stereo position
   noiseSource?: AudioBufferSourceNode  // blob only
-  lfoOscillator: OscillatorNode         // Phase 4 — LFO for amplitude modulation (D-09)
-  lfoGain: GainNode                     // Phase 4 — scales LFO amplitude (D-10)
-  dcOffset: ConstantSourceNode          // Phase 4 — DC base gain (avoids AudioParam sum confusion)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -205,47 +205,38 @@ function createNoiseBuffer(ctx: AudioContext): AudioBuffer {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// createLfo — builds a ConstantSourceNode (DC offset) + OscillatorNode (LFO)
-// topology for one voice's gainNode.gain AudioParam.
-// DC offset: ramps from 0 to baseGain in 10ms (click-free ramp-in).
-// LFO: swings ±40% of baseGain at animRate Hz (D-10).
-// Both sources connect additively to gainNode.gain (gainNode.gain.value = 0).
+// evalCurveAtBeat — evaluate a SplineCurve at a given beat position (looping).
+// Linear interpolation between the two nearest in-window control points.
+// Points with beat > duration are excluded (outside the loop window).
 // ─────────────────────────────────────────────────────────────────────────────
-function createLfo(
-  ctx: AudioContext,
-  gainNode: GainNode,
-  shape: Shape,
-): { lfoOscillator: OscillatorNode; lfoGain: GainNode; dcOffset: ConstantSourceNode } {
-  const baseGain = (shape.size / 100) * 0.8  // size=50 → 0.4 (matches Phase 3 ramp-in target)
-  gainNode.gain.value = 0  // All gain comes from dcOffset + lfoGain
-
-  // DC offset: ConstantSourceNode provides base gain level
-  const dcOffset = ctx.createConstantSource()
-  dcOffset.offset.setValueAtTime(0, ctx.currentTime)
-  dcOffset.offset.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)
-  dcOffset.connect(gainNode.gain)
-  dcOffset.start()  // CRITICAL — ConstantSourceNode must be started (Pitfall 6)
-
-  // LFO oscillator: sine wave at animRate Hz, modulates ±40% of baseGain
-  const lfoOscillator = ctx.createOscillator()
-  lfoOscillator.type = 'sine'
-  lfoOscillator.frequency.value = computeLfoHz(shape.animRate as BeatFraction, playbackStore.getState().bpm)
-
-  const lfoGain = ctx.createGain()
-  lfoGain.gain.value = baseGain * 0.4  // ±40% swing amplitude (D-10)
-
-  lfoOscillator.connect(lfoGain)
-  lfoGain.connect(gainNode.gain)  // additive with dcOffset
-  lfoOscillator.start()
-
-  return { lfoOscillator, lfoGain, dcOffset }
+export function evalCurveAtBeat(curve: SplineCurve, beatPos: number): number {
+  const pos = curve.duration > 0 ? beatPos % curve.duration : 0
+  const active = curve.points
+    .filter((p) => p.beat <= curve.duration)
+    .sort((a, b) => a.beat - b.beat)
+  if (active.length === 0) return 0
+  if (active.length === 1) return active[0].value
+  let lo = active[active.length - 1]
+  let hi = active[0]
+  for (let i = 0; i < active.length - 1; i++) {
+    if (active[i].beat <= pos && pos < active[i + 1].beat) {
+      lo = active[i]
+      hi = active[i + 1]
+      break
+    }
+  }
+  if (lo.beat === hi.beat) return lo.value
+  const segLength = hi.beat - lo.beat
+  if (segLength <= 0) return lo.value
+  const t = (pos - lo.beat) / segLength
+  return lo.value + t * (hi.value - lo.value)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // createVoice — builds the signal chain for one shape (D-09, Pattern 4)
 // Signal path (standard): OscillatorNode → WaveShaperNode → BiquadFilterNode → GainNode → masterGain
 // Signal path (blob):      [noiseSource + sineOsc] → mixer GainNode → WaveShaperNode → BiquadFilterNode → GainNode → masterGain
-// Gain: ConstantSourceNode (DC offset) + LFO oscillator drive gainNode.gain (Phase 4 D-09, D-10)
+// Phase 7: Direct gainNode.gain ramp-in (no LFO/dcOffset)
 // ─────────────────────────────────────────────────────────────────────────────
 function createVoice(shape: Shape): void {
   const ctx = getAudioContext()
@@ -262,8 +253,6 @@ function createVoice(shape: Shape): void {
   filter.Q.value = 1
 
   const gainNode = ctx.createGain()
-  // LFO topology — DC offset + LFO oscillator (Phase 4 D-09, D-10)
-  // gainNode.gain is driven by dcOffset + lfoGain instead of direct value assignment
 
   const waveDesc = shapeTypeToWave(shape.type)
   const freq = colorToFrequency(shape.color)
@@ -305,8 +294,10 @@ function createVoice(shape: Shape): void {
     noiseSource.start()
     sineOsc.start()
 
-    const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
-    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, panner, noiseSource, lfoOscillator, lfoGain, dcOffset })
+    const baseGain = (shape.size / 100) * 0.8  // size=50 → 0.4 (D-15)
+    gainNode.gain.setValueAtTime(0, ctx.currentTime)
+    gainNode.gain.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)  // 10ms ramp-in (click-free)
+    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, panner, noiseSource })
   } else {
     // Standard oscillator path (circle, triangle, square, star, diamond)
     const osc = ctx.createOscillator()
@@ -328,8 +319,10 @@ function createVoice(shape: Shape): void {
 
     osc.start()
 
-    const { lfoOscillator, lfoGain, dcOffset } = createLfo(ctx, gainNode, shape)
-    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, panner, lfoOscillator, lfoGain, dcOffset })
+    const baseGain = (shape.size / 100) * 0.8  // size=50 → 0.4 (D-15)
+    gainNode.gain.setValueAtTime(0, ctx.currentTime)
+    gainNode.gain.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)  // 10ms ramp-in (click-free)
+    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, panner })
   }
 }
 
@@ -363,56 +356,14 @@ export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// updateVoiceSize — glitch-free gain update on a live voice (D-13)
-// Updates dcOffset.offset (base gain) and lfoGain.gain (LFO amplitude) together
-// to maintain ±40% modulation depth at new size level (D-10)
+// updateVoiceSize — set base gain directly on gainNode (no LFO in Phase 7)
 // ─────────────────────────────────────────────────────────────────────────────
 export function updateVoiceSize(shapeId: string, size: number): void {
   const voice = voices.get(shapeId)
   const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
-  // getAudioContext() resumes a suspended context, overriding the user's Stop action.
-  // setTargetAtTime is safe on a suspended context — values are buffered.
   if (!voice || !ctx) return
-  const newBase = (size / 100) * 0.8
-  // Update DC offset (base gain level)
-  voice.dcOffset.offset.setTargetAtTime(newBase, ctx.currentTime, 0.015)
-  // Update LFO amplitude to maintain ±40% of new base
-  voice.lfoGain.gain.setTargetAtTime(newBase * 0.4, ctx.currentTime, 0.015)
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// recreateLfo — destroys and re-creates LFO oscillator only (D-14)
-// Called when shape.animRate changes. Cannot update a running oscillator's
-// frequency and also safely reconnect AudioParam — simpler to rebuild.
-// ─────────────────────────────────────────────────────────────────────────────
-function recreateLfo(shapeId: string, animRate: BeatFraction): void {
-  const voice = voices.get(shapeId)
-  const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
-  // getAudioContext() resumes a suspended context, overriding the user's Stop action
-  if (!voice || !ctx) return
-
-  // Stop and disconnect old LFO
-  try { voice.lfoOscillator.stop() } catch { /* already stopped */ }
-  voice.lfoGain.disconnect()
-  voice.lfoOscillator.disconnect()
-
-  // Get current base gain from dcOffset
-  const baseGain = voice.dcOffset.offset.value
-
-  // Create new LFO at new rate
-  const newLfoOsc = ctx.createOscillator()
-  newLfoOsc.type = 'sine'
-  newLfoOsc.frequency.value = computeLfoHz(animRate, playbackStore.getState().bpm)
-  const newLfoGain = ctx.createGain()
-  newLfoGain.gain.value = baseGain * 0.4
-
-  newLfoOsc.connect(newLfoGain)
-  newLfoGain.connect(voice.gainNode.gain)
-  newLfoOsc.start()
-
-  // Update voice in-place
-  voice.lfoOscillator = newLfoOsc
-  voice.lfoGain = newLfoGain
+  const newBase = (size / 100) * 0.8  // size=50 → 0.4, size=100 → 0.8
+  voice.gainNode.gain.setTargetAtTime(newBase, ctx.currentTime, 0.015)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -442,7 +393,7 @@ export function initAudioEngine(): () => void {
       }
     }
 
-    // Detect property changes on existing voices (Phase 4 — color, size, animRate, type)
+    // Detect property changes on existing voices (Phase 4 — color, size, type)
     for (const shape of curr) {
       const prev = prevShapes.get(shape.id)
       if (prev && voices.has(shape.id)) {
@@ -456,10 +407,6 @@ export function initAudioEngine(): () => void {
         if (shape.size !== prev.size) {
           updateVoiceSize(shape.id, shape.size)
         }
-        // animRate change — destroy + recreate LFO oscillator only (D-14)
-        if (shape.animRate !== prev.animRate) {
-          recreateLfo(shape.id, shape.animRate)
-        }
         // Type change — destroy entire voice, re-create with new waveform (D-08)
         if (shape.type !== prev.type) {
           const voice = voices.get(shape.id)
@@ -472,12 +419,8 @@ export function initAudioEngine(): () => void {
               if (v) {
                 try { v.oscillator.stop() } catch { /* already stopped */ }
                 if (v.noiseSource) try { v.noiseSource.stop() } catch { /* already stopped */ }
-                try { v.lfoOscillator.stop() } catch { /* already stopped */ }
-                try { v.dcOffset.stop() } catch { /* already stopped */ }
                 v.gainNode.disconnect()
                 v.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak
-                v.lfoGain.disconnect()
-                v.dcOffset.disconnect()
                 voices.delete(idToRecreate)
                 // Only recreate if context is running — do NOT call createVoice when suspended;
                 // createVoice() calls getAudioContext() which resumes the context, overriding Stop.
@@ -509,12 +452,6 @@ export function initAudioEngine(): () => void {
             if (voice.noiseSource) {
               try { voice.noiseSource.stop() } catch { /* already stopped */ }
             }
-            // Stop and disconnect LFO nodes (Phase 4)
-            try { voice.lfoOscillator.stop() } catch { /* already stopped */ }
-            voice.lfoGain.disconnect()
-            voice.lfoOscillator.disconnect()
-            try { voice.dcOffset.stop() } catch { /* already stopped */ }
-            voice.dcOffset.disconnect()
             voice.gainNode.disconnect()
             voice.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak
             voices.delete(id)
@@ -525,13 +462,12 @@ export function initAudioEngine(): () => void {
     }
   })
 
-  // Phase 5: subscribe to playbackStore for isPlaying, volume, and bpm changes (D-15)
+  // Phase 5: subscribe to playbackStore for isPlaying, volume changes (D-15)
   // CRITICAL: do NOT call getAudioContext() here — only act if audioCtx already exists
   // (i.e., user has already placed a shape). Calling getAudioContext() in subscribe
   // would create AudioContext outside a user gesture. (RESEARCH.md Pitfall 1)
   let prevIsPlaying = playbackStore.getState().isPlaying
   let prevVolume = playbackStore.getState().volume
-  let prevBpm = playbackStore.getState().bpm
 
   const unsubscribePlayback = playbackStore.subscribe((state) => {
     const ctx = audioCtx  // Direct module-level null check — do NOT use getAudioContext()
@@ -562,19 +498,6 @@ export function initAudioEngine(): () => void {
         masterGain.gain.setTargetAtTime(state.volume * 0.15, ctx.currentTime, 0.05)
       }
     }
-
-    // bpm changed → update all live LFO frequencies in-place via setTargetAtTime
-    // (no full rebuild — OscillatorNode.frequency is an AudioParam; RESEARCH.md Code Examples)
-    if (state.bpm !== prevBpm) {
-      prevBpm = state.bpm
-      for (const [shapeId, voice] of voices) {
-        const shape = shapeStore.getState().shapes.find((s) => s.id === shapeId)
-        if (shape) {
-          const newHz = computeLfoHz(shape.animRate, state.bpm)
-          voice.lfoOscillator.frequency.setTargetAtTime(newHz, ctx.currentTime, 0.015)
-        }
-      }
-    }
   })
 
   let prevRootKey = scaleStore.getState().rootKey
@@ -594,18 +517,66 @@ export function initAudioEngine(): () => void {
     }
   })
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // animationStore curve evaluator — runs at ~60fps, evaluates each active curve
+  // at the current beat position and applies to the corresponding AudioParam.
+  // Curves loop independently (ANIM-04): beat position mod curve.duration.
+  // ─────────────────────────────────────────────────────────────────────────────
+  let curveIntervalId: ReturnType<typeof setInterval> | null = null
+
+  curveIntervalId = setInterval(() => {
+    const ctx = audioCtx
+    if (!ctx) return
+    const { bpm, isPlaying } = playbackStore.getState()
+    if (!isPlaying) return
+
+    const beatPos = (performance.now() / 1000) * (bpm / 60)
+    const { curves } = animationStore.getState()
+
+    for (const [shapeId, shapeCurves] of Object.entries(curves)) {
+      const voice = voices.get(shapeId)
+      if (!voice) continue
+      const shape = shapeStore.getState().shapes.find((s) => s.id === shapeId)
+      if (!shape) continue
+
+      // 'size' curve → modulate gainNode.gain
+      if (shapeCurves.size) {
+        const sizeVal = evalCurveAtBeat(shapeCurves.size, beatPos)
+        const gain = (sizeVal / 100) * 0.8
+        voice.gainNode.gain.setTargetAtTime(gain, ctx.currentTime, 0.008)
+      }
+
+      // 'hue' curve → modulate oscillator frequency (via updateVoiceColor with patched hue)
+      if (shapeCurves.hue && voice.oscillator instanceof OscillatorNode) {
+        const hueVal = evalCurveAtBeat(shapeCurves.hue, beatPos)
+        updateVoiceColor(shapeId, { ...shape.color, h: hueVal })
+      }
+
+      // 'saturation' curve → modulate WaveShaper curve (direct assignment, not AudioParam)
+      if (shapeCurves.saturation) {
+        const satVal = evalCurveAtBeat(shapeCurves.saturation, beatPos)
+        voice.waveshaper.curve = makeDistortionCurve(satVal)
+      }
+
+      // 'lightness' curve → modulate filter cutoff
+      if (shapeCurves.lightness) {
+        const lightVal = evalCurveAtBeat(shapeCurves.lightness, beatPos)
+        voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(lightVal), ctx.currentTime, 0.008)
+      }
+    }
+  }, 16)
+
   return function destroy(): void {
     unsubscribe()
     unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
     unsubscribeScale()     // Phase 6: clean up scale subscription
+    if (curveIntervalId !== null) clearInterval(curveIntervalId)
     // Stop all voices on cleanup (e.g., React StrictMode double-invoke)
     voices.forEach((voice) => {
       try { voice.oscillator.stop() } catch { /* already stopped */ }
       if (voice.noiseSource) {
         try { voice.noiseSource.stop() } catch { /* already stopped */ }
       }
-      try { voice.lfoOscillator.stop() } catch { /* already stopped */ }
-      try { voice.dcOffset.stop() } catch { /* already stopped */ }
     })
     voices.clear()
     prevShapes.clear()
