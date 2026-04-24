@@ -57,16 +57,14 @@
 
 ## Traceability
 
-> Filled by roadmapper when ROADMAP.md is created.
-
 | REQ-ID | Phase | Plan |
 |--------|-------|------|
-| ANIM-08 | — | — |
-| ANIM-09 | — | — |
-| ANIM-10 | — | — |
-| ANIM-11 | — | — |
-| ANIM-12 | — | — |
-| ANIM-13 | — | — |
-| ANIM-14 | — | — |
-| ANIM-15 | — | — |
-| ANIM-16 | — | — |
+| ANIM-08 | Phase 9 | — |
+| ANIM-09 | Phase 9 | — |
+| ANIM-10 | Phase 10 | — |
+| ANIM-11 | Phase 9 | — |
+| ANIM-12 | Phase 10 | — |
+| ANIM-13 | Phase 10 | — |
+| ANIM-14 | Phase 8 | — |
+| ANIM-15 | Phase 8 | — |
+| ANIM-16 | Phase 11 | — |
