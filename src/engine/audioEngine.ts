@@ -8,7 +8,7 @@ import { shapeStore } from '../store/shapeStore'
 import { playbackStore } from '../store/playbackStore'
 import { animationStore } from '../store/animationStore'
 import type { AnimatableProperty, SplineCurve } from '../store/animationStore'
-import { getCurrentBeat } from './beatClock'
+import { getCurrentBeat, markPlaybackStart } from './beatClock'
 
 // Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
 // 'pulse' → createPeriodicWave (square-ish with PWM)
@@ -304,8 +304,12 @@ export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
       colorToFrequency(color), ctx.currentTime, 0.015
     )
   }
-  // Filter cutoff — always present
-  voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(color.l), ctx.currentTime, 0.015)
+  // Filter cutoff — skip blob voices: blob uses a bandpass filter centred on pitch
+  // frequency (set in createVoice); overwriting with a lightness-derived cutoff
+  // detunes the resonant character. noiseSource is only set for blob voices.
+  if (!voice.noiseSource) {
+    voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(color.l), ctx.currentTime, 0.015)
+  }
   // Distortion curve — direct assignment (WaveShaper.curve is not an AudioParam)
   voice.waveshaper.curve = makeDistortionCurve(color.s)
 }
@@ -432,6 +436,7 @@ export function initAudioEngine(): () => void {
     if (state.isPlaying !== prevIsPlaying) {
       prevIsPlaying = state.isPlaying
       if (state.isPlaying) {
+        markPlaybackStart()
         void ctx.resume()
         // Create voices for shapes added while the context was suspended
         for (const shape of shapeStore.getState().shapes) {

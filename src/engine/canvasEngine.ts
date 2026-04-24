@@ -12,7 +12,7 @@ import { drawShape } from './drawShape'
 import { playbackStore } from '../store/playbackStore'
 import { animationStore } from '../store/animationStore'
 import type { SplineCurve } from '../store/animationStore'
-import { getCurrentBeat } from './beatClock'
+import { getCurrentBeat, markPlaybackStart } from './beatClock'
 
 // frozenBeatPos: beat position captured at the instant Stop is pressed.
 // null means playback is live; non-null means use this position for curve evaluation.
@@ -252,8 +252,9 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
   const unsubscribePlayback = playbackStore.subscribe(() => {
     const { isPlaying, bpm } = playbackStore.getState()
     if (!isPlaying) {
-      frozenBeatPos = (performance.now() / 1000 * bpm) / 60
+      frozenBeatPos = getCurrentBeat(bpm)
     } else {
+      markPlaybackStart()
       frozenBeatPos = null
     }
     dirty = true
