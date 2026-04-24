@@ -122,8 +122,8 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
   }
 
   function handleDragHandleDoubleClick() {
-    // Toggle between collapsed (40px) and default (180px)
-    onHeightChange(panelHeight <= PANEL_MIN ? 180 : PANEL_MIN)
+    // Toggle between collapsed (PANEL_MIN) and default (PANEL_DEFAULT)
+    onHeightChange(panelHeight <= PANEL_MIN ? PANEL_DEFAULT : PANEL_MIN)
   }
 
   // Property picker state
