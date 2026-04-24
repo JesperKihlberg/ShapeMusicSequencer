@@ -1,5 +1,5 @@
 ---
-status: partial
+status: deferred
 phase: 07-composition-tools
 source: [07-VERIFICATION.md, 07-FIX-01-PLAN.md]
 started: 2026-04-24T10:10:00Z

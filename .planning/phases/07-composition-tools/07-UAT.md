@@ -147,14 +147,14 @@ blocked: 0
 ## Gaps
 
 - truth: "Shape freezes at its current visual size when Stop is pressed"
-  status: resolved
-  reason: "Fixed in 07-FIX-01: frozenBeatPos captured at stop, evalBeat uses frozen value, && isPlaying guard removed"
+  status: deferred
+  reason: "07-FIX-01 attempt did not fix the issue on manual testing; deferred by user"
   severity: major
   test: 7
-  root_cause: "The && isPlaying guard prevented curve evaluation when stopped, causing snap-to-base-size"
+  root_cause: "The && isPlaying guard was removed but fix did not produce the expected visual result"
   artifacts:
     - path: "src/engine/canvasEngine.ts"
-      fix: "frozenBeatPos module variable + subscriber capture + evalBeat selector"
+      fix: "frozenBeatPos module variable + subscriber capture + evalBeat selector (attempted)"
   missing: []
   debug_session: ""
 
