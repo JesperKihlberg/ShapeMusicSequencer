@@ -75,7 +75,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         if (!ctx) continue
         const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
         if (!curve) continue
-        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, beat)
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, selectedPoints[prop] ?? null, beat)
       }
 
       rafId = requestAnimationFrame(tick)
@@ -125,6 +125,10 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
     // Toggle between collapsed (PANEL_MIN) and default (PANEL_DEFAULT)
     onHeightChange(panelHeight <= PANEL_MIN ? PANEL_DEFAULT : PANEL_MIN)
   }
+
+  // Selected control-point indices keyed by property — lifted from AnimLane so the
+  // RAF tick can pass the correct selectedIdx to drawLaneCanvas during playback (WR-04)
+  const [selectedPoints, setSelectedPoints] = useState<Partial<Record<AnimatableProperty, number | null>>>({})
 
   // Property picker state
   const [showPicker, setShowPicker] = useState(false)
@@ -236,6 +240,8 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
                 curve={shapeCurves[property]!}
                 shapeId={shape!.id}
                 onCanvasRef={handleCanvasRef}
+                selectedPointIdx={selectedPoints[property] ?? null}
+                onSelectedPointChange={(idx) => setSelectedPoints(prev => ({ ...prev, [property]: idx }))}
               />
             ))
           )}
@@ -331,12 +337,13 @@ interface AnimLaneProps {
   curve: SplineCurve
   shapeId: string
   onCanvasRef: (property: AnimatableProperty, ref: HTMLCanvasElement | null) => void
+  selectedPointIdx: number | null
+  onSelectedPointChange: (idx: number | null) => void
 }
 
-function AnimLane({ property, curve, shapeId, onCanvasRef }: AnimLaneProps) {
+function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onSelectedPointChange }: AnimLaneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null)
   const isDraggingPoint = useRef(false)
   const canvasRect = useRef<DOMRect | null>(null)
 
@@ -411,7 +418,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef }: AnimLaneProps) {
     const hitIdx = findPointAt(px, py)
     if (hitIdx >= 0) {
       // Click on existing point — select for drag
-      setSelectedPointIdx(hitIdx)
+      onSelectedPointChange(hitIdx)
       isDraggingPoint.current = true
       canvas.setPointerCapture(e.pointerId)
     } else {
@@ -419,7 +426,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef }: AnimLaneProps) {
       const newPoint = pixelToPoint(px, py)
       const newPoints = [...curve.points, newPoint].sort((a, b) => a.beat - b.beat)
       animationStore.getState().setCurve(shapeId, property, { ...curve, points: newPoints })
-      setSelectedPointIdx(null)
+      onSelectedPointChange(null)
     }
   }
 
@@ -448,7 +455,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef }: AnimLaneProps) {
     if (curve.points.length <= 2) return  // minimum 2 points invariant (T-07-04-03)
     const newPoints = curve.points.filter((_, i) => i !== hitIdx)
     animationStore.getState().setCurve(shapeId, property, { ...curve, points: newPoints })
-    setSelectedPointIdx(null)
+    onSelectedPointChange(null)
   }
 
   function handleDurationChange(e: React.ChangeEvent<HTMLInputElement>) {
