@@ -1,7 +1,7 @@
 ---
 phase: 07-composition-tools
 verified: 2026-04-24T10:11:00Z
-status: human_needed
+status: verified
 score: 3/3 must-haves verified
 overrides_applied: 0
 re_verification: null
@@ -11,9 +11,13 @@ human_verification:
   - test: "UAT Test 7 re-run: shape freezes at animated size on Stop"
     expected: "Add a shape, add a size curve, press Start — shape animates. Press Stop — shape holds its current visual size (does NOT snap to base size). Press Start — animation resumes smoothly from live beat position."
     why_human: "Visual freeze behavior can only be confirmed by observing the canvas RAF output in a running browser; grep cannot verify perceptual correctness of the rendered frame."
+    result: pass
+    verified: "2026-04-24"
   - test: "UAT Test 1 regression: shape with no size curve renders at base size when stopped"
     expected: "A shape with no active size curve continues to render at its base size before, during, and after pressing Stop — no unexpected shrink/snap behaviour."
     why_human: "Regression requires visual confirmation in a running browser."
+    result: pass
+    verified: "2026-04-24"
 ---
 
 # Phase 07 Gap Closure (FIX-01): Verification Report
