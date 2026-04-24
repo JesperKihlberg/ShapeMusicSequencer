@@ -86,6 +86,24 @@ None — milestone v1.0 complete.
 | 260424-lcs | Fix lightness curve sound mapping: animated lightness now drives pitch octave and filter cutoff to match static color behavior | 2026-04-24 | 0f66a4f | [260424-lcs-fix-lightness-curve-sound-mapping](./quick/260424-lcs-fix-lightness-curve-sound-mapping/) |
 | 260424-2px | Replace scale-quantized hue→pitch with direct linear mapping: hue 0–359° maps continuously to C1–C8, lightness no longer affects pitch | 2026-04-24 | cd7dfe3 | [260424-2px-hue-direct-pitch-mapping](./quick/260424-2px-hue-direct-pitch-mapping/) |
 
+## Deferred Items
+
+Items acknowledged and deferred at milestone close on 2026-04-24:
+
+| Category | Item | Status |
+|----------|------|--------|
+| uat_gap | Phase 04: 04-HUMAN-UAT.md | partial (0 open scenarios) |
+| verification_gap | Phase 04: 04-VERIFICATION.md | human_needed |
+| verification_gap | Phase 05: 05-VERIFICATION.md | human_needed |
+| verification_gap | Phase 06: 06-VERIFICATION.md | human_needed |
+| quick_task | 260417-jwd-there-is-a-bug-when-changing-properties- | missing SUMMARY (work committed: 05dfe7f) |
+| quick_task | 260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr | missing SUMMARY (work committed: dc50484) |
+| quick_task | 260424-2px-hue-direct-pitch-mapping | missing SUMMARY (work committed: cd7dfe3) |
+| quick_task | 260424-col-color-animation-fix | missing SUMMARY (work committed: 35a60ec) |
+| quick_task | 260424-lcs-fix-lightness-curve-sound-mapping | missing SUMMARY (work committed: 0f66a4f) |
+
+Known deferred items at close: 9 (see above)
+
 ## Session Continuity
 
 Last session: 2026-04-24T12:00:00Z

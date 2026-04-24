@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A public-facing web app for visual music composition where sound is created and controlled entirely through drawing. Users place geometric shapes on a grid canvas — each shape is an autonomous, continuously-playing sound voice whose visual properties (type, color, size, animation) map directly to sonic properties (waveform, pitch, filter, envelope). The canvas is the composition: the animation of shapes over time is the music.
+A public-facing web app for visual music composition where sound is created and controlled entirely through drawing. Users place geometric shapes on a 4×4 grid canvas — each shape is an autonomous, continuously-playing Web Audio voice whose color (hue→pitch, saturation→timbre, lightness→filter), type (waveform), size (amplitude), and per-property spline animation curves map directly to sonic output. A key/scale selector, stereo panning by column, and a multi-lane spline animation panel with polyrhythm support complete the v1.0 instrument.
 
 ## Core Value
 
@@ -12,28 +12,27 @@ Any change to the visual canvas is an immediate, audible change to the music —
 
 ### Validated
 
-- [x] Shape type determines oscillator waveform (circle=sine, triangle=triangle, square=square, star=sawtooth, diamond=pulse, blob=noise+sine) — Validated in Phase 02: audio-engine
-- [x] Shape color (hue) maps to pitch; saturation maps to distortion/timbre; lightness maps to filter cutoff — Validated in Phase 02: audio-engine
-- [x] Each shape plays continuously and independently as an audio voice — Validated in Phase 02: audio-engine (human-verified)
-- [x] Shape size maps to amplitude/loudness — Validated in Phase 04: shape-panel-animation
-- [x] Shape animation lifecycle directly modulates sound (size oscillation = amplitude LFO) — Validated in Phase 04: shape-panel-animation; LFO replaced by spline curves in Phase 07
-- [x] Animation parameters (rate) are configurable per shape — Validated in Phase 04: shape-panel-animation; replaced by per-curve beat duration in Phase 07
-- [x] Per-property spline animation curves with free-float beat duration — Validated in Phase 07: composition-tools (human-verified)
-- [x] AnimationPanel with drag-to-resize, per-shape lanes, property picker — Validated in Phase 07: composition-tools (human-verified)
-- [x] Polyrhythm: multiple shapes animate at independent curve durations — Validated in Phase 07: composition-tools (human-verified)
-- [x] Clicking a shape opens a side panel with sliders/pickers for all properties — Validated in Phase 04: shape-panel-animation (human-verified)
+- ✓ Shape type determines oscillator waveform (circle=sine, triangle=triangle, square=square, star=sawtooth, diamond=pulse, blob=noise+sine) — v1.0
+- ✓ Shape color (hue) maps to pitch via direct linear mapping (0–359° → C1–C8); saturation maps to WaveShaper harmonic richness; lightness maps to filter cutoff — v1.0
+- ✓ Each shape plays continuously and independently as an audio voice — v1.0
+- ✓ Shape size maps to amplitude/loudness — v1.0
+- ✓ Per-property spline animation curves with free-float beat duration; polyrhythm from mismatched durations — v1.0
+- ✓ AnimationPanel with drag-to-resize divider, per-shape lanes, property picker — v1.0
+- ✓ Clicking a shape opens a side panel with HSV sliders, shape type selector, and size control — v1.0
+- ✓ User can place shapes on strict 4×4 grid (up to 16 cells) and remove them — v1.0
+- ✓ Playback has configurable BPM (40–200 BPM) and master volume — v1.0
+- ✓ User can start/stop playback — v1.0
+- ✓ Cell column maps to stereo pan (StereoPannerNode; left col = hard left, right = hard right) — v1.0
+- ✓ Key/scale selector constrains pitch to selected scale (6 scales + chromatic) — v1.0
+- ✓ Shapes hold animated size position when playback stops (frozenBeatPos) — v1.0
 
 ### Active
 
-- [ ] User can place shapes on a strict grid canvas (up to 4x4 = 16 cells)
-- [ ] Shape type determines oscillator waveform (circle=sine, square=square/buzz, star=noise burst, triangle=triangle, diamond=sawtooth)
-- [ ] Shape color (hue) maps to pitch; saturation maps to harmonic richness (WaveShaper); value/brightness maps to filter cutoff
-- [ ] Each shape plays continuously and independently as an audio voice
-- [ ] User can remove shapes from the canvas
-- [x] Playback has configurable BPM/tempo — Validated in Phase 05: playback-controls (human-verified)
-- [x] User can start/stop playback — Validated in Phase 05: playback-controls (human-verified)
-- [ ] Canvas can be saved and loaded as JSON
-- [ ] Composition can be shared via URL
+- [ ] Undo/redo with minimum 50-step depth (zundo middleware) — COMP-01 (deferred from v1.0)
+- [ ] Export canvas as PNG encoding full composition state — COMP-02 (deferred from v1.0)
+- [ ] Canvas can be saved and loaded as JSON — PERS-01/02
+- [ ] Composition can be shared via URL — PERS-03
+- [ ] Multi-shape per cell for complex timbres — SHPE-06
 
 ### Out of Scope
 
@@ -42,36 +41,39 @@ Any change to the visual canvas is an immediate, audible change to the music —
 - Playhead as trigger mechanism — all shapes play continuously; playhead is cosmetic
 - Mobile/touch optimization — desktop web first
 - Advanced MIDI export — out of scope for v1
+- LFO-driven animation — replaced by spline curves (D-05); ANIM-01 superseded
 
 ## Context
 
-- Stack: React + TypeScript + CSS (no UI framework imposed)
-- Audio: Web Audio API or Tone.js (architecture-dependent choice)
-- Grid: Strict snap-to-cell placement, 4x4 (up to 16 simultaneous voices)
-- All shapes play simultaneously at all times; animations modulate their sound properties in real time
-- The playhead is a BPM-synced visual cursor — primarily cosmetic/arrangement reference for v1
-- Shape properties drive both the visual rendering and the audio synthesis parameters — they are the same data
-- Save/load (JSON) and URL sharing are v1 but not the primary PoC focus; working instrument is the goal
+- **Stack**: React 19 + TypeScript + CSS (no UI framework); Vite 8; Zustand + Immer + XState; Vitest 4
+- **Audio**: Web Audio API (no Tone.js — direct control sufficient for PoC)
+- **Grid**: Strict snap-to-cell, 4×4 (up to 16 simultaneous voices)
+- **Codebase**: ~4,672 LOC, 182 files changed across v1.0
+- **Shipped**: v1.0 on 2026-04-24 — fully functional PoC instrument
+- All shapes play simultaneously; spline curves modulate properties in real time at independent beat durations
+- Shape properties drive both visual rendering and audio synthesis — they are the same data object
+- frozenBeatPos pattern: canvasEngine module variable captures beat position at stop; shapes visually freeze in animated state
 
 ## Constraints
 
 - **Tech Stack**: React + TypeScript + CSS — no UI framework; solid design principles
 - **Scope**: PoC — full feature set with rough edges acceptable; polish is v2
-- **Polyphony**: Up to 16 simultaneous voices (4x4 grid); browser performance is the practical ceiling
+- **Polyphony**: Up to 16 simultaneous voices (4×4 grid); browser performance is the practical ceiling
 - **Client-only**: No backend; all state lives in the browser
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| All shapes play continuously (no playhead trigger) | Animations drive sound evolution — this is the core mechanic | — Pending |
-| Strict grid (4x4) | Predictable timing, manageable polyphony for PoC | — Pending |
-| Click → side panel for properties | Full control per shape without cluttering canvas | Implemented in Phase 04: HsvSliders, ShapeTypeSelector, size/rate sliders |
-| Image is actually animated JSON | Canvas state is the composition — saving JSON saves everything | — Pending |
-| Audio library TBD at planning | Web Audio API or Tone.js decided based on architecture needs | — Pending |
-| Saturation → WaveShaper harmonic richness (not reverb) | HSV saturation = colour richness/purity; WaveShaper is the honest metaphor. Per-voice reverb causes mud at 32 voices; makeDistortionCurve already exists from Phase 2 | Decided 2026-04-22; implement in Phase 6 |
-| Animation: LFO → spline curves (full replacement) | Two subsystems is a maintenance trap; LFO is a degenerate spline case. BeatFraction maps to spline loop duration. No migration — LFO removed completely (D-05) | Implemented Phase 07; animRate removed, createLfo/recreateLfo removed, pulseScale removed |
-| frozenBeatPos freeze-on-stop pattern | Capture beat position at stop instant in canvasEngine module variable; RAF loop uses frozen value; cleared to null on resume — single write path, O(1) overhead | Implemented Phase 07-FIX-01 |
+| All shapes play continuously (no playhead trigger) | Animations drive sound evolution — this is the core mechanic | ✓ Good — core mechanic validated |
+| Strict grid (4×4) | Predictable timing, manageable polyphony for PoC | ✓ Good |
+| Click → side panel for properties | Full control per shape without cluttering canvas | ✓ Good — HsvSliders, ShapeTypeSelector, size slider all in Phase 04 |
+| Web Audio API (no Tone.js) | Direct control; no third-party abstraction needed for PoC complexity | ✓ Good |
+| Saturation → WaveShaper harmonic richness (not reverb) | HSV saturation = colour richness/purity; WaveShaper is the honest metaphor; no mud at 32 voices | ✓ Good — implemented Phase 06 |
+| LFO → spline curves (full replacement, D-05) | Two subsystems is a maintenance trap; LFO is a degenerate spline case; BeatFraction maps to spline loop duration | ✓ Good — polyrhythm is a free emergent feature |
+| frozenBeatPos freeze-on-stop pattern | Module variable captures beat position at stop instant; O(1) overhead; single write path; cleared to null on resume | ✓ Good — UAT Test 7 confirmed |
+| Hue → direct linear pitch mapping (no scale quantization on hue) | Scale quantization caused jumpy pitch for continuous hue changes; direct mapping is musically expressive | ✓ Good — quick-260424-2px |
+| COMP-01/02 deferred (D-01/D-02) | Undo/redo and PNG export are polish; working instrument is the v1 goal | ✓ Good — shipped cleaner without them |
 
 ## Evolution
 
@@ -91,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after Phase 07 — spline animation system complete; LFO fully removed; all 7 phases of milestone v1.0 complete*
+*Last updated: 2026-04-24 after v1.0 milestone — full PoC instrument shipped; all 7 phases complete*
