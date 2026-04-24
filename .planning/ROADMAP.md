@@ -24,7 +24,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 ### v1.1 Animation Panel improvements
 
-- [ ] **Phase 8: Beat Clock and Playhead** - RAF-derived beat position and visible playhead line across all lanes
+- [x] **Phase 8: Beat Clock and Playhead** - RAF-derived beat position and visible playhead line across all lanes — completed 2026-04-24
 - [ ] **Phase 9: Timeline Zoom, Ghosts, and Lane Focus** - Global zoom control, ghost curve repetitions, and per-lane focus toggle
 - [ ] **Phase 10: Visual Reference Grids** - Beat indicator lines, hue scale grid, and Y-axis scroll/zoom per lane
 - [ ] **Phase 11: Shift+Drag Snapping** - Shift-key snap of control points to beat lines and scale note lines
@@ -44,8 +44,8 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   4. The playhead position never triggers a React re-render — it is driven entirely by requestAnimationFrame
 **Plans**: 2 plans
 Plans:
-- [ ] 08-01-PLAN.md — Extract beat formula to beatClock.ts; refactor canvasEngine and audioEngine
-- [ ] 08-02-PLAN.md — Extend drawLaneCanvas with playheadBeat param; add RAF loop to AnimationPanel
+- [x] 08-01-PLAN.md — Extract beat formula to beatClock.ts; refactor canvasEngine and audioEngine
+- [x] 08-02-PLAN.md — Extend drawLaneCanvas with playheadBeat param; add RAF loop to AnimationPanel
 **UI hint**: yes
 
 ### Phase 9: Timeline Zoom, Ghosts, and Lane Focus
@@ -98,7 +98,7 @@ Plans:
 | 5. Playback Controls | v1.0 | 5/5 | Complete | 2026-04-22 |
 | 6. Full Visual Language | v1.0 | 4/4 | Complete | 2026-04-23 |
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
-| 8. Beat Clock and Playhead | v1.1 | 0/2 | Not started | - |
+| 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
 | 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 0/? | Not started | - |
 | 10. Visual Reference Grids | v1.1 | 0/? | Not started | - |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |
