@@ -487,26 +487,20 @@ export function initAudioEngine(): () => void {
         voice.gainNode.gain.setTargetAtTime(gain, ctx.currentTime, 0.008)
       }
 
-      // Evaluate animated lightness once — used by both hue and lightness curve handlers
+      // Pre-evaluate all animated color components for this tick — any curve overrides its static value
+      const animatedHue = shapeCurves.hue
+        ? evalCurveAtBeat(shapeCurves.hue, beatPos)
+        : shape.color.h
       const animatedLightness = shapeCurves.lightness
         ? evalCurveAtBeat(shapeCurves.lightness, beatPos)
         : shape.color.l
+      const animatedSaturation = shapeCurves.saturation
+        ? evalCurveAtBeat(shapeCurves.saturation, beatPos)
+        : shape.color.s
 
-      // 'hue' curve → modulate oscillator frequency (via updateVoiceColor with patched hue + animated l)
-      if (shapeCurves.hue && voice.oscillator instanceof OscillatorNode) {
-        const hueVal = evalCurveAtBeat(shapeCurves.hue, beatPos)
-        updateVoiceColor(shapeId, { ...shape.color, h: hueVal, l: animatedLightness })
-      }
-
-      // 'saturation' curve → modulate WaveShaper curve (direct assignment, not AudioParam)
-      if (shapeCurves.saturation) {
-        const satVal = evalCurveAtBeat(shapeCurves.saturation, beatPos)
-        voice.waveshaper.curve = makeDistortionCurve(satVal)
-      }
-
-      // 'lightness' curve → modulate filter cutoff only (COLR-01: lightness no longer affects pitch)
-      if (shapeCurves.lightness) {
-        voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(animatedLightness), ctx.currentTime, 0.008)
+      // Any color curve → call updateVoiceColor with the fully-animated color (hue drives pitch, lightness drives filter).
+      if ((shapeCurves.hue || shapeCurves.lightness || shapeCurves.saturation) && voice.oscillator instanceof OscillatorNode) {
+        updateVoiceColor(shapeId, { h: animatedHue, l: animatedLightness, s: animatedSaturation })
       }
     }
   }, 16)

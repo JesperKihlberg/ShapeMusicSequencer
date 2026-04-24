@@ -110,9 +110,10 @@ None.
 | 260417-klm | Fix the bug: when I add a shape to the grid and change bmp to 0, the grid is cleared | 2026-04-17 | dc50484 | [260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr](./quick/260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr/) |
 | 260424-col | Fix color animation bug in canvasEngine.ts: evaluate hue/saturation/lightness curves and pass effectiveColor to drawShape | 2026-04-24 | 35a60ec | [260424-col-color-animation-fix](./quick/260424-col-color-animation-fix/) |
 | 260424-lcs | Fix lightness curve sound mapping: animated lightness now drives pitch octave and filter cutoff to match static color behavior | 2026-04-24 | 0f66a4f | [260424-lcs-fix-lightness-curve-sound-mapping](./quick/260424-lcs-fix-lightness-curve-sound-mapping/) |
+| 260424-2px | Replace scale-quantized hue→pitch with direct linear mapping: hue 0–359° maps continuously to C1–C8, lightness no longer affects pitch | 2026-04-24 | cd7dfe3 | [260424-2px-hue-direct-pitch-mapping](./quick/260424-2px-hue-direct-pitch-mapping/) |
 
 ## Session Continuity
 
-Last session: 2026-04-24T08:02:00Z
-Stopped at: 07-FIX-01 complete — frozenBeatPos freeze fix in canvasEngine.ts; UAT Test 7 resolved
-Resume file: .planning/phases/07-composition-tools/07-FIX-01-SUMMARY.md
+Last session: 2026-04-24T11:54:00Z
+Stopped at: 260424-2px complete — direct hue-to-frequency mapping; scaleStore subscription removed from audioEngine
+Resume file: .planning/quick/260424-2px-hue-direct-pitch-mapping/260424-2px-SUMMARY.md
