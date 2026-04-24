@@ -195,6 +195,7 @@ function drawLaneCanvas(
   curve: SplineCurve,
   property: AnimatableProperty,
   selectedIdx: number | null,
+  playheadBeat?: number,
 ): void {
   ctx.clearRect(0, 0, w, h)
   // Background
@@ -248,6 +249,20 @@ function drawLaneCanvas(
     ctx.fillStyle = isSelected ? '#6366f1' : 'rgba(255,255,255,0.55)'
     ctx.fill()
   }
+
+  // Playhead line — drawn last so it appears on top of curve and control points (D-06)
+  // When playheadBeat is undefined the line still draws at beat 0 (x = 0, left edge)
+  const phBeat = playheadBeat ?? 0
+  const phX = curve.duration > 0
+    ? (phBeat % curve.duration) / curve.duration * w
+    : 0
+  ctx.strokeStyle = '#6366f1'  // --color-accent, hardcoded per D-06
+  ctx.lineWidth = 2
+  ctx.setLineDash([])
+  ctx.beginPath()
+  ctx.moveTo(phX, 0)
+  ctx.lineTo(phX, h)
+  ctx.stroke()
 }
 
 // ── AnimLane sub-component ────────────────────────────────────────────────────
