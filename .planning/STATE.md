@@ -109,6 +109,7 @@ None.
 | 260417-jwd | there is a bug when changing properties of a cell, the loop starts playing even if stopped in the main control | 2026-04-17 | 05dfe7f | [260417-jwd-there-is-a-bug-when-changing-properties-](./quick/260417-jwd-there-is-a-bug-when-changing-properties-/) |
 | 260417-klm | Fix the bug: when I add a shape to the grid and change bmp to 0, the grid is cleared | 2026-04-17 | dc50484 | [260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr](./quick/260417-klm-fix-the-bug-when-i-add-a-shape-to-the-gr/) |
 | 260424-col | Fix color animation bug in canvasEngine.ts: evaluate hue/saturation/lightness curves and pass effectiveColor to drawShape | 2026-04-24 | 35a60ec | [260424-col-color-animation-fix](./quick/260424-col-color-animation-fix/) |
+| 260424-lcs | Fix lightness curve sound mapping: animated lightness now drives pitch octave and filter cutoff to match static color behavior | 2026-04-24 | 0f66a4f | [260424-lcs-fix-lightness-curve-sound-mapping](./quick/260424-lcs-fix-lightness-curve-sound-mapping/) |
 
 ## Session Continuity
 
