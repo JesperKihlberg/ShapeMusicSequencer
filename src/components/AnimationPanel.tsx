@@ -6,6 +6,8 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAnimationStore, animationStore } from '../store/animationStore'
 import { useSelectionStore } from '../store/selectionStore'
 import { useShapeStore } from '../store/shapeStore'
+import { playbackStore, usePlaybackStore } from '../store/playbackStore'
+import { getCurrentBeat } from '../engine/beatClock'
 import type { AnimatableProperty, SplineCurve, SplinePoint } from '../store/animationStore'
 
 const PANEL_MIN = 40    // px — only handle visible when collapsed
@@ -41,6 +43,62 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
   const isDragging = useRef(false)
   const dragStartY = useRef(0)
   const dragStartHeight = useRef(0)
+
+  // Ref map: property → canvas element — populated by AnimLane registration callbacks (D-02)
+  const laneCanvasRefs = useRef<Map<AnimatableProperty, HTMLCanvasElement>>(new Map())
+
+  // Stable callback so AnimLane useEffect deps don't fire on every render
+  const handleCanvasRef = useCallback(
+    (property: AnimatableProperty, el: HTMLCanvasElement | null) => {
+      if (el) {
+        laneCanvasRefs.current.set(property, el)
+      } else {
+        laneCanvasRefs.current.delete(property)
+      }
+    },
+    []
+  )
+
+  // Read isPlaying via React hook so useEffect re-runs on transition (D-04)
+  const isPlaying = usePlaybackStore((s) => s.isPlaying)
+
+  // RAF loop — redraws all lane canvases every frame while playing (D-02, D-03, D-04)
+  useEffect(() => {
+    let rafId: number
+
+    function tick() {
+      const { bpm } = playbackStore.getState()
+      const beat = getCurrentBeat(bpm)
+
+      for (const [prop, canvas] of laneCanvasRefs.current.entries()) {
+        const ctx = canvas.getContext('2d')
+        if (!ctx) continue
+        const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
+        if (!curve) continue
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, beat)
+      }
+
+      rafId = requestAnimationFrame(tick)
+    }
+
+    if (isPlaying) {
+      // Start RAF loop
+      rafId = requestAnimationFrame(tick)
+    } else {
+      // Stopped: draw each lane once at beat 0 (D-04, D-05)
+      for (const [prop, canvas] of laneCanvasRefs.current.entries()) {
+        const ctx = canvas.getContext('2d')
+        if (!ctx) continue
+        const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
+        if (!curve) continue
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, 0)
+      }
+    }
+
+    return () => {
+      if (rafId !== undefined) cancelAnimationFrame(rafId)
+    }
+  }, [isPlaying, shape])
 
   function handleDragHandlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     e.preventDefault()
@@ -177,6 +235,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
                 property={property}
                 curve={shapeCurves[property]!}
                 shapeId={shape!.id}
+                onCanvasRef={handleCanvasRef}
               />
             ))
           )}
@@ -271,14 +330,21 @@ interface AnimLaneProps {
   property: AnimatableProperty
   curve: SplineCurve
   shapeId: string
+  onCanvasRef: (property: AnimatableProperty, ref: HTMLCanvasElement | null) => void
 }
 
-function AnimLane({ property, curve, shapeId }: AnimLaneProps) {
+function AnimLane({ property, curve, shapeId, onCanvasRef }: AnimLaneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null)
   const isDraggingPoint = useRef(false)
   const canvasRect = useRef<DOMRect | null>(null)
+
+  // Register canvas ref with parent AnimationPanel for RAF loop access (D-02)
+  useEffect(() => {
+    onCanvasRef(property, canvasRef.current)
+    return () => { onCanvasRef(property, null) }
+  }, [property, onCanvasRef])
 
   // Canvas sizing via ResizeObserver (UI-SPEC Pitfall 2)
   useEffect(() => {
