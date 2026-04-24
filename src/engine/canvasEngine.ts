@@ -175,9 +175,23 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
         effectiveSize = evalCurveAtBeat(shapeCurves.size, evalBeat)
       }
 
+      // Determine effective color: base color OR curve-modulated HSL if curves present.
+      // frozenBeatPos is respected here (same as effectiveSize) so the shape holds its
+      // last animated color when stopped rather than snapping back to shape.color.
+      let effectiveColor = { ...shape.color }
+      if (shapeCurves?.hue) {
+        effectiveColor.h = Math.max(0, Math.min(360, evalCurveAtBeat(shapeCurves.hue, evalBeat)))
+      }
+      if (shapeCurves?.saturation) {
+        effectiveColor.s = Math.max(0, Math.min(100, evalCurveAtBeat(shapeCurves.saturation, evalBeat)))
+      }
+      if (shapeCurves?.lightness) {
+        effectiveColor.l = Math.max(0, Math.min(100, evalCurveAtBeat(shapeCurves.lightness, evalBeat)))
+      }
+
       // D-05: shape.size=50 → (50/50)=1.0 → same base radius as Phase 3
       const radius = Math.floor(cellSize * 0.35 * (effectiveSize / 50))
-      drawShape(ctx, cx, cy, radius, shape.type, shape.color)
+      drawShape(ctx, cx, cy, radius, shape.type, effectiveColor)
     }
   }
 
