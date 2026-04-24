@@ -124,11 +124,22 @@ result: issue
 reported: "it freezes in the default cell setting state"
 severity: major
 
+### 8. Hue/saturation/lightness curves modulate shape color visually
+expected: |
+  Add a shape, open AnimationPanel, add a "hue" curve. Add a control point at a
+  clearly different hue value. Press Start. The shape on the canvas should visibly
+  change color over time as the hue value evolves along the spline. Same applies
+  to saturation and lightness curves — the shape fill/stroke color should update
+  each animation frame to reflect the animated values.
+result: issue
+reported: "animated color properties are reflected in audio, but not on the visual shape on the canvas"
+severity: major
+
 ## Summary
 
-total: 21
+total: 22
 passed: 20
-issues: 1
+issues: 2
 pending: 0
 skipped: 0
 blocked: 0
@@ -136,11 +147,26 @@ blocked: 0
 ## Gaps
 
 - truth: "Shape freezes at its current visual size when Stop is pressed"
-  status: failed
-  reason: "User reported: it freezes in the default cell setting state"
+  status: resolved
+  reason: "Fixed in 07-FIX-01: frozenBeatPos captured at stop, evalBeat uses frozen value, && isPlaying guard removed"
   severity: major
   test: 7
-  root_cause: ""
-  artifacts: []
+  root_cause: "The && isPlaying guard prevented curve evaluation when stopped, causing snap-to-base-size"
+  artifacts:
+    - path: "src/engine/canvasEngine.ts"
+      fix: "frozenBeatPos module variable + subscriber capture + evalBeat selector"
   missing: []
+  debug_session: ""
+
+- truth: "Shape fill/stroke color updates each frame to reflect animated hue/saturation/lightness curve values"
+  status: failed
+  reason: "User reported: animated color properties are reflected in audio, but not on the visual shape on the canvas"
+  severity: major
+  test: 8
+  root_cause: "canvasEngine.ts passes shape.color directly to drawShape — hue/saturation/lightness curves are evaluated for audio but never applied to the rendered color"
+  artifacts:
+    - path: "src/engine/canvasEngine.ts"
+      issue: "drawShape called with shape.color; no effectiveColor computed from hue/saturation/lightness curves"
+  missing:
+    - "Compute effectiveColor by evaluating hue/saturation/lightness curves (same pattern as effectiveSize) and pass to drawShape"
   debug_session: ""
