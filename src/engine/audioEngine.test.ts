@@ -1,37 +1,41 @@
 // src/engine/audioEngine.test.ts
 // Pure function tests only — no AudioContext (jsdom does not implement it)
-// Covers: COLR-01, COLR-02, COLR-03, SHPE-01
+// Covers: COLR-01 (direct hue→pitch), COLR-02, COLR-03, SHPE-01
 import { describe, it, expect } from 'vitest'
 import {
   colorToFrequency,
   makeDistortionCurve,
   lightnessToFilterCutoff,
   shapeTypeToWave,
-  quantizeSemitone,
   evalCurveAtBeat,
 } from './audioEngine'
 
 describe('colorToFrequency', () => {
-  it('returns ~261.63 Hz (C4) for hue=0, lightness=50', () => {
-    // D-02: hue 0 = C, D-03: l=50 maps to octave 4
-    expect(colorToFrequency({ h: 0, s: 50, l: 50 })).toBeCloseTo(261.63, 0)
+  it('COLR-01: hue=0 returns ~32.70 Hz (C1, MIDI 24) — lowest pitch', () => {
+    // Direct linear mapping: midiNote = 24 + (0/360)*84 = 24 → C1 ≈ 32.70 Hz
+    expect(colorToFrequency({ h: 0, s: 50, l: 50 })).toBeCloseTo(32.70, 0)
   })
 
-  it('returns ~277.18 Hz (C#4) for hue=30, lightness=50', () => {
-    // D-02: hue 30 = semitone 1 (C#), same octave as C4
-    expect(colorToFrequency({ h: 30, s: 50, l: 50 })).toBeCloseTo(277.18, 0)
+  it('COLR-01: hue=180 returns a mid-range frequency (200–2000 Hz)', () => {
+    // midiNote = 24 + (180/360)*84 = 24 + 42 = 66 → A4-ish area
+    const freq = colorToFrequency({ h: 180, s: 50, l: 50 })
+    expect(freq).toBeGreaterThan(200)
+    expect(freq).toBeLessThan(2000)
   })
 
-  it('returns a low frequency (~32.70 Hz, C1) for lightness=0', () => {
-    // D-03: l=0 → octave 1 → MIDI 24 → C1
-    const freq = colorToFrequency({ h: 0, s: 50, l: 0 })
-    expect(freq).toBeCloseTo(32.70, 0)
+  it('COLR-01: hue=359 returns a frequency close to but below 4186 Hz (C8)', () => {
+    // midiNote = 24 + (359/360)*84 ≈ 107.77 → approaches but stays below MIDI 108
+    const freq = colorToFrequency({ h: 359, s: 50, l: 50 })
+    expect(freq).toBeLessThan(4186)
+    expect(freq).toBeGreaterThan(3500)
   })
 
-  it('returns a high frequency (~4186 Hz, C8) for lightness=100', () => {
-    // D-03: l=100 → octave 8 → MIDI 108 → C8
-    const freq = colorToFrequency({ h: 0, s: 50, l: 100 })
-    expect(freq).toBeCloseTo(4186, 0)
+  it('COLR-01: lightness has NO effect on frequency (pitch comes from hue only)', () => {
+    // Lightness no longer controls octave — it only affects filter cutoff
+    expect(colorToFrequency({ h: 60, s: 50, l: 0 })).toBeCloseTo(
+      colorToFrequency({ h: 60, s: 50, l: 100 }),
+      5
+    )
   })
 })
 
@@ -165,37 +169,6 @@ describe('updateVoiceSize (Phase 4)', () => {
   })
 })
 
-// Covers: PLAY-05 (scale quantization), PLAY-06 (chromatic passthrough)
-describe('quantizeSemitone (Phase 6)', () => {
-  it('snaps C# (raw=1) to C (0) in C major — tie breaks to lower', () => {
-    expect(quantizeSemitone(1, 0, [0,2,4,5,7,9,11])).toBe(0)
-  })
-
-  it('snaps F# (raw=6) to F (5) in C major — tie breaks to lower', () => {
-    expect(quantizeSemitone(6, 0, [0,2,4,5,7,9,11])).toBe(5)
-  })
-
-  it('uses rootKey offset: raw=3 in D major (rootKey=2) snaps to D (2)', () => {
-    // D major candidates: intervals [0,2,4,5,7,9,11] + rootKey=2, mod 12 = [2,4,6,7,9,11,1]
-    // raw=3 (D#/Eb): nearest candidate is 2 (D, dist=1) vs 4 (E, dist=1) — tie to lower (2)
-    // Note: raw=1 (C#) IS in D major as the 7th degree (interval 11 + 2 = 1 mod 12),
-    // so that input would return 1 (distance 0), not 2.
-    expect(quantizeSemitone(3, 2, [0,2,4,5,7,9,11])).toBe(2)
-  })
-
-  it('chromatic intervals are identity passthrough (PLAY-06)', () => {
-    const chromatic = [0,1,2,3,4,5,6,7,8,9,10,11]
-    for (let raw = 0; raw <= 11; raw++) {
-      expect(quantizeSemitone(raw, 0, chromatic)).toBe(raw)
-    }
-  })
-
-  it('returns value in range [0, 11] for rootKey=11 (B major)', () => {
-    const result = quantizeSemitone(0, 11, [0,2,4,5,7,9,11])
-    expect(result).toBeGreaterThanOrEqual(0)
-    expect(result).toBeLessThanOrEqual(11)
-  })
-})
 
 // Covers: AUDI-03 (pan formula correctness)
 describe('pan formula (Phase 6 AUDI-03)', () => {
