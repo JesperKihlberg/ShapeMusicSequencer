@@ -131,15 +131,14 @@ expected: |
   change color over time as the hue value evolves along the spline. Same applies
   to saturation and lightness curves — the shape fill/stroke color should update
   each animation frame to reflect the animated values.
-result: issue
-reported: "animated color properties are reflected in audio, but not on the visual shape on the canvas"
-severity: major
+result: pass
+note: "Fixed by quick task 260424-col (color animation fix)"
 
 ## Summary
 
 total: 22
-passed: 20
-issues: 2
+passed: 22
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -147,26 +146,13 @@ blocked: 0
 ## Gaps
 
 - truth: "Shape freezes at its current visual size when Stop is pressed"
-  status: deferred
-  reason: "07-FIX-01 attempt did not fix the issue on manual testing; deferred by user"
+  status: resolved
+  reason: "Fixed by 07-FIX-01 (frozenBeatPos mechanism) — confirmed working by user 2026-04-24"
   severity: major
   test: 7
-  root_cause: "The && isPlaying guard was removed but fix did not produce the expected visual result"
-  artifacts:
-    - path: "src/engine/canvasEngine.ts"
-      fix: "frozenBeatPos module variable + subscriber capture + evalBeat selector (attempted)"
-  missing: []
-  debug_session: ""
 
 - truth: "Shape fill/stroke color updates each frame to reflect animated hue/saturation/lightness curve values"
-  status: failed
-  reason: "User reported: animated color properties are reflected in audio, but not on the visual shape on the canvas"
+  status: resolved
+  reason: "Fixed by quick task 260424-col — confirmed working by user 2026-04-24"
   severity: major
   test: 8
-  root_cause: "canvasEngine.ts passes shape.color directly to drawShape — hue/saturation/lightness curves are evaluated for audio but never applied to the rendered color"
-  artifacts:
-    - path: "src/engine/canvasEngine.ts"
-      issue: "drawShape called with shape.color; no effectiveColor computed from hue/saturation/lightness curves"
-  missing:
-    - "Compute effectiveColor by evaluating hue/saturation/lightness curves (same pattern as effectiveSize) and pass to drawShape"
-  debug_session: ""

@@ -16,8 +16,11 @@ Any change to the visual canvas is an immediate, audible change to the music —
 - [x] Shape color (hue) maps to pitch; saturation maps to distortion/timbre; lightness maps to filter cutoff — Validated in Phase 02: audio-engine
 - [x] Each shape plays continuously and independently as an audio voice — Validated in Phase 02: audio-engine (human-verified)
 - [x] Shape size maps to amplitude/loudness — Validated in Phase 04: shape-panel-animation
-- [x] Shape animation lifecycle directly modulates sound (size oscillation = amplitude LFO) — Validated in Phase 04: shape-panel-animation
-- [x] Animation parameters (rate) are configurable per shape — Validated in Phase 04: shape-panel-animation
+- [x] Shape animation lifecycle directly modulates sound (size oscillation = amplitude LFO) — Validated in Phase 04: shape-panel-animation; LFO replaced by spline curves in Phase 07
+- [x] Animation parameters (rate) are configurable per shape — Validated in Phase 04: shape-panel-animation; replaced by per-curve beat duration in Phase 07
+- [x] Per-property spline animation curves with free-float beat duration — Validated in Phase 07: composition-tools (human-verified)
+- [x] AnimationPanel with drag-to-resize, per-shape lanes, property picker — Validated in Phase 07: composition-tools (human-verified)
+- [x] Polyrhythm: multiple shapes animate at independent curve durations — Validated in Phase 07: composition-tools (human-verified)
 - [x] Clicking a shape opens a side panel with sliders/pickers for all properties — Validated in Phase 04: shape-panel-animation (human-verified)
 
 ### Active
@@ -67,7 +70,8 @@ Any change to the visual canvas is an immediate, audible change to the music —
 | Image is actually animated JSON | Canvas state is the composition — saving JSON saves everything | — Pending |
 | Audio library TBD at planning | Web Audio API or Tone.js decided based on architecture needs | — Pending |
 | Saturation → WaveShaper harmonic richness (not reverb) | HSV saturation = colour richness/purity; WaveShaper is the honest metaphor. Per-voice reverb causes mud at 32 voices; makeDistortionCurve already exists from Phase 2 | Decided 2026-04-22; implement in Phase 6 |
-| Animation: LFO → spline curves (staged migration) | Two subsystems is a maintenance trap; LFO is a degenerate spline case. BeatFraction already maps to spline loop duration. Auto-convert on first panel open — lossless migration | Decided 2026-04-22; implement in Phase 7 |
+| Animation: LFO → spline curves (full replacement) | Two subsystems is a maintenance trap; LFO is a degenerate spline case. BeatFraction maps to spline loop duration. No migration — LFO removed completely (D-05) | Implemented Phase 07; animRate removed, createLfo/recreateLfo removed, pulseScale removed |
+| frozenBeatPos freeze-on-stop pattern | Capture beat position at stop instant in canvasEngine module variable; RAF loop uses frozen value; cleared to null on resume — single write path, O(1) overhead | Implemented Phase 07-FIX-01 |
 
 ## Evolution
 
@@ -87,4 +91,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — ingested PRD-visual-sequencer.md v1.1; resolved saturation→WaveShaper and LFO→spline decisions*
+*Last updated: 2026-04-24 after Phase 07 — spline animation system complete; LFO fully removed; all 7 phases of milestone v1.0 complete*

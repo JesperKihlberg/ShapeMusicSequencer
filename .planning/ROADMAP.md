@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Shape Panel & Animation** - Per-shape property editor and LFO amplitude modulation
 - [ ] **Phase 5: Playback Controls** - Start/stop, BPM, and master volume controls
 - [x] **Phase 6: Full Visual Language** - Complete visual-to-audio mapping: WaveShaper timbre, stereo pan, star percussion, key/scale selector, multi-shape cells (2026-04-23)
-- [ ] **Phase 7: Composition Tools** - Undo/redo, PNG export, and spline animation curve system replacing LFO
+- [x] **Phase 7: Composition Tools** - Undo/redo, PNG export, and spline animation curve system replacing LFO (2026-04-24)
 
 ## Phase Details
 
@@ -134,10 +134,10 @@ Plans:
 **Decision**: LFO deprecated completely — animRate removed from Shape, createLfo/recreateLfo removed from audioEngine, pulseScale removed from canvasEngine. No LFO-to-spline migration (D-05). COMP-01 and COMP-02 deferred to a later phase (D-01, D-02).
 **Plans**: 5 plans
 Plans:
-- [ ] 07-00-PLAN.md — Wave 0: test infrastructure — scaffold animationStore.test.ts (RED), AnimationPanel.test.tsx (RED), update CellPanel.test.tsx with Phase 7 RED tests
-- [ ] 07-01-PLAN.md — Wave 1: data layer — create animationStore.ts (SplineCurve/setCurve/removeCurve/clearShape); remove animRate from shapeStore; wire clearShape on removeShape
-- [ ] 07-02-PLAN.md — Wave 2a: audio engine — remove LFO (createLfo/recreateLfo/AudioVoice fields); add animationStore setInterval modulation loop; export evalCurveAtBeat
-- [ ] 07-03-PLAN.md — Wave 2b: canvas engine — remove pulseScale; add animationStore-driven visual size modulation via evalCurveAtBeat
+- [x] 07-00-PLAN.md — Wave 0: test infrastructure — scaffold animationStore.test.ts (RED), AnimationPanel.test.tsx (RED), update CellPanel.test.tsx with Phase 7 RED tests
+- [x] 07-01-PLAN.md — Wave 1: data layer — create animationStore.ts (SplineCurve/setCurve/removeCurve/clearShape); remove animRate from shapeStore; wire clearShape on removeShape
+- [x] 07-02-PLAN.md — Wave 2a: audio engine — remove LFO (createLfo/recreateLfo/AudioVoice fields); add animationStore setInterval modulation loop; export evalCurveAtBeat
+- [x] 07-03-PLAN.md — Wave 2b: canvas engine — remove pulseScale; add animationStore-driven visual size modulation via evalCurveAtBeat
 - [x] 07-04-PLAN.md — Wave 3: UI layer — update CellPanel (Animate button); create AnimationPanel component (drag handle, header, lane list with canvas); update App.tsx + CSS; human-verify checkpoint
 - [x] 07-FIX-01-PLAN.md — Bug fix: freeze shape size at stop by capturing frozenBeatPos in canvasEngine (UAT Test 7)
 **UI hint**: yes
@@ -155,4 +155,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. Shape Panel & Animation | 0/5 | Not started | - |
 | 5. Playback Controls | 0/5 | Not started | - |
 | 6. Full Visual Language | 0/4 | Not started | - |
-| 7. Composition Tools | 5/5 | In Progress | - |
+| 7. Composition Tools | 6/6 | Complete | 2026-04-24 |
