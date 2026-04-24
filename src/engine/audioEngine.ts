@@ -8,6 +8,7 @@ import { shapeStore } from '../store/shapeStore'
 import { playbackStore } from '../store/playbackStore'
 import { animationStore } from '../store/animationStore'
 import type { AnimatableProperty, SplineCurve } from '../store/animationStore'
+import { getCurrentBeat } from './beatClock'
 
 // Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
 // 'pulse' → createPeriodicWave (square-ish with PWM)
@@ -467,7 +468,7 @@ export function initAudioEngine(): () => void {
     const { bpm, isPlaying } = playbackStore.getState()
     if (!isPlaying) return
 
-    const beatPos = (performance.now() / 1000) * (bpm / 60)
+    const beatPos = getCurrentBeat(bpm)
     const { curves } = animationStore.getState()
 
     for (const [shapeId, shapeCurves] of Object.entries(curves)) {

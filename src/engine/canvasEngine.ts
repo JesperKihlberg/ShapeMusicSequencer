@@ -12,6 +12,7 @@ import { drawShape } from './drawShape'
 import { playbackStore } from '../store/playbackStore'
 import { animationStore } from '../store/animationStore'
 import type { SplineCurve } from '../store/animationStore'
+import { getCurrentBeat } from './beatClock'
 
 // frozenBeatPos: beat position captured at the instant Stop is pressed.
 // null means playback is live; non-null means use this position for curve evaluation.
@@ -155,10 +156,9 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     if (!ctx) return  // Defensive check for TypeScript strictNullChecks
     // D-03/D-04 (Phase 7): pulseScale removed — shapes render at base size unless
     // an animationStore size curve is active for this shape.
-    // Beat position for curve evaluation: (t_seconds * bpm) / 60
-    const t = performance.now() / 1000
+    // Beat position for curve evaluation: delegated to beatClock.ts (ANIM-15)
     const { bpm } = playbackStore.getState()
-    const liveBeatPos = (t * bpm) / 60
+    const liveBeatPos = getCurrentBeat(bpm)
     const curves = animationStore.getState().curves
 
     for (const shape of shapes) {
