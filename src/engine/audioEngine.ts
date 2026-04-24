@@ -546,10 +546,15 @@ export function initAudioEngine(): () => void {
         voice.gainNode.gain.setTargetAtTime(gain, ctx.currentTime, 0.008)
       }
 
-      // 'hue' curve → modulate oscillator frequency (via updateVoiceColor with patched hue)
+      // Evaluate animated lightness once — used by both hue and lightness curve handlers
+      const animatedLightness = shapeCurves.lightness
+        ? evalCurveAtBeat(shapeCurves.lightness, beatPos)
+        : shape.color.l
+
+      // 'hue' curve → modulate oscillator frequency (via updateVoiceColor with patched hue + animated l)
       if (shapeCurves.hue && voice.oscillator instanceof OscillatorNode) {
         const hueVal = evalCurveAtBeat(shapeCurves.hue, beatPos)
-        updateVoiceColor(shapeId, { ...shape.color, h: hueVal })
+        updateVoiceColor(shapeId, { ...shape.color, h: hueVal, l: animatedLightness })
       }
 
       // 'saturation' curve → modulate WaveShaper curve (direct assignment, not AudioParam)
@@ -558,10 +563,17 @@ export function initAudioEngine(): () => void {
         voice.waveshaper.curve = makeDistortionCurve(satVal)
       }
 
-      // 'lightness' curve → modulate filter cutoff
+      // 'lightness' curve → modulate filter cutoff AND oscillator frequency (pitch octave)
       if (shapeCurves.lightness) {
-        const lightVal = evalCurveAtBeat(shapeCurves.lightness, beatPos)
-        voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(lightVal), ctx.currentTime, 0.008)
+        voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(animatedLightness), ctx.currentTime, 0.008)
+        if (voice.oscillator instanceof OscillatorNode) {
+          const { rootKey, scale } = scaleStore.getState()
+          const rawSemitone = hueToSemitone(shape.color.h)
+          const quantized = quantizeSemitone(rawSemitone, rootKey, SCALE_INTERVALS[scale])
+          voice.oscillator.frequency.setTargetAtTime(
+            colorToFrequency({ ...shape.color, h: quantized * 30, l: animatedLightness }), ctx.currentTime, 0.008
+          )
+        }
       }
     }
   }, 16)
