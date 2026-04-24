@@ -1,6 +1,6 @@
 // src/engine/audioEngine.test.ts
 // Pure function tests only — no AudioContext (jsdom does not implement it)
-// Covers: COLR-01 (direct hue→pitch), COLR-02, COLR-03, SHPE-01
+// Covers: COLR-01 (hue=semitone-within-octave, lightness=octave), COLR-02, COLR-03, SHPE-01
 import { describe, it, expect } from 'vitest'
 import {
   colorToFrequency,
@@ -11,31 +11,33 @@ import {
 } from './audioEngine'
 
 describe('colorToFrequency', () => {
-  it('COLR-01: hue=0 returns ~32.70 Hz (C1, MIDI 24) — lowest pitch', () => {
-    // Direct linear mapping: midiNote = 24 + (0/360)*84 = 24 → C1 ≈ 32.70 Hz
-    expect(colorToFrequency({ h: 0, s: 50, l: 50 })).toBeCloseTo(32.70, 0)
+  it('COLR-01: hue=0, l=0 → C1 ≈ 32.70 Hz (lowest octave, no semitone offset)', () => {
+    // octaveBase = 24 + floor(0/100*7)*12 = 24; hueSemitone = 0 → MIDI 24
+    expect(colorToFrequency({ h: 0, s: 50, l: 0 })).toBeCloseTo(32.70, 0)
   })
 
-  it('COLR-01: hue=180 returns a mid-range frequency (200–2000 Hz)', () => {
-    // midiNote = 24 + (180/360)*84 = 24 + 42 = 66 → A4-ish area
-    const freq = colorToFrequency({ h: 180, s: 50, l: 50 })
-    expect(freq).toBeGreaterThan(200)
-    expect(freq).toBeLessThan(2000)
+  it('COLR-01: lightness selects octave — higher l produces higher frequency at same hue', () => {
+    const low  = colorToFrequency({ h: 0, s: 50, l: 10 })
+    const mid  = colorToFrequency({ h: 0, s: 50, l: 50 })
+    const high = colorToFrequency({ h: 0, s: 50, l: 90 })
+    expect(mid).toBeGreaterThan(low)
+    expect(high).toBeGreaterThan(mid)
   })
 
-  it('COLR-01: hue=359 returns a frequency close to but below 4186 Hz (C8)', () => {
-    // midiNote = 24 + (359/360)*84 ≈ 107.77 → approaches but stays below MIDI 108
-    const freq = colorToFrequency({ h: 359, s: 50, l: 50 })
-    expect(freq).toBeLessThan(4186)
-    expect(freq).toBeGreaterThan(3500)
+  it('COLR-01: hue selects pitch within octave — higher hue produces higher frequency at same lightness', () => {
+    const f0   = colorToFrequency({ h: 0,   s: 50, l: 50 })
+    const f180 = colorToFrequency({ h: 180, s: 50, l: 50 })
+    const f359 = colorToFrequency({ h: 359, s: 50, l: 50 })
+    expect(f180).toBeGreaterThan(f0)
+    expect(f359).toBeGreaterThan(f180)
   })
 
-  it('COLR-01: lightness has NO effect on frequency (pitch comes from hue only)', () => {
-    // Lightness no longer controls octave — it only affects filter cutoff
-    expect(colorToFrequency({ h: 60, s: 50, l: 0 })).toBeCloseTo(
-      colorToFrequency({ h: 60, s: 50, l: 100 }),
-      5
-    )
+  it('COLR-01: hue spans at most one octave within a fixed lightness', () => {
+    // hueSemitone goes 0–11.97, so max ratio is 2^(11.97/12) < 2 (one octave)
+    const fLow  = colorToFrequency({ h: 0,   s: 50, l: 50 })
+    const fHigh = colorToFrequency({ h: 359, s: 50, l: 50 })
+    expect(fHigh / fLow).toBeLessThan(2)
+    expect(fHigh / fLow).toBeGreaterThan(1)
   })
 })
 

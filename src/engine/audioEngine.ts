@@ -14,21 +14,17 @@ import type { AnimatableProperty, SplineCurve } from '../store/animationStore'
 // 'blob'  → noise + sine mix
 export type WaveDescriptor = OscillatorType | 'pulse' | 'blob'
 
-// COLR-01: hue → frequency (Hz) via direct linear MIDI mapping (no scale quantization)
-// hue 0° → MIDI 24 (C1, ~32.70 Hz), hue 360° → MIDI 108 (C8, ~4186 Hz)
-// Linear: midiNote = 24 + (h / 360) * 84
-// Input is clamped to [0, 359] — UI already validates range (T-2px-01)
-function hueToFrequency(h: number): number {
-  const hClamped = Math.max(0, Math.min(359, h))
-  const midiNote = 24 + (hClamped / 360) * 84
-  return 440 * Math.pow(2, (midiNote - 69) / 12)
-}
-
-// COLR-01: color → frequency (Hz) — pitch comes entirely from hue; lightness no longer affects octave
-// Lightness only controls filter cutoff (COLR-03). Using MIDI formula 440 * 2^((n-69)/12).
-//   hue 0° → C1 ≈ 32.70 Hz, hue 180° → mid-range, hue 359° → near C8 ≈ 4186 Hz
+// COLR-01: color → frequency (Hz)
+// lightness selects octave (0–100 → MIDI octaves C1–C8, i.e. base notes 24, 36, 48, 60, 72, 84, 96, 108)
+// hue provides fine-grained pitch within that octave (0–359° → 0–11.97 semitones, continuous, no snapping)
+// Combined: midiNote = octaveBase + hueSemitone (both continuous — no scale quantization)
 export function colorToFrequency(color: ShapeColor): number {
-  return hueToFrequency(color.h)
+  const hClamped = Math.max(0, Math.min(359, color.h))
+  const lClamped = Math.max(0, Math.min(100, color.l))
+  const octaveBase = 24 + Math.floor((lClamped / 100) * 7) * 12  // C1(24) to C8(108)
+  const hueSemitone = (hClamped / 360) * 12                       // 0–11.97 within the octave
+  const midiNote = octaveBase + hueSemitone
+  return 440 * Math.pow(2, (midiNote - 69) / 12)
 }
 
 // COLR-02: saturation → WaveShaper distortion curve (Float32Array, 256 samples)
