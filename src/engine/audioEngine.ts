@@ -1,42 +1,34 @@
 // src/engine/audioEngine.ts
 // Pure color-to-audio mapping functions — no AudioContext, no side effects
 // These are the mathematical heart of the audio engine, testable in jsdom.
-// COLR-01: hue → frequency; COLR-02: saturation → distortion; COLR-03: lightness → filter
+// COLR-01: hue → frequency (direct linear mapping, no scale quantization); COLR-02: saturation → distortion; COLR-03: lightness → filter
 // SHPE-01: shape type → waveform descriptor
 import type { ShapeColor, ShapeType, Shape } from '../store/shapeStore'
 import { shapeStore } from '../store/shapeStore'
 import { playbackStore } from '../store/playbackStore'
 import { animationStore } from '../store/animationStore'
 import type { AnimatableProperty, SplineCurve } from '../store/animationStore'
-import { scaleStore, SCALE_INTERVALS } from '../store/scaleStore'
 
 // Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
 // 'pulse' → createPeriodicWave (square-ish with PWM)
 // 'blob'  → noise + sine mix
 export type WaveDescriptor = OscillatorType | 'pulse' | 'blob'
 
-// D-02: hue → pitch class (semitone 0–11)
-// 30° per semitone: hue 0° = C, 30° = C#, 60° = D, ... 330° = B
-function hueToSemitone(h: number): number {
-  return Math.round((h % 360) / 30) % 12
-}
-
-// D-03: lightness → octave (1–8, linear mapping)
-// l=0 → octave 1 (C1 = ~32.7 Hz), l=100 → octave 8 (C8 = ~4186 Hz)
-// Uses Math.floor so l=50 → floor(3.5) = 3 → octave 4 (C4 = 261 Hz), not octave 5
-function lightnessToOctave(l: number): number {
-  const clamped = Math.max(0, Math.min(100, l))
-  return 1 + Math.floor((clamped / 100) * 7)
-}
-
-// COLR-01: color → frequency (Hz) using MIDI formula 440 * 2^((n-69)/12)
-// MIDI note formula: 12 + octave*12 + semitone
-//   C1 = MIDI 24 = 32.70 Hz, C4 = MIDI 60 = 261.63 Hz, C8 = MIDI 108 = 4186 Hz
-export function colorToFrequency(color: ShapeColor): number {
-  const semitone = hueToSemitone(color.h)
-  const octave = lightnessToOctave(color.l)
-  const midiNote = 12 + octave * 12 + semitone
+// COLR-01: hue → frequency (Hz) via direct linear MIDI mapping (no scale quantization)
+// hue 0° → MIDI 24 (C1, ~32.70 Hz), hue 360° → MIDI 108 (C8, ~4186 Hz)
+// Linear: midiNote = 24 + (h / 360) * 84
+// Input is clamped to [0, 359] — UI already validates range (T-2px-01)
+function hueToFrequency(h: number): number {
+  const hClamped = Math.max(0, Math.min(359, h))
+  const midiNote = 24 + (hClamped / 360) * 84
   return 440 * Math.pow(2, (midiNote - 69) / 12)
+}
+
+// COLR-01: color → frequency (Hz) — pitch comes entirely from hue; lightness no longer affects octave
+// Lightness only controls filter cutoff (COLR-03). Using MIDI formula 440 * 2^((n-69)/12).
+//   hue 0° → C1 ≈ 32.70 Hz, hue 180° → mid-range, hue 359° → near C8 ≈ 4186 Hz
+export function colorToFrequency(color: ShapeColor): number {
+  return hueToFrequency(color.h)
 }
 
 // COLR-02: saturation → WaveShaper distortion curve (Float32Array, 256 samples)
@@ -80,35 +72,6 @@ export function makeDistortionCurve(saturation: number): Float32Array {
   }
 
   return curve
-}
-
-// PLAY-05, PLAY-06: snap a raw semitone (0–11 from hueToSemitone) to the nearest
-// in-scale semitone. Returns a value in [0, 11].
-//
-// Algorithm: build absolute candidate set (scaleIntervals shifted by rootKey, mod 12),
-// find the candidate with minimum circular distance. Tie-breaking: lower candidate wins
-// (because candidates are generated in ascending interval order and < is strict).
-//
-// Chromatic passthrough: when scaleIntervals = [0,1,...,11], every semitone is a candidate
-// so the function returns rawSemitone unchanged — no special case needed.
-export function quantizeSemitone(
-  rawSemitone: number,
-  rootKey: number,
-  scaleIntervals: number[],
-): number {
-  // Build absolute semitone candidates: shift each interval by rootKey, wrap mod 12
-  const candidates = scaleIntervals.map((i) => (i + rootKey) % 12)
-  let best = candidates[0]
-  let bestDist = 13  // sentinel larger than max possible circular distance (6)
-  for (const c of candidates) {
-    // Circular (pitch-class) distance: semitones are mod-12 so B(11) and C(0) are 1 apart
-    const dist = Math.min(Math.abs(rawSemitone - c), 12 - Math.abs(rawSemitone - c))
-    if (dist < bestDist) {  // strict < → ties go to first (lower) candidate encountered
-      bestDist = dist
-      best = c
-    }
-  }
-  return best
 }
 
 // COLR-03: lightness → filter cutoff frequency (Hz)
@@ -338,15 +301,10 @@ export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
   // setTargetAtTime is safe on a suspended context — values are buffered.
   if (!voice || !ctx) return
   // Frequency — only OscillatorNode has frequency AudioParam (not blob's BufferSource)
+  // COLR-01: direct hue-to-frequency mapping; no scale quantization
   if (voice.oscillator instanceof OscillatorNode) {
-    const { rootKey, scale } = scaleStore.getState()
-    const rawSemitone = hueToSemitone(color.h)
-    const quantized = quantizeSemitone(rawSemitone, rootKey, SCALE_INTERVALS[scale])
-    // Back-convert quantized semitone to hue (semitone × 30 = hue).
-    // hueToSemitone(quantized * 30) == quantized exactly (30° per semitone, no rounding error).
-    const quantizedHue = quantized * 30
     voice.oscillator.frequency.setTargetAtTime(
-      colorToFrequency({ ...color, h: quantizedHue }), ctx.currentTime, 0.015
+      colorToFrequency(color), ctx.currentTime, 0.015
     )
   }
   // Filter cutoff — always present
@@ -500,23 +458,6 @@ export function initAudioEngine(): () => void {
     }
   })
 
-  let prevRootKey = scaleStore.getState().rootKey
-  let prevScale = scaleStore.getState().scale
-
-  const unsubscribeScale = scaleStore.subscribe((state) => {
-    const ctx = audioCtx  // Direct module-level null check — do NOT use getAudioContext()
-    if (!ctx) return
-    if (state.rootKey !== prevRootKey || state.scale !== prevScale) {
-      prevRootKey = state.rootKey
-      prevScale = state.scale
-      // Re-pitch all active voices with new scale/key
-      for (const [shapeId] of voices) {
-        const shape = shapeStore.getState().shapes.find((s) => s.id === shapeId)
-        if (shape) updateVoiceColor(shapeId, shape.color)
-      }
-    }
-  })
-
   // ─────────────────────────────────────────────────────────────────────────────
   // animationStore curve evaluator — runs at ~60fps, evaluates each active curve
   // at the current beat position and applies to the corresponding AudioParam.
@@ -563,17 +504,9 @@ export function initAudioEngine(): () => void {
         voice.waveshaper.curve = makeDistortionCurve(satVal)
       }
 
-      // 'lightness' curve → modulate filter cutoff AND oscillator frequency (pitch octave)
+      // 'lightness' curve → modulate filter cutoff only (COLR-01: lightness no longer affects pitch)
       if (shapeCurves.lightness) {
         voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(animatedLightness), ctx.currentTime, 0.008)
-        if (voice.oscillator instanceof OscillatorNode) {
-          const { rootKey, scale } = scaleStore.getState()
-          const rawSemitone = hueToSemitone(shape.color.h)
-          const quantized = quantizeSemitone(rawSemitone, rootKey, SCALE_INTERVALS[scale])
-          voice.oscillator.frequency.setTargetAtTime(
-            colorToFrequency({ ...shape.color, h: quantized * 30, l: animatedLightness }), ctx.currentTime, 0.008
-          )
-        }
       }
     }
   }, 16)
@@ -581,7 +514,6 @@ export function initAudioEngine(): () => void {
   return function destroy(): void {
     unsubscribe()
     unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
-    unsubscribeScale()     // Phase 6: clean up scale subscription
     if (curveIntervalId !== null) clearInterval(curveIntervalId)
     // Stop all voices on cleanup (e.g., React StrictMode double-invoke)
     voices.forEach((voice) => {
