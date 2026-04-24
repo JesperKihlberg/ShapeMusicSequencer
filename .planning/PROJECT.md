@@ -1,5 +1,20 @@
 # Shape Music Sequencer
 
+## Current Milestone: v1.1 Animation Panel improvements
+
+**Goal:** Significantly improve the spline animation panel's usability — zoom, focus, visual context, and playhead.
+
+**Target features:**
+- Global timeline zoom (shared across all lanes, 1–64 beats; default 4 beats visible)
+- Ghost repetitions (fills timeline viewport when curve duration < zoom width; 30% opacity, non-interactive)
+- Y-axis scroll + zoom per lane (plain scroll = pan, Ctrl+scroll = zoom; clamped to property range)
+- Lane focus (click label → 160px tall canvas; unfocused → 40–48px compressed curve; toggle; no transition)
+- Beat indicator lines (two-tier: integer beats ~35% opacity, sub-beats ~15% adaptive; beat labels at top)
+- Hue lane scale grid (note lines colored by hue value, root brighter; labels when lane focused)
+- Playhead line (RAF-driven vertical line, beat % lane duration, not React state)
+- Current beat clock (AudioContext.currentTime → beat derivation, RAF-based, no store thrash)
+- Shift-to-snap (X-axis snaps to beat lines, Y-axis snaps to scale note lines for hue; simultaneous)
+
 ## What This Is
 
 A public-facing web app for visual music composition where sound is created and controlled entirely through drawing. Users place geometric shapes on a 4×4 grid canvas — each shape is an autonomous, continuously-playing Web Audio voice whose color (hue→pitch, saturation→timbre, lightness→filter), type (waveform), size (amplitude), and per-property spline animation curves map directly to sonic output. A key/scale selector, stereo panning by column, and a multi-lane spline animation panel with polyrhythm support complete the v1.0 instrument.
@@ -28,8 +43,20 @@ Any change to the visual canvas is an immediate, audible change to the music —
 
 ### Active
 
-- [ ] Undo/redo with minimum 50-step depth (zundo middleware) — COMP-01 (deferred from v1.0)
-- [ ] Export canvas as PNG encoding full composition state — COMP-02 (deferred from v1.0)
+- [ ] Global timeline zoom control in animation panel header — ANIM-08
+- [ ] Ghost curve repetitions filling timeline viewport — ANIM-09
+- [ ] Per-lane Y-axis scroll and zoom (plain scroll / Ctrl+scroll) — ANIM-10
+- [ ] Lane focus: click label toggles tall/compact height — ANIM-11
+- [ ] Beat indicator lines with adaptive sub-beat density — ANIM-12
+- [ ] Hue lane scale grid (note lines colored by hue, root brighter) — ANIM-13
+- [ ] Playhead line across all lanes (RAF-driven, modulo per duration) — ANIM-14
+- [ ] Current beat clock (AudioContext.currentTime RAF-based derivation) — ANIM-15
+- [ ] Shift-to-snap: X→beat lines, Y→scale note lines (hue only) — ANIM-16
+
+### Deferred (from v1.0)
+
+- [ ] Undo/redo with minimum 50-step depth (zundo middleware) — COMP-01
+- [ ] Export canvas as PNG encoding full composition state — COMP-02
 - [ ] Canvas can be saved and loaded as JSON — PERS-01/02
 - [ ] Composition can be shared via URL — PERS-03
 - [ ] Multi-shape per cell for complex timbres — SHPE-06
@@ -93,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after v1.0 milestone — full PoC instrument shipped; all 7 phases complete*
+*Last updated: 2026-04-24 — milestone v1.1 Animation Panel improvements started*
