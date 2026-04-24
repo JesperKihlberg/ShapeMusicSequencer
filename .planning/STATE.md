@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: checkpoint
-stopped_at: "07-04: Tasks 1-2 complete — CellPanel Animate button + AnimationPanel created; awaiting human-verify checkpoint"
-last_updated: "2026-04-23T12:35:00Z"
-last_activity: 2026-04-23
+status: executing
+stopped_at: "07-FIX-01: Complete — frozenBeatPos freeze fix applied to canvasEngine.ts"
+last_updated: "2026-04-24T08:02:00Z"
+last_activity: 2026-04-24
 progress:
   total_phases: 6
   completed_phases: 6
@@ -92,6 +92,7 @@ Recent decisions affecting current work:
 - [Phase 03-canvas-interaction]: canvas height:100% ensures CSS display dimensions match ResizeObserver-reported clientHeight for correct cell math
 - [Phase 04-shape-panel-animation]: useEffect deps for TypeButton use individual h/s/l fields instead of color object reference — avoids missed redraws from object reference instability
 - [Phase 04-shape-panel-animation]: DPR-unaware mini canvas at PoC scope: canvas.width=32 without devicePixelRatio scaling — acceptable softness for 32x32 preview per UI-SPEC Pitfall 2
+- [Phase 07-FIX-01]: frozenBeatPos (number | null) module variable in canvasEngine captures beat position at stop instant; null = live, non-null = frozen; evalBeat selector picks frozen when non-null; destroy() resets to null for HMR safety
 
 ### Pending Todos
 
@@ -110,6 +111,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-23T12:35:00Z
-Stopped at: 07-04 checkpoint:human-verify — AnimationPanel and CellPanel Animate button complete; user must visually verify at http://localhost:5173
-Resume file: .planning/phases/07-composition-tools/07-04-SUMMARY.md
+Last session: 2026-04-24T08:02:00Z
+Stopped at: 07-FIX-01 complete — frozenBeatPos freeze fix in canvasEngine.ts; UAT Test 7 resolved
+Resume file: .planning/phases/07-composition-tools/07-FIX-01-SUMMARY.md
