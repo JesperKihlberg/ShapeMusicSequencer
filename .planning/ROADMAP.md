@@ -42,7 +42,10 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   2. The playhead position reflects the correct beat modulo each lane's curve duration (polyrhythm lanes each show their own phase)
   3. When playback is stopped the playhead sits at beat 0 (left edge) on all lanes
   4. The playhead position never triggers a React re-render — it is driven entirely by requestAnimationFrame
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — Extract beat formula to beatClock.ts; refactor canvasEngine and audioEngine
+- [ ] 08-02-PLAN.md — Extend drawLaneCanvas with playheadBeat param; add RAF loop to AnimationPanel
 **UI hint**: yes
 
 ### Phase 9: Timeline Zoom, Ghosts, and Lane Focus
@@ -95,7 +98,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 5. Playback Controls | v1.0 | 5/5 | Complete | 2026-04-22 |
 | 6. Full Visual Language | v1.0 | 4/4 | Complete | 2026-04-23 |
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
-| 8. Beat Clock and Playhead | v1.1 | 0/? | Not started | - |
+| 8. Beat Clock and Playhead | v1.1 | 0/2 | Not started | - |
 | 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 0/? | Not started | - |
 | 10. Visual Reference Grids | v1.1 | 0/? | Not started | - |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |
