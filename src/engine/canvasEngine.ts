@@ -13,6 +13,10 @@ import { playbackStore } from '../store/playbackStore'
 import { animationStore } from '../store/animationStore'
 import type { SplineCurve } from '../store/animationStore'
 
+// frozenBeatPos: beat position captured at the instant Stop is pressed.
+// null means playback is live; non-null means use this position for curve evaluation.
+let frozenBeatPos: number | null = null
+
 // ────────────────────────────────────────────────────────────────────
 // Pure helper — exported for isolated unit testing (Plan 03, Task 1)
 // ────────────────────────────────────────────────────────────────────
@@ -153,19 +157,22 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     // an animationStore size curve is active for this shape.
     // Beat position for curve evaluation: (t_seconds * bpm) / 60
     const t = performance.now() / 1000
-    const { bpm, isPlaying } = playbackStore.getState()
-    const beatPos = (t * bpm) / 60
+    const { bpm } = playbackStore.getState()
+    const liveBeatPos = (t * bpm) / 60
     const curves = animationStore.getState().curves
 
     for (const shape of shapes) {
       const cx = offsetX + shape.col * cellSize + Math.floor(cellSize / 2)
       const cy = offsetY + shape.row * cellSize + Math.floor(cellSize / 2)
 
-      // Determine effective size: base size OR spline-modulated size if curve present
+      // Determine effective size: base size OR spline-modulated size if curve present.
+      // frozenBeatPos is non-null while stopped — use it so the shape holds its
+      // last animated position rather than snapping back to shape.size.
       let effectiveSize = shape.size
       const shapeCurves = curves[shape.id]
-      if (shapeCurves?.size && isPlaying) {
-        effectiveSize = evalCurveAtBeat(shapeCurves.size, beatPos)
+      const evalBeat = frozenBeatPos !== null ? frozenBeatPos : liveBeatPos
+      if (shapeCurves?.size) {
+        effectiveSize = evalCurveAtBeat(shapeCurves.size, evalBeat)
       }
 
       // D-05: shape.size=50 → (50/50)=1.0 → same base radius as Phase 3
@@ -226,8 +233,17 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
   // Subscribe to shape and selection stores — either change sets dirty flag
   const unsubscribeShape = shapeStore.subscribe(() => { dirty = true })
   const unsubscribeSelection = selectionStore.subscribe(() => { dirty = true })
-  // Phase 5: subscribe to playbackStore — isPlaying/bpm/volume changes trigger redraw
-  const unsubscribePlayback = playbackStore.subscribe(() => { dirty = true })
+  // Phase 5/7: subscribe to playbackStore — isPlaying/bpm/volume changes trigger redraw.
+  // Capture frozenBeatPos at the instant playback stops so drawShapes can hold position.
+  const unsubscribePlayback = playbackStore.subscribe(() => {
+    const { isPlaying, bpm } = playbackStore.getState()
+    if (!isPlaying) {
+      frozenBeatPos = (performance.now() / 1000 * bpm) / 60
+    } else {
+      frozenBeatPos = null
+    }
+    dirty = true
+  })
   // Phase 7: subscribe to animationStore — curve changes trigger redraw
   const unsubscribeAnimation = animationStore.subscribe(() => { dirty = true })
 
@@ -246,8 +262,9 @@ export function initCanvasEngine({ canvas, container }: EngineOptions): () => vo
     if (rafId !== null) cancelAnimationFrame(rafId)
     unsubscribeShape()
     unsubscribeSelection()
-    unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)
+    unsubscribePlayback()  // Phase 5/7: clean up playback subscription (Pitfall 3)
     unsubscribeAnimation()  // Phase 7: clean up animationStore subscription
     resizeObserver.disconnect()
+    frozenBeatPos = null   // Reset freeze state on engine teardown
   }
 }
