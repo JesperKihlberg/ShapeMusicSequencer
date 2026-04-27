@@ -9,6 +9,7 @@ import { useShapeStore } from '../store/shapeStore'
 import { playbackStore, usePlaybackStore } from '../store/playbackStore'
 import { getCurrentBeat } from '../engine/beatClock'
 import type { AnimatableProperty, SplineCurve, SplinePoint } from '../store/animationStore'
+import { uiStore, useUiStore } from '../store/uiStore'
 
 const PANEL_MIN = 40    // px — only handle visible when collapsed
 const PANEL_DEFAULT = 188  // px — 8 handle + 36 header + 144 lanes
@@ -62,6 +63,9 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
   // Read isPlaying via React hook so useEffect re-runs on transition (D-04)
   const isPlaying = usePlaybackStore((s) => s.isPlaying)
 
+  // Read zoomBeats from uiStore — global visible beat span (ANIM-08, D-06)
+  const zoomBeats = useUiStore((s) => s.zoomBeats)
+
   // RAF loop — redraws all lane canvases every frame while playing (D-02, D-03, D-04)
   useEffect(() => {
     let rafId: number
@@ -69,13 +73,48 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
     function tick() {
       const { bpm } = playbackStore.getState()
       const beat = getCurrentBeat(bpm)
+      const currentZoom = uiStore.getState().zoomBeats
 
       for (const [prop, canvas] of laneCanvasRefs.current.entries()) {
         const ctx = canvas.getContext('2d')
         if (!ctx) continue
         const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
         if (!curve) continue
-        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, selectedPoints[prop] ?? null, beat)
+
+        // Primary draw — uses zoomBeats for X-axis scaling (D-07)
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, selectedPointsRef.current[prop] ?? null, beat, currentZoom)
+
+        // Ghost passes (ANIM-09, D-08, D-09)
+        const primaryWidthPx = (curve.duration / currentZoom) * canvas.width
+        const repeatCount = Math.floor(currentZoom / curve.duration) - 1
+
+        // Full ghost copies
+        for (let i = 1; i <= repeatCount; i++) {
+          const ghostStartPx = (i * curve.duration / currentZoom) * canvas.width
+          ctx.save()
+          ctx.globalAlpha = 0.30
+          ctx.beginPath()
+          ctx.rect(ghostStartPx, 0, primaryWidthPx, canvas.height)
+          ctx.clip()
+          ctx.translate(ghostStartPx, 0)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          ctx.restore()
+        }
+
+        // Partial ghost at right edge when zoomBeats % curve.duration !== 0
+        const remainder = currentZoom % curve.duration
+        if (remainder > 0 && repeatCount >= 0) {
+          const partialStartPx = Math.floor(currentZoom / curve.duration) * curve.duration / currentZoom * canvas.width
+          const partialWidthPx = (remainder / currentZoom) * canvas.width
+          ctx.save()
+          ctx.globalAlpha = 0.30
+          ctx.beginPath()
+          ctx.rect(partialStartPx, 0, partialWidthPx, canvas.height)
+          ctx.clip()
+          ctx.translate(partialStartPx, 0)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          ctx.restore()
+        }
       }
 
       rafId = requestAnimationFrame(tick)
@@ -91,14 +130,48 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         if (!ctx) continue
         const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
         if (!curve) continue
-        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, 0)
+
+        // Primary draw with current zoom (D-07)
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, 0, zoomBeats)
+
+        // Ghost passes (ANIM-09, D-08, D-09)
+        const primaryWidthPx = (curve.duration / zoomBeats) * canvas.width
+        const repeatCount = Math.floor(zoomBeats / curve.duration) - 1
+
+        // Full ghost copies
+        for (let i = 1; i <= repeatCount; i++) {
+          const ghostStartPx = (i * curve.duration / zoomBeats) * canvas.width
+          ctx.save()
+          ctx.globalAlpha = 0.30
+          ctx.beginPath()
+          ctx.rect(ghostStartPx, 0, primaryWidthPx, canvas.height)
+          ctx.clip()
+          ctx.translate(ghostStartPx, 0)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          ctx.restore()
+        }
+
+        // Partial ghost at right edge when zoomBeats % curve.duration !== 0
+        const remainder = zoomBeats % curve.duration
+        if (remainder > 0 && repeatCount >= 0) {
+          const partialStartPx = Math.floor(zoomBeats / curve.duration) * curve.duration / zoomBeats * canvas.width
+          const partialWidthPx = (remainder / zoomBeats) * canvas.width
+          ctx.save()
+          ctx.globalAlpha = 0.30
+          ctx.beginPath()
+          ctx.rect(partialStartPx, 0, partialWidthPx, canvas.height)
+          ctx.clip()
+          ctx.translate(partialStartPx, 0)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          ctx.restore()
+        }
       }
     }
 
     return () => {
       if (rafId !== undefined) cancelAnimationFrame(rafId)
     }
-  }, [isPlaying, shape])
+  }, [isPlaying, shape, zoomBeats])
 
   function handleDragHandlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     e.preventDefault()
@@ -129,6 +202,10 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
   // Selected control-point indices keyed by property — lifted from AnimLane so the
   // RAF tick can pass the correct selectedIdx to drawLaneCanvas during playback (WR-04)
   const [selectedPoints, setSelectedPoints] = useState<Partial<Record<AnimatableProperty, number | null>>>({})
+
+  // Ref to keep selectedPoints current inside RAF closure without re-running effect (RESEARCH pitfall 1)
+  const selectedPointsRef = useRef(selectedPoints)
+  useEffect(() => { selectedPointsRef.current = selectedPoints }, [selectedPoints])
 
   // Property picker state
   const [showPicker, setShowPicker] = useState(false)
@@ -191,6 +268,27 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
               Cell ({shape.col}, {shape.row})
             </span>
           )}
+          {/* Zoom segmented buttons — controls visible beat span across all lanes (ANIM-08, D-04, D-05) */}
+          <div
+            className="zoom-selector"
+            role="group"
+            aria-label="Timeline zoom"
+          >
+            {([1, 2, 4, 8, 16, 32, 64] as const).map((v) => (
+              <button
+                key={v}
+                className={[
+                  'zoom-selector__btn',
+                  v === zoomBeats ? 'zoom-selector__btn--active' : '',
+                ].filter(Boolean).join(' ')}
+                aria-label={`Zoom to ${v} beats`}
+                aria-pressed={v === zoomBeats}
+                onClick={() => uiStore.getState().setZoomBeats(v)}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
           <div style={{ position: 'relative', marginLeft: 'auto' }}>
             <button
               className="animation-panel__add-btn btn"
@@ -261,6 +359,7 @@ function drawLaneCanvas(
   property: AnimatableProperty,
   selectedIdx: number | null,
   playheadBeat?: number,
+  zoomBeats?: number,           // NEW — Phase 9: X-axis denominator override (D-07)
 ): void {
   ctx.clearRect(0, 0, w, h)
   // Background
@@ -278,9 +377,10 @@ function drawLaneCanvas(
   ctx.setLineDash([])
 
   const [minVal, maxVal] = property === 'hue' ? [0, 360] : [0, 100]
+  const xDenominator = zoomBeats ?? curve.duration   // NEW — Phase 9 (D-07)
 
   function toPixel(p: SplinePoint): [number, number] {
-    const px = (p.beat / curve.duration) * w
+    const px = (p.beat / xDenominator) * w      // CHANGED: curve.duration → xDenominator
     const py = ((maxVal - p.value) / (maxVal - minVal)) * h
     return [px, py]
   }
@@ -319,7 +419,7 @@ function drawLaneCanvas(
   // When playheadBeat is undefined the line still draws at beat 0 (x = 0, left edge)
   const phBeat = playheadBeat ?? 0
   const phX = curve.duration > 0
-    ? (phBeat % curve.duration) / curve.duration * w
+    ? (phBeat % curve.duration) / xDenominator * w   // modulo stays curve.duration; display scale uses xDenominator
     : 0
   ctx.strokeStyle = '#6366f1'  // --color-accent, hardcoded per D-06
   ctx.lineWidth = 2
@@ -346,6 +446,17 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   const containerRef = useRef<HTMLDivElement>(null)
   const isDraggingPoint = useRef(false)
   const canvasRect = useRef<DOMRect | null>(null)
+
+  // Lane focus state — read from uiStore (ANIM-11, D-11)
+  const focusedLane = useUiStore((s) => s.focusedLane)
+  const isFocused = focusedLane === property
+  const isCompressed = focusedLane !== null && !isFocused
+
+  // Toggle focus on label column click (D-13)
+  function handleLabelColClick() {
+    const { focusedLane: current, setFocusedLane } = uiStore.getState()
+    setFocusedLane(current === property ? null : property)
+  }
 
   // Register canvas ref with parent AnimationPanel for RAF loop access (D-02)
   useEffect(() => {
@@ -415,6 +526,12 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     canvasRect.current = canvas.getBoundingClientRect()
     const px = e.clientX - canvasRect.current.left
     const py = e.clientY - canvasRect.current.top
+
+    // Phase 9: ignore clicks in ghost region (D-10)
+    const currentZoom = uiStore.getState().zoomBeats
+    const primaryRegionWidth = (curve.duration / currentZoom) * canvas.width
+    if (px > primaryRegionWidth) return
+
     const hitIdx = findPointAt(px, py)
     if (hitIdx >= 0) {
       // Click on existing point — select for drag
@@ -435,6 +552,13 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     const rect = canvasRect.current ?? canvasRef.current!.getBoundingClientRect()
     const px = e.clientX - rect.left
     const py = e.clientY - rect.top
+
+    // Phase 9: ignore movement in ghost region (D-10)
+    const canvas = canvasRef.current!
+    const currentZoom = uiStore.getState().zoomBeats
+    const primaryRegionWidth = (curve.duration / currentZoom) * canvas.width
+    if (px > primaryRegionWidth) return
+
     const updated = pixelToPoint(px, py)
     const newPoints = curve.points.map((p, i) => i === selectedPointIdx ? updated : p)
     animationStore.getState().setCurve(shapeId, property, { ...curve, points: newPoints })
@@ -475,8 +599,23 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   }
 
   return (
-    <div className="anim-lane" data-property={property}>
-      <div className="anim-lane__label-col">
+    <div
+      className={[
+        'anim-lane',
+        isFocused ? 'anim-lane--focused' : '',
+        isCompressed ? 'anim-lane--compressed' : '',
+      ].filter(Boolean).join(' ')}
+      data-property={property}
+    >
+      <div
+        className="anim-lane__label-col"
+        role="button"
+        tabIndex={0}
+        aria-label={`Focus ${property} lane`}
+        aria-pressed={isFocused}
+        onClick={handleLabelColClick}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleLabelColClick() }}
+      >
         <span className="anim-lane__prop-name">{property}</span>
         <div className="anim-lane__duration-row">
           <input
@@ -495,7 +634,10 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
         <button
           className="anim-lane__remove-btn"
           aria-label={`Remove ${property} curve`}
-          onClick={() => animationStore.getState().removeCurve(shapeId, property)}
+          onClick={(e) => {
+            e.stopPropagation()
+            animationStore.getState().removeCurve(shapeId, property)
+          }}
         >
           ×
         </button>
