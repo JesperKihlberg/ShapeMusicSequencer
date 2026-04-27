@@ -57,7 +57,10 @@ Plans:
   2. When a lane's curve duration is shorter than the zoom span, semi-transparent ghost copies (30% opacity) fill the remaining viewport and cannot be clicked or dragged
   3. Clicking a lane's label column snaps it to 160px tall; all other lanes compress to 40–48px; clicking the focused lane collapses it back — no transition animation
   4. Only one lane is focused at a time; on first load no lane is focused
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 09-01-PLAN.md — Create uiStore (zoomBeats + focusedLane), extend drawLaneCanvas with zoomBeats param, add zoom segmented buttons to header
+- [ ] 09-02-PLAN.md — Ghost rendering in RAF loop and stopped-state draw; AnimLane focus classes + label-col click; ghost pointer exclusion
 **UI hint**: yes
 
 ### Phase 10: Visual Reference Grids
@@ -99,6 +102,6 @@ Plans:
 | 6. Full Visual Language | v1.0 | 4/4 | Complete | 2026-04-23 |
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
-| 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 0/? | Not started | - |
+| 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 0/2 | Not started | - |
 | 10. Visual Reference Grids | v1.1 | 0/? | Not started | - |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |
