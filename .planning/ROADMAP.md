@@ -25,7 +25,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 ### v1.1 Animation Panel improvements
 
 - [x] **Phase 8: Beat Clock and Playhead** - RAF-derived beat position and visible playhead line across all lanes — completed 2026-04-24
-- [ ] **Phase 9: Timeline Zoom, Ghosts, and Lane Focus** - Global zoom control, ghost curve repetitions, and per-lane focus toggle
+- [x] **Phase 9: Timeline Zoom, Ghosts, and Lane Focus** - Global zoom control, ghost curve repetitions, and per-lane focus toggle — completed 2026-04-27
 - [ ] **Phase 10: Visual Reference Grids** - Beat indicator lines, hue scale grid, and Y-axis scroll/zoom per lane
 - [ ] **Phase 11: Shift+Drag Snapping** - Shift-key snap of control points to beat lines and scale note lines
 
@@ -60,7 +60,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 09-01-PLAN.md — Create uiStore (zoomBeats + focusedLane), extend drawLaneCanvas with zoomBeats param, add zoom segmented buttons to header, ghost rendering, lane focus toggle
-- [ ] 09-02-PLAN.md — TBD (Wave 2)
+- [x] 09-02-PLAN.md — Verify ghost rendering, lane focus, and pointer exclusion (all delivered in Plan 01 as Rule 2 auto-additions)
 **UI hint**: yes
 
 ### Phase 10: Visual Reference Grids
@@ -102,6 +102,6 @@ Plans:
 | 6. Full Visual Language | v1.0 | 4/4 | Complete | 2026-04-23 |
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
-| 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 1/2 | In progress | - |
+| 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 2/2 | Complete | 2026-04-27 |
 | 10. Visual Reference Grids | v1.1 | 0/? | Not started | - |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Animation Panel improvements
 status: in_progress
-stopped_at: "Phase 9 Plan 01 complete — uiStore, zoom buttons, ghosts, lane focus"
-last_updated: "2026-04-27T07:46:00Z"
+stopped_at: "Phase 9 complete — ANIM-08, ANIM-09, ANIM-11 verified; ready for Phase 10"
+last_updated: "2026-04-27T07:55:00Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 37
+  completed_plans: 4
+  percent: 50
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 9 — Timeline Zoom, Ghosts, and Lane Focus (in progress)
-Next: Execute Phase 9 Plan 02 (Wave 2)
-Status: Phase 9 Plan 01 complete — uiStore, zoom buttons, ghost rendering, lane focus implemented
-Last activity: 2026-04-27 — Phase 9 Plan 01 executed (2 tasks, 4 files, all tests green)
+Phase: 9 — Timeline Zoom, Ghosts, and Lane Focus (complete)
+Next: Execute Phase 10 (Visual Reference Grids)
+Status: Phase 9 Plan 02 complete — all features verified (ghost rendering, lane focus, pointer exclusion confirmed from Plan 01)
+Last activity: 2026-04-27 — Phase 9 Plan 02 executed (verification pass, 0 tasks needed, all tests green)
 
-Progress: [###_______] 37%
+Progress: [#####_____] 50%
 
 ## Accumulated Context
 
@@ -51,6 +51,7 @@ Recent decisions affecting current work:
 - [09-01]: Ghost rendering lives in RAF loop caller (not inside drawLaneCanvas) — keeps drawLaneCanvas pure and reusable
 - [09-01]: selectedPointsRef fixes stale-closure bug in RAF loop without adding selectedPoints to effect deps
 - [09-01]: Ghost rendering + lane focus implemented in Plan 01 (Wave 1) alongside zoom — both depend on same zoomBeats wiring
+- [09-02]: Plan 02 was a verification pass only — all Wave 2 features were delivered in Wave 1 as Rule 2 auto-additions
 
 ### Pending Todos
 
@@ -72,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T07:46:00Z
-Stopped at: Completed Phase 9 Plan 01 — uiStore, zoom buttons, ghost rendering, lane focus
+Last session: 2026-04-27T07:55:00Z
+Stopped at: Completed Phase 9 Plan 02 — all ANIM-08/09/11 features verified; Phase 9 complete
 Resume file: None
