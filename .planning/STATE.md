@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Animation Panel improvements
 status: in_progress
-stopped_at: "Phase 8 complete — UAT passed 5/5"
-last_updated: "2026-04-24T13:38:00Z"
-last_activity: 2026-04-24
+stopped_at: "Phase 9 UI-SPEC approved"
+last_updated: "2026-04-27T00:00:00Z"
+last_activity: 2026-04-27
 progress:
   total_phases: 4
   completed_phases: 1
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 8 — Beat Clock and Playhead (complete)
-Next: Phase 9 — Timeline Zoom, Ghosts, and Lane Focus
-Status: Phase 8 UAT passed 5/5 — ready to plan Phase 9
-Last activity: 2026-04-24 — Phase 8 UAT complete (5/5 passed, 0 issues)
+Phase: 9 — Timeline Zoom, Ghosts, and Lane Focus (UI-SPEC approved)
+Next: Plan Phase 9
+Status: Phase 9 UI design contract approved — ready to plan
+Last activity: 2026-04-27 — Phase 9 UI-SPEC approved (6/6 pass, 2 non-blocking flags)
 
 Progress: [##________] 25%
 
