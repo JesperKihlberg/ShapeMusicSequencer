@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Animation Panel improvements
 status: in_progress
-stopped_at: "Phase 9 UI-SPEC approved"
-last_updated: "2026-04-27T00:00:00Z"
+stopped_at: "Phase 9 Plan 01 complete — uiStore, zoom buttons, ghosts, lane focus"
+last_updated: "2026-04-27T07:46:00Z"
 last_activity: 2026-04-27
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 25
+  total_plans: 4
+  completed_plans: 3
+  percent: 37
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 9 — Timeline Zoom, Ghosts, and Lane Focus (UI-SPEC approved)
-Next: Plan Phase 9
-Status: Phase 9 UI design contract approved — ready to plan
-Last activity: 2026-04-27 — Phase 9 UI-SPEC approved (6/6 pass, 2 non-blocking flags)
+Phase: 9 — Timeline Zoom, Ghosts, and Lane Focus (in progress)
+Next: Execute Phase 9 Plan 02 (Wave 2)
+Status: Phase 9 Plan 01 complete — uiStore, zoom buttons, ghost rendering, lane focus implemented
+Last activity: 2026-04-27 — Phase 9 Plan 01 executed (2 tasks, 4 files, all tests green)
 
-Progress: [##________] 25%
+Progress: [###_______] 37%
 
 ## Accumulated Context
 
@@ -47,6 +47,10 @@ Recent decisions affecting current work:
 - [v1.1]: Unfocused lanes show compressed curve at 40–48px; focused lanes snap to 160px (no animation)
 - [v1.1]: Ghost regions are non-interactive; beat labels in ghost region are dimmed
 - [v1.1]: Hue scale note labels rendered in lane canvas when focused; property name in label strip unchanged
+- [09-01]: uiStore uses Zustand vanilla (createStore) — no Immer needed for flat setters; matches playbackStore.ts pattern exactly
+- [09-01]: Ghost rendering lives in RAF loop caller (not inside drawLaneCanvas) — keeps drawLaneCanvas pure and reusable
+- [09-01]: selectedPointsRef fixes stale-closure bug in RAF loop without adding selectedPoints to effect deps
+- [09-01]: Ghost rendering + lane focus implemented in Plan 01 (Wave 1) alongside zoom — both depend on same zoomBeats wiring
 
 ### Pending Todos
 
@@ -68,6 +72,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-24T00:00:00Z
-Stopped at: Roadmap created — Phases 8–11 defined, all 9 v1.1 requirements mapped
+Last session: 2026-04-27T07:46:00Z
+Stopped at: Completed Phase 9 Plan 01 — uiStore, zoom buttons, ghost rendering, lane focus
 Resume file: None

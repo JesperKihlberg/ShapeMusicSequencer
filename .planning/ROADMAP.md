@@ -59,8 +59,8 @@ Plans:
   4. Only one lane is focused at a time; on first load no lane is focused
 **Plans**: 2 plans
 Plans:
-- [ ] 09-01-PLAN.md — Create uiStore (zoomBeats + focusedLane), extend drawLaneCanvas with zoomBeats param, add zoom segmented buttons to header
-- [ ] 09-02-PLAN.md — Ghost rendering in RAF loop and stopped-state draw; AnimLane focus classes + label-col click; ghost pointer exclusion
+- [x] 09-01-PLAN.md — Create uiStore (zoomBeats + focusedLane), extend drawLaneCanvas with zoomBeats param, add zoom segmented buttons to header, ghost rendering, lane focus toggle
+- [ ] 09-02-PLAN.md — TBD (Wave 2)
 **UI hint**: yes
 
 ### Phase 10: Visual Reference Grids
@@ -102,6 +102,6 @@ Plans:
 | 6. Full Visual Language | v1.0 | 4/4 | Complete | 2026-04-23 |
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
-| 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 0/2 | Not started | - |
+| 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 1/2 | In progress | - |
 | 10. Visual Reference Grids | v1.1 | 0/? | Not started | - |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |

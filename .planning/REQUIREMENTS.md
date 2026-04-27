@@ -8,13 +8,13 @@
 
 ## Animation Panel — Timeline & Zoom
 
-- [ ] **ANIM-08**: User can control how many beats are visible across all lanes simultaneously via a zoom control in the animation panel header (range 1–64, default 4, common values: 1, 2, 4, 8, 16, 32, 64)
-- [ ] **ANIM-09**: When a lane's curve duration is shorter than the global timeline zoom width, the curve is repeated as ghost copies (30% opacity, same stroke color, no fill) to fill the remaining viewport; ghost regions are non-interactive (no click, drag, or point insertion)
+- [x] **ANIM-08**: User can control how many beats are visible across all lanes simultaneously via a zoom control in the animation panel header (range 1–64, default 4, common values: 1, 2, 4, 8, 16, 32, 64) — Phase 9 Plan 01
+- [x] **ANIM-09**: When a lane's curve duration is shorter than the global timeline zoom width, the curve is repeated as ghost copies (30% opacity, same stroke color, no fill) to fill the remaining viewport; ghost regions are non-interactive (no click, drag, or point insertion) — Phase 9 Plan 01
 - [ ] **ANIM-10**: User can scroll the Y-axis of each lane independently with plain scroll wheel (pan up/down); user can zoom the Y-axis with Ctrl/Cmd+scroll wheel (narrow or widen visible value range); scroll is clamped to the property's full range; default visible range on load is the full property range (hue 0–360, others 0–100)
 
 ## Animation Panel — Lane Interaction
 
-- [ ] **ANIM-11**: Clicking the label column of a lane toggles focus — focused lane snaps to 160px canvas height, unfocused lanes snap to 40–48px (compressed curve visible, no collapse); only one lane focused at a time; clicking an already-focused lane collapses it; no lane focused on first load; no transition animation
+- [x] **ANIM-11**: Clicking the label column of a lane toggles focus — focused lane snaps to 160px canvas height, unfocused lanes snap to 40–48px (compressed curve visible, no collapse); only one lane focused at a time; clicking an already-focused lane collapses it; no lane focused on first load; no transition animation — Phase 9 Plan 01
 
 ## Animation Panel — Visual Grid
 
@@ -59,10 +59,10 @@
 
 | REQ-ID | Phase | Plan |
 |--------|-------|------|
-| ANIM-08 | Phase 9 | — |
-| ANIM-09 | Phase 9 | — |
+| ANIM-08 | Phase 9 | 09-01 |
+| ANIM-09 | Phase 9 | 09-01 |
 | ANIM-10 | Phase 10 | — |
-| ANIM-11 | Phase 9 | — |
+| ANIM-11 | Phase 9 | 09-01 |
 | ANIM-12 | Phase 10 | — |
 | ANIM-13 | Phase 10 | — |
 | ANIM-14 | Phase 8 | — |
