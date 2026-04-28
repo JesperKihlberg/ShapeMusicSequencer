@@ -88,7 +88,10 @@ Plans:
   2. Holding Shift while dragging a control point on the hue lane additionally snaps its Y position to the nearest scale note line
   3. Both axes snap simultaneously on the hue lane when Shift is held
   4. Releasing Shift mid-drag immediately returns to free-drag behavior without dropping the point
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — Wave 0 test scaffold: snapFormulas.test.ts covering X beat snap, Y hue snap, and pixelToPoint Y-viewport formula
+- [ ] 11-02-PLAN.md — Fix pixelToPoint + pointToPixel yViewport bug, add isSnappedRef, snap branches in both pointer handlers, DrawOptions.isSnapped, snapped visual; human checkpoint
 **UI hint**: yes
 
 ---
@@ -107,4 +110,4 @@ Plans:
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
 | 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 2/2 | Complete | 2026-04-27 |
 | 10. Visual Reference Grids | v1.1 | 2/2 | Complete | 2026-04-28 |
-| 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |
+| 11. Shift+Drag Snapping | v1.1 | 0/2 | Not started | - |
