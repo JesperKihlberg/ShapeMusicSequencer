@@ -382,6 +382,7 @@ interface DrawOptions {
   rootKey?: number         // Scale root key 0–11; passed by caller from scaleStore (D-08)
   scale?: ScaleName        // Scale name; passed by caller from scaleStore (D-08)
   isGhostRegion?: boolean  // Ghost pass — halves beat label opacity (D-03, D-18)
+  isSnapped?: boolean      // Phase 11: selected point is currently snapped (D-11)
 }
 
 function drawLaneCanvas(
@@ -564,11 +565,23 @@ function drawLaneCanvas(
   for (let i = 0; i < visible.length; i++) {
     const [px, py] = toPixel(visible[i])
     const isSelected = selectedIdx !== null && curve.points.indexOf(visible[i]) === selectedIdx
+    const isSnappedPoint = isSelected && (options?.isSnapped ?? false)  // Phase 11 (D-10)
     const radius = isSelected ? 6 : 5  // 12px / 10px diameter
     ctx.beginPath()
     ctx.arc(px, py, radius, 0, Math.PI * 2)
-    ctx.fillStyle = isSelected ? '#6366f1' : 'rgba(255,255,255,0.55)'
-    ctx.fill()
+    if (isSnappedPoint) {
+      // Snapped: white fill + accent ring — signals grid lock (D-10)
+      ctx.fillStyle = '#ffffff'
+      ctx.fill()
+      ctx.save()
+      ctx.strokeStyle = '#6366f1'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.restore()
+    } else {
+      ctx.fillStyle = isSelected ? '#6366f1' : 'rgba(255,255,255,0.55)'
+      ctx.fill()
+    }
   }
 
   // Playhead line — drawn last so it appears on top of curve and control points (D-06)
@@ -614,6 +627,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const isDraggingPoint = useRef(false)
+  const isSnappedRef = useRef(false)  // Phase 11: tracks snap state during drag (D-11)
   const canvasRect = useRef<DOMRect | null>(null)
 
   // Lane focus state — read from uiStore (ANIM-11, D-11)
@@ -706,6 +720,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
       yMin: yVp.min, yMax: yVp.max,
       isFocused,
       rootKey, scale,
+      isSnapped: isSnappedRef.current,  // Phase 11 (D-11)
     }
 
     // Primary draw
@@ -800,7 +815,25 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
       canvas.setPointerCapture(e.pointerId)
     } else {
       // Click on empty canvas — insert new point
-      const newPoint = pixelToPoint(px, py)
+      let newPoint = pixelToPoint(px, py)
+
+      // Phase 11: Shift snap on insert (D-04)
+      if (e.shiftKey) {
+        const snappedBeat = Math.max(0, Math.min(curve.duration, Math.round(newPoint.beat)))
+        let snappedValue = newPoint.value
+        if (property === 'hue') {
+          const { rootKey, scale } = scaleStore.getState()
+          const noteHues = scaleNoteHues(rootKey, scale)
+          snappedValue = noteHues.reduce(
+            (best, n) => Math.abs(n.hue - newPoint.value) < Math.abs(best.hue - newPoint.value) ? n : best
+          ).hue
+        }
+        newPoint = { beat: snappedBeat, value: snappedValue }
+        isSnappedRef.current = true
+      } else {
+        isSnappedRef.current = false  // no snap on free insert
+      }
+
       const newPoints = [...curve.points, newPoint].sort((a, b) => a.beat - b.beat)
       animationStore.getState().setCurve(shapeId, property, { ...curve, points: newPoints })
       onSelectedPointChange(null)
@@ -819,13 +852,32 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     const primaryRegionWidth = (curve.duration / currentZoom) * canvas.width
     if (px > primaryRegionWidth) return
 
-    const updated = pixelToPoint(px, py)
+    let updated = pixelToPoint(px, py)
+
+    // Phase 11: Shift snap (D-01, D-02, D-13)
+    if (e.shiftKey) {
+      const snappedBeat = Math.max(0, Math.min(curve.duration, Math.round(updated.beat)))
+      let snappedValue = updated.value
+      if (property === 'hue') {
+        const { rootKey, scale } = scaleStore.getState()  // D-07: read live each move
+        const noteHues = scaleNoteHues(rootKey, scale)
+        snappedValue = noteHues.reduce(
+          (best, n) => Math.abs(n.hue - updated.value) < Math.abs(best.hue - updated.value) ? n : best
+        ).hue
+      }
+      updated = { beat: snappedBeat, value: snappedValue }
+      isSnappedRef.current = true
+    } else {
+      isSnappedRef.current = false  // D-03: releasing Shift returns immediately to free-drag
+    }
+
     const newPoints = curve.points.map((p, i) => i === selectedPointIdx ? updated : p)
     animationStore.getState().setCurve(shapeId, property, { ...curve, points: newPoints })
   }
 
   function handleCanvasPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     isDraggingPoint.current = false
+    isSnappedRef.current = false  // Phase 11: clear snap state so next static draw is clean (Pitfall 1)
     canvasRef.current?.releasePointerCapture(e.pointerId)
   }
 
