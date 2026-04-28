@@ -559,17 +559,19 @@ function handleCanvasPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Optional separator line between primary and first ghost**
    - What we know: UI-SPEC specifies 1px line at `x = primaryRegionWidth`, color `rgba(255,255,255,0.15)`, drawn after primary before first ghost pass
    - What's unclear: Whether the visual result aids readability or adds noise in the dark theme
    - Recommendation: Implement it — the dark background makes boundaries subtle; 15% white is very low contrast and adds useful context without visual noise
+   - RESOLVED: Include the separator line — implemented in 09-02 Task 1 as an optional 1px `rgba(255,255,255,0.15)` line at `x = primaryRegionWidth`, drawn after the primary region and before the first ghost pass.
 
 2. **`selectedPoints` stale closure in existing RAF loop**
    - What we know: Line 78 references `selectedPoints` which is React state, not a ref; the effect deps are `[isPlaying, shape]`; `selectedPoints` changes will not re-run the RAF effect
    - What's unclear: Whether this causes visible bugs in practice (the RAF loop re-runs on shape change which resets selected points to `{}`)
    - Recommendation: Fix as part of Wave 2 when touching the RAF loop; use `useRef` pattern to track `selectedPoints` inside the loop
+   - RESOLVED: Fixed in 09-01 Task 2 — `selectedPointsRef` added as a `useRef` that tracks `selectedPoints` state; RAF loop reads from `selectedPointsRef.current` instead of the captured closure value.
 
 ---
 
