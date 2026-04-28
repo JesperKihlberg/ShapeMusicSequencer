@@ -73,7 +73,10 @@ Plans:
   3. The hue lane draws horizontal lines at the hue values corresponding to notes in the active scale, each line colored with its actual hue; the root note line is brighter and slightly thicker; note name labels appear on the left edge when the lane is focused
   4. The hue scale grid updates immediately when the user changes the root key or scale
   5. Scrolling the mouse wheel over a lane pans its Y-axis; Ctrl/Cmd+scroll zooms the visible value range; scrolling is clamped so the full property range remains reachable
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 10-01-PLAN.md — noteHue.ts utility, uiStore yViewport extension, DrawOptions interface, Y-axis transform, onWheel handler, all call-site wiring
+- [ ] 10-02-PLAN.md — Beat grid drawing pass, hue scale grid drawing pass, Y-axis zoom indicator strip
 **UI hint**: yes
 
 ### Phase 11: Shift+Drag Snapping
@@ -103,5 +106,5 @@ Plans:
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
 | 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 2/2 | Complete | 2026-04-27 |
-| 10. Visual Reference Grids | v1.1 | 0/? | Not started | - |
+| 10. Visual Reference Grids | v1.1 | 0/2 | Not started | - |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |
