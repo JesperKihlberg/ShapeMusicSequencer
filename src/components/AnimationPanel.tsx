@@ -399,7 +399,96 @@ function drawLaneCanvas(
   ctx.fillStyle = '#111113'  // --color-bg-primary
   ctx.fillRect(0, 0, w, h)
 
-  // X-axis baseline (midpoint dashed line)
+  const [fullMin, fullMax] = property === 'hue' ? [0, 360] : [0, 100]
+  const yMin = options?.yMin ?? fullMin   // Phase 10: Y-axis viewport (D-11)
+  const yMax = options?.yMax ?? fullMax   // Phase 10: Y-axis viewport (D-11)
+  const xDenominator = zoomBeats ?? curve.duration   // Phase 9 (D-07)
+
+  // ── Layer 3: Beat indicator lines (ANIM-12) ──────────────────────────────────
+  {
+    const pxPerBeat = w / xDenominator
+    const beatCount = Math.ceil(xDenominator)
+
+    // Integer beats (including beat 0)
+    for (let beat = 0; beat <= beatCount; beat++) {
+      const x = (beat / xDenominator) * w
+
+      if (beat === 0) {
+        // Beat 0 / loop boundary: solid line, ~55% opacity (D-04)
+        ctx.save()
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'
+        ctx.lineWidth = 1
+        ctx.setLineDash([])
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, h)
+        ctx.stroke()
+        ctx.restore()
+      } else {
+        // Regular integer beats: dashed [3,3], ~35% opacity (D-04)
+        ctx.save()
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)'
+        ctx.lineWidth = 1
+        ctx.setLineDash([3, 3])
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, h)
+        ctx.stroke()
+        ctx.setLineDash([])
+        ctx.restore()
+
+        // Beat number label — suppressed when too crowded (D-02, D-03, D-05)
+        if (pxPerBeat >= 16) {
+          const labelOpacity = options?.isGhostRegion ? 0.22 : 0.45
+          ctx.save()
+          ctx.font = '10px monospace'
+          ctx.textBaseline = 'top'
+          ctx.fillStyle = `rgba(255,255,255,${labelOpacity})`
+          ctx.fillText(String(beat), x + 2, 2)
+          ctx.restore()
+        }
+      }
+    }
+
+    // Half-beat sub-marks — shown when pxPerBeat >= 40 (D-05)
+    if (pxPerBeat >= 40) {
+      for (let beat = 0; beat < beatCount; beat++) {
+        const x = ((beat + 0.5) / xDenominator) * w
+        ctx.save()
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'
+        ctx.lineWidth = 1
+        ctx.setLineDash([2, 4])
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, h)
+        ctx.stroke()
+        ctx.setLineDash([])
+        ctx.restore()
+      }
+    }
+
+    // Quarter-beat sub-marks — shown when pxPerBeat >= 80 (D-05)
+    if (pxPerBeat >= 80) {
+      for (let beat = 0; beat < beatCount; beat++) {
+        for (const offset of [0.25, 0.75]) {
+          const x = ((beat + offset) / xDenominator) * w
+          ctx.save()
+          ctx.strokeStyle = 'rgba(255,255,255,0.10)'
+          ctx.lineWidth = 1
+          ctx.setLineDash([1, 5])
+          ctx.beginPath()
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, h)
+          ctx.stroke()
+          ctx.setLineDash([])
+          ctx.restore()
+        }
+      }
+    }
+  }
+  // ── End beat indicator lines ──────────────────────────────────────────────────
+
+  // X-axis baseline (midpoint dashed line) — Layer 4: drawn after beat grid, before curve
   ctx.strokeStyle = 'rgba(255,255,255,0.10)'
   ctx.lineWidth = 1
   ctx.setLineDash([4, 4])
@@ -408,11 +497,6 @@ function drawLaneCanvas(
   ctx.lineTo(w, h / 2)
   ctx.stroke()
   ctx.setLineDash([])
-
-  const [fullMin, fullMax] = property === 'hue' ? [0, 360] : [0, 100]
-  const yMin = options?.yMin ?? fullMin   // Phase 10: Y-axis viewport (D-11)
-  const yMax = options?.yMax ?? fullMax   // Phase 10: Y-axis viewport (D-11)
-  const xDenominator = zoomBeats ?? curve.duration   // Phase 9 (D-07)
 
   function toPixel(p: SplinePoint): [number, number] {
     const px = (p.beat / xDenominator) * w
