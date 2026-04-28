@@ -5,7 +5,7 @@ milestone_name: Animation Panel improvements
 status: in_progress
 stopped_at: "Phase 9 complete — ANIM-08, ANIM-09, ANIM-11 verified; ready for Phase 10"
 last_updated: "2026-04-27T07:55:00Z"
-last_activity: 2026-04-27
+last_activity: 2026-04-28
 progress:
   total_phases: 4
   completed_phases: 1
@@ -56,6 +56,12 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260428 | when first adding an animation curve the curve is not drawn | 2026-04-28 | 766e7a3 | [260428-gfx-anim-curve-first-add-not-drawn](./quick/260428-gfx-anim-curve-first-add-not-drawn/) |
 
 ### Blockers/Concerns
 
