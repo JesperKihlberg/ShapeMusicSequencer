@@ -477,14 +477,15 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     return () => ro.disconnect()
   }, [])
 
-  // Draw curve on canvas — redraws every render (curve changes trigger re-render via store subscription)
+  // Draw curve on canvas when curve data, selection, or property changes
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    drawLaneCanvas(ctx, canvas.width, canvas.height, curve, property, selectedPointIdx)
-  })
+    const zoom = uiStore.getState().zoomBeats
+    drawLaneCanvas(ctx, canvas.width, canvas.height, curve, property, selectedPointIdx, undefined, zoom)
+  }, [curve, property, selectedPointIdx])
 
   function getPropertyRange(prop: AnimatableProperty): [number, number] {
     return prop === 'hue' ? [0, 360] : [0, 100]
@@ -494,7 +495,8 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   function pixelToPoint(px: number, py: number): SplinePoint {
     const canvas = canvasRef.current!
     const [minVal, maxVal] = getPropertyRange(property)
-    const beat = (px / canvas.width) * curve.duration
+    const zoom = uiStore.getState().zoomBeats
+    const beat = (px / canvas.width) * zoom
     const value = maxVal - (py / canvas.height) * (maxVal - minVal)
     return {
       beat: Math.max(0, Math.min(curve.duration, beat)),
@@ -505,7 +507,8 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   // Convert (beat, value) → canvas pixel coords
   function pointToPixel(p: SplinePoint, w: number, h: number): [number, number] {
     const [minVal, maxVal] = getPropertyRange(property)
-    const px = (p.beat / curve.duration) * w
+    const zoom = uiStore.getState().zoomBeats
+    const px = (p.beat / zoom) * w
     const py = ((maxVal - p.value) / (maxVal - minVal)) * h
     return [px, py]
   }

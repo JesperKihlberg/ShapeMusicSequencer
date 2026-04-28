@@ -15,7 +15,7 @@ export interface UiState {
 export const uiStore = createStore<UiState>()((set) => ({
   zoomBeats: 4,
   focusedLane: null,
-  setZoomBeats: (beats: number) => set({ zoomBeats: beats }),
+  setZoomBeats: (beats: number) => set({ zoomBeats: Number.isFinite(beats) && beats > 0 ? beats : 4 }),
   setFocusedLane: (prop: AnimatableProperty | null) => set({ focusedLane: prop }),
 }))
 
