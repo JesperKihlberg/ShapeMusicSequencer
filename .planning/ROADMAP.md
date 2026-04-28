@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–7 (shipped 2026-04-24)
-- **v1.1 Animation Panel improvements** — Phases 8–11 (in progress)
+- ✅ **v1.1 Animation Panel improvements** — Phases 8–11 (shipped 2026-04-28)
 
 ## Phases
 
@@ -27,7 +27,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 - [x] **Phase 8: Beat Clock and Playhead** - RAF-derived beat position and visible playhead line across all lanes — completed 2026-04-24
 - [x] **Phase 9: Timeline Zoom, Ghosts, and Lane Focus** - Global zoom control, ghost curve repetitions, and per-lane focus toggle — completed 2026-04-27
 - [x] **Phase 10: Visual Reference Grids** - Beat indicator lines, hue scale grid, and Y-axis scroll/zoom per lane — completed 2026-04-28
-- [ ] **Phase 11: Shift+Drag Snapping** - Shift-key snap of control points to beat lines and scale note lines
+- [x] **Phase 11: Shift+Drag Snapping** - Shift-key snap of control points to beat lines and scale note lines — completed 2026-04-28
 
 ---
 
@@ -91,7 +91,8 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 11-01-PLAN.md — Wave 0 test scaffold: snapFormulas.test.ts covering X beat snap, Y hue snap, and pixelToPoint Y-viewport formula
-- [ ] 11-02-PLAN.md — Fix pixelToPoint + pointToPixel yViewport bug, add isSnappedRef, snap branches in both pointer handlers, DrawOptions.isSnapped, snapped visual; human checkpoint
+- [x] 11-02-PLAN.md — Fix pixelToPoint + pointToPixel yViewport bug, add isSnappedRef, snap branches in both pointer handlers, DrawOptions.isSnapped, snapped visual; human checkpoint
+- [x] 11-03-PLAN.md — Gap closure: isSnapped React state mirror of isSnappedRef; static-draw useEffect dep array fix; snapped visual now renders during Shift+drag; human-approved
 **UI hint**: yes
 
 ---
@@ -110,4 +111,4 @@ Plans:
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
 | 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 2/2 | Complete | 2026-04-27 |
 | 10. Visual Reference Grids | v1.1 | 2/2 | Complete | 2026-04-28 |
-| 11. Shift+Drag Snapping | v1.1 | 1/2 | In progress | - |
+| 11. Shift+Drag Snapping | v1.1 | 3/3 | Complete | 2026-04-28 |

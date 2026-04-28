@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Animation Panel improvements
 status: in_progress
-stopped_at: "Phase 11 Plan 03 Task 1 complete — paused at checkpoint:human-verify Task 2 (snapped visual browser verification)"
-last_updated: "2026-04-28T13:54:58Z"
+stopped_at: "Phase 11 Plan 03 complete — all 9/9 must-haves verified, ANIM-16 satisfied"
+last_updated: "2026-04-28T14:10:00Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 8
-  completed_plans: 8
-  percent: 97
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 10 — Visual Reference Grids (complete — all plans and human verification passed)
-Next: Phase 11 — Shift+Drag Snapping (ANIM-16)
-Status: Phase 10 fully complete — ANIM-10 (Y-axis viewport), ANIM-12 (beat grid), ANIM-13 (hue scale grid) all delivered and verified; human checkpoint approved 2026-04-28
-Last activity: 2026-04-28 — Phase 10 Plan 02 human verification approved; Phase 10 marked complete
+Phase: 11 — Shift+Drag Snapping (complete — all plans and human verification passed)
+Next: Milestone v1.1 complete — no further phases planned
+Status: Phase 11 fully complete — ANIM-16 satisfied; all 9/9 must-haves verified; snapped visual gap closed by 11-03 and human-approved 2026-04-28
+Last activity: 2026-04-28 — Phase 11 Plan 03 human verification approved; Phase 11 marked complete; milestone v1.1 complete
 
-Progress: [##########] 97%
+Progress: [##########] 100%
 
 ## Accumulated Context
 
@@ -60,6 +60,7 @@ Recent decisions affecting current work:
 - [10-02]: Hue scale grid guard is property === hue && rootKey !== undefined && scale !== undefined — prevents drawing on non-hue lanes
 - [10-02]: Y indicator thumbTop uses (1 - yMax / fullMax) * h because fullMin is always 0 for both hue and non-hue properties
 - [10-02]: ctx.save/restore wraps every individual stroke/fill in multi-item loops — no lineDash or globalAlpha leaks between layers
+- [11-03]: Dual-write ref+state pattern: isSnappedRef.current = X AND setIsSnapped(X) — ref for RAF loop (stale-closure safe), state for useEffect dep array (re-fire trigger); primaryOptions.isSnapped reads from state not ref
 
 ### Pending Todos
 
@@ -87,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-28T12:00:00Z
-Stopped at: Phase 10 complete — human verification approved; ready to begin Phase 11 (Shift+Drag Snapping)
+Last session: 2026-04-28T14:10:00Z
+Stopped at: Phase 11 Plan 03 complete — human verification approved; milestone v1.1 complete
 Resume file: None

@@ -47,10 +47,10 @@ completed: 2026-04-28
 
 ## Performance
 
-- **Duration:** ~10 min
+- **Duration:** ~15 min
 - **Started:** 2026-04-28T13:50:00Z
-- **Completed:** 2026-04-28T13:54:58Z (Task 1 done; paused at checkpoint Task 2)
-- **Tasks:** 1 of 2 completed (paused at checkpoint:human-verify)
+- **Completed:** 2026-04-28T14:10:00Z
+- **Tasks:** 2 of 2 completed (Task 2 human-verify: approved)
 - **Files modified:** 1
 
 ## Accomplishments
@@ -77,10 +77,20 @@ The RAF loop (`laneSnappedRefs.current.get(prop)?.current`) was NOT changed — 
 ## Task Commits
 
 1. **Task 1: Add isSnapped state, wire to static-draw useEffect** — `084d4f2` (feat)
+2. **Task 2: Human verify — snapped visual approved** — checkpoint approved; no code commit
 
-## Checkpoint Status
+## Human Verification
 
-Paused at Task 2: `checkpoint:human-verify` — manual browser verification required.
+Task 2: `checkpoint:human-verify` — **APPROVED** by user on 2026-04-28.
+
+Verified in browser:
+- Snapped control point renders white fill with accent-color (#6366f1) ring during Shift+drag (Truth 6 gap closed)
+- Ring clears immediately when Shift is released mid-drag (returns to solid accent fill)
+- Ring clears on pointerUp (point returns to normal selected style)
+- Shift+drag still snaps X to beat lines on all lanes (regression: PASS)
+- Shift+drag still snaps X+Y simultaneously on hue lane (regression: PASS)
+
+All 9/9 phase must-haves now verified. VERIFICATION.md updated to `status: verified`, `score: 9/9`.
 
 ## Files Created/Modified
 
