@@ -464,6 +464,9 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     return () => { onCanvasRef(property, null) }
   }, [property, onCanvasRef])
 
+  // Track canvas dimensions so the draw effect re-fires after first resize
+  const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 })
+
   // Canvas sizing via ResizeObserver (UI-SPEC Pitfall 2)
   useEffect(() => {
     const container = containerRef.current
@@ -472,12 +475,13 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     const ro = new ResizeObserver(() => {
       canvas.width = container.clientWidth
       canvas.height = container.clientHeight
+      setCanvasSize({ w: canvas.width, h: canvas.height })
     })
     ro.observe(container)
     return () => ro.disconnect()
   }, [])
 
-  // Draw curve on canvas when curve data, selection, or property changes
+  // Draw curve on canvas when curve data, selection, property, or canvas size changes
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -517,7 +521,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
       drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined)
       ctx.restore()
     }
-  }, [curve, property, selectedPointIdx])
+  }, [curve, property, selectedPointIdx, canvasSize])
 
   function getPropertyRange(prop: AnimatableProperty): [number, number] {
     return prop === 'hue' ? [0, 360] : [0, 100]
