@@ -10,7 +10,7 @@ import { playbackStore, usePlaybackStore } from '../store/playbackStore'
 import { getCurrentBeat } from '../engine/beatClock'
 import type { AnimatableProperty, SplineCurve, SplinePoint } from '../store/animationStore'
 import { uiStore, useUiStore } from '../store/uiStore'
-import { scaleStore } from '../store/scaleStore'
+import { scaleStore, useScaleStore } from '../store/scaleStore'
 import type { ScaleName } from '../store/scaleStore'
 import { scaleNoteHues } from '../engine/noteHue'
 
@@ -623,6 +623,8 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
 
   // Y viewport subscription — causes static draw useEffect to re-run when yViewport changes (ANIM-10, D-11, Pitfall 2)
   const yViewport = useUiStore((s) => s.yViewport)
+  const scaleRootKey = useScaleStore((s) => s.rootKey)
+  const scaleName = useScaleStore((s) => s.scale)
 
   // Toggle focus on label column click (D-13)
   function handleLabelColClick() {
@@ -738,7 +740,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
       drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined, { ...primaryOptions, isGhostRegion: true })
       ctx.restore()
     }
-  }, [curve, property, selectedPointIdx, canvasSize, yViewport, isFocused])
+  }, [curve, property, selectedPointIdx, canvasSize, yViewport, isFocused, scaleRootKey, scaleName])
 
   function getPropertyRange(prop: AnimatableProperty): [number, number] {
     return prop === 'hue' ? [0, 360] : [0, 100]
