@@ -484,7 +484,39 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     const zoom = uiStore.getState().zoomBeats
+
+    // Primary draw
     drawLaneCanvas(ctx, canvas.width, canvas.height, curve, property, selectedPointIdx, undefined, zoom)
+
+    // Ghost passes (mirrors outer-effect static path; needed when curve changes while stopped)
+    const primaryWidthPx = (curve.duration / zoom) * canvas.width
+    const repeatCount = Math.floor(zoom / curve.duration) - 1
+
+    for (let i = 1; i <= repeatCount; i++) {
+      const ghostStartPx = (i * curve.duration / zoom) * canvas.width
+      ctx.save()
+      ctx.globalAlpha = 0.30
+      ctx.beginPath()
+      ctx.rect(ghostStartPx, 0, primaryWidthPx, canvas.height)
+      ctx.clip()
+      ctx.translate(ghostStartPx, 0)
+      drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined)
+      ctx.restore()
+    }
+
+    const remainder = zoom % curve.duration
+    if (remainder > 0 && repeatCount >= 0) {
+      const partialStartPx = Math.floor(zoom / curve.duration) * curve.duration / zoom * canvas.width
+      const partialWidthPx = (remainder / zoom) * canvas.width
+      ctx.save()
+      ctx.globalAlpha = 0.30
+      ctx.beginPath()
+      ctx.rect(partialStartPx, 0, partialWidthPx, canvas.height)
+      ctx.clip()
+      ctx.translate(partialStartPx, 0)
+      drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined)
+      ctx.restore()
+    }
   }, [curve, property, selectedPointIdx])
 
   function getPropertyRange(prop: AnimatableProperty): [number, number] {
