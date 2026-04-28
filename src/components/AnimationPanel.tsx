@@ -10,6 +10,8 @@ import { playbackStore, usePlaybackStore } from '../store/playbackStore'
 import { getCurrentBeat } from '../engine/beatClock'
 import type { AnimatableProperty, SplineCurve, SplinePoint } from '../store/animationStore'
 import { uiStore, useUiStore } from '../store/uiStore'
+import { scaleStore } from '../store/scaleStore'
+import type { ScaleName } from '../store/scaleStore'
 
 const PANEL_MIN = 40    // px — only handle visible when collapsed
 const PANEL_DEFAULT = 188  // px — 8 handle + 36 header + 144 lanes
@@ -81,8 +83,18 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
         if (!curve) continue
 
+        // Build DrawOptions for this prop — Phase 10 (D-17, D-19)
+        const [rafFullMin, rafFullMax] = prop === 'hue' ? [0, 360] : [0, 100]
+        const { yViewport } = uiStore.getState()
+        const yVp = yViewport[prop] ?? { min: rafFullMin, max: rafFullMax }
+        const { rootKey, scale } = scaleStore.getState()
+        const primaryOptions: DrawOptions = {
+          yMin: yVp.min, yMax: yVp.max,
+          rootKey, scale,
+        }
+
         // Primary draw — uses zoomBeats for X-axis scaling (D-07)
-        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, selectedPointsRef.current[prop] ?? null, beat, currentZoom)
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, selectedPointsRef.current[prop] ?? null, beat, currentZoom, primaryOptions)
 
         // Ghost passes (ANIM-09, D-08, D-09)
         const primaryWidthPx = (curve.duration / currentZoom) * canvas.width
@@ -97,7 +109,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
           ctx.rect(ghostStartPx, 0, primaryWidthPx, canvas.height)
           ctx.clip()
           ctx.translate(ghostStartPx, 0)
-          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined, { ...primaryOptions, isGhostRegion: true })
           ctx.restore()
         }
 
@@ -112,7 +124,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
           ctx.rect(partialStartPx, 0, partialWidthPx, canvas.height)
           ctx.clip()
           ctx.translate(partialStartPx, 0)
-          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined, { ...primaryOptions, isGhostRegion: true })
           ctx.restore()
         }
       }
@@ -131,8 +143,18 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         const curve = animationStore.getState().curves[shape?.id ?? '']?.[prop]
         if (!curve) continue
 
+        // Build DrawOptions for this prop — Phase 10 (D-17, D-19)
+        const [stoppedFullMin, stoppedFullMax] = prop === 'hue' ? [0, 360] : [0, 100]
+        const { yViewport: stoppedYViewport } = uiStore.getState()
+        const stoppedYVp = stoppedYViewport[prop] ?? { min: stoppedFullMin, max: stoppedFullMax }
+        const { rootKey: stoppedRootKey, scale: stoppedScale } = scaleStore.getState()
+        const stoppedOptions: DrawOptions = {
+          yMin: stoppedYVp.min, yMax: stoppedYVp.max,
+          rootKey: stoppedRootKey, scale: stoppedScale,
+        }
+
         // Primary draw with current zoom (D-07)
-        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, 0, zoomBeats)
+        drawLaneCanvas(ctx, canvas.width, canvas.height, curve, prop, null, 0, zoomBeats, stoppedOptions)
 
         // Ghost passes (ANIM-09, D-08, D-09)
         const primaryWidthPx = (curve.duration / zoomBeats) * canvas.width
@@ -147,7 +169,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
           ctx.rect(ghostStartPx, 0, primaryWidthPx, canvas.height)
           ctx.clip()
           ctx.translate(ghostStartPx, 0)
-          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined, { ...stoppedOptions, isGhostRegion: true })
           ctx.restore()
         }
 
@@ -162,7 +184,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
           ctx.rect(partialStartPx, 0, partialWidthPx, canvas.height)
           ctx.clip()
           ctx.translate(partialStartPx, 0)
-          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined)
+          drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, prop, null, undefined, undefined, { ...stoppedOptions, isGhostRegion: true })
           ctx.restore()
         }
       }
@@ -351,6 +373,16 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
 
 // ── drawLaneCanvas helper (pure function) ─────────────────────────────────────
 
+// DrawOptions — optional params for Phase 10 features (D-17)
+interface DrawOptions {
+  yMin?: number            // Y-axis viewport minimum (D-11); undefined = fullMin
+  yMax?: number            // Y-axis viewport maximum (D-11); undefined = fullMax
+  isFocused?: boolean      // Lane is focused (160px); enables note name labels (D-07)
+  rootKey?: number         // Scale root key 0–11; passed by caller from scaleStore (D-08)
+  scale?: ScaleName        // Scale name; passed by caller from scaleStore (D-08)
+  isGhostRegion?: boolean  // Ghost pass — halves beat label opacity (D-03, D-18)
+}
+
 function drawLaneCanvas(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -359,7 +391,8 @@ function drawLaneCanvas(
   property: AnimatableProperty,
   selectedIdx: number | null,
   playheadBeat?: number,
-  zoomBeats?: number,           // NEW — Phase 9: X-axis denominator override (D-07)
+  zoomBeats?: number,           // Phase 9: X-axis denominator override (D-07)
+  options?: DrawOptions,        // Phase 10: Y-axis viewport, grid passes, ghost flag (D-17)
 ): void {
   ctx.clearRect(0, 0, w, h)
   // Background
@@ -376,12 +409,14 @@ function drawLaneCanvas(
   ctx.stroke()
   ctx.setLineDash([])
 
-  const [minVal, maxVal] = property === 'hue' ? [0, 360] : [0, 100]
-  const xDenominator = zoomBeats ?? curve.duration   // NEW — Phase 9 (D-07)
+  const [fullMin, fullMax] = property === 'hue' ? [0, 360] : [0, 100]
+  const yMin = options?.yMin ?? fullMin   // Phase 10: Y-axis viewport (D-11)
+  const yMax = options?.yMax ?? fullMax   // Phase 10: Y-axis viewport (D-11)
+  const xDenominator = zoomBeats ?? curve.duration   // Phase 9 (D-07)
 
   function toPixel(p: SplinePoint): [number, number] {
-    const px = (p.beat / xDenominator) * w      // CHANGED: curve.duration → xDenominator
-    const py = ((maxVal - p.value) / (maxVal - minVal)) * h
+    const px = (p.beat / xDenominator) * w
+    const py = ((yMax - p.value) / (yMax - yMin)) * h   // uses yMin/yMax — D-11
     return [px, py]
   }
 
@@ -452,6 +487,9 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   const isFocused = focusedLane === property
   const isCompressed = focusedLane !== null && !isFocused
 
+  // Y viewport subscription — causes static draw useEffect to re-run when yViewport changes (ANIM-10, D-11, Pitfall 2)
+  const yViewport = useUiStore((s) => s.yViewport)
+
   // Toggle focus on label column click (D-13)
   function handleLabelColClick() {
     const { focusedLane: current, setFocusedLane } = uiStore.getState()
@@ -481,7 +519,42 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     return () => ro.disconnect()
   }, [])
 
-  // Draw curve on canvas when curve data, selection, property, or canvas size changes
+  // Y-axis scroll/zoom handler — imperative { passive: false } to allow preventDefault (ANIM-10, D-16, Pitfall 1)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    function handleCanvasWheel(e: WheelEvent) {
+      e.preventDefault()
+      const [fullMin, fullMax] = getPropertyRange(property)
+      const fullRange = fullMax - fullMin
+      const current = uiStore.getState().yViewport[property] ?? { min: fullMin, max: fullMax }
+      const range = current.max - current.min
+
+      if (e.ctrlKey || e.metaKey) {
+        // Zoom: 10% of current range per wheel click, midpoint pivot (D-16, UI-SPEC)
+        const ZOOM_FACTOR = 0.10
+        const MIN_RANGE = property === 'hue' ? 30 : 10  // ~1 semitone for hue (UI-SPEC)
+        const delta = Math.sign(e.deltaY) * range * ZOOM_FACTOR
+        const mid = (current.min + current.max) / 2
+        const newRange = Math.max(MIN_RANGE, Math.min(fullRange, range + delta))
+        const newMin = Math.max(fullMin, mid - newRange / 2)
+        const newMax = Math.min(fullMax, newMin + newRange)
+        uiStore.getState().setYViewport(property, { min: newMin, max: newMax })
+      } else {
+        // Pan: normalized delta cap 50, 10% of visible range per unit (D-16, UI-SPEC)
+        const normalizedDelta = Math.sign(e.deltaY) * Math.min(Math.abs(e.deltaY), 50)
+        const panAmount = normalizedDelta * 0.10 * range
+        const newMin = Math.max(fullMin, Math.min(fullMax - range, current.min + panAmount))
+        uiStore.getState().setYViewport(property, { min: newMin, max: newMin + range })
+      }
+    }
+
+    canvas.addEventListener('wheel', handleCanvasWheel, { passive: false })
+    return () => canvas.removeEventListener('wheel', handleCanvasWheel)
+  }, [property])  // property is the only closed-over value that changes; uiStore read via getState()
+
+  // Draw curve on canvas when curve data, selection, property, canvas size, or yViewport changes
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -489,8 +562,18 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     if (!ctx) return
     const zoom = uiStore.getState().zoomBeats
 
+    // Build DrawOptions for this property — Phase 10 (D-17, Pitfall 2)
+    const [staticFullMin, staticFullMax] = property === 'hue' ? [0, 360] : [0, 100]
+    const yVp = uiStore.getState().yViewport[property] ?? { min: staticFullMin, max: staticFullMax }
+    const { rootKey, scale } = scaleStore.getState()
+    const primaryOptions: DrawOptions = {
+      yMin: yVp.min, yMax: yVp.max,
+      isFocused,
+      rootKey, scale,
+    }
+
     // Primary draw
-    drawLaneCanvas(ctx, canvas.width, canvas.height, curve, property, selectedPointIdx, undefined, zoom)
+    drawLaneCanvas(ctx, canvas.width, canvas.height, curve, property, selectedPointIdx, undefined, zoom, primaryOptions)
 
     // Ghost passes (mirrors outer-effect static path; needed when curve changes while stopped)
     const primaryWidthPx = (curve.duration / zoom) * canvas.width
@@ -504,7 +587,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
       ctx.rect(ghostStartPx, 0, primaryWidthPx, canvas.height)
       ctx.clip()
       ctx.translate(ghostStartPx, 0)
-      drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined)
+      drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined, { ...primaryOptions, isGhostRegion: true })
       ctx.restore()
     }
 
@@ -518,10 +601,10 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
       ctx.rect(partialStartPx, 0, partialWidthPx, canvas.height)
       ctx.clip()
       ctx.translate(partialStartPx, 0)
-      drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined)
+      drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined, { ...primaryOptions, isGhostRegion: true })
       ctx.restore()
     }
-  }, [curve, property, selectedPointIdx, canvasSize])
+  }, [curve, property, selectedPointIdx, canvasSize, yViewport, isFocused])
 
   function getPropertyRange(prop: AnimatableProperty): [number, number] {
     return prop === 'hue' ? [0, 360] : [0, 100]
