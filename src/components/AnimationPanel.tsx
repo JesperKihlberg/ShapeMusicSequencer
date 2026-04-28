@@ -646,6 +646,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selecte
   const containerRef = useRef<HTMLDivElement>(null)
   const isDraggingPoint = useRef(false)
   const isSnappedRef = useRef(false)  // Phase 11: tracks snap state during drag (D-11)
+  const [isSnapped, setIsSnapped] = useState(false)  // Phase 11 gap fix: state mirror of isSnappedRef — triggers static-draw useEffect re-fire
   const canvasRect = useRef<DOMRect | null>(null)
 
   // Lane focus state — read from uiStore (ANIM-11, D-11)
@@ -744,7 +745,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selecte
       yMin: yVp.min, yMax: yVp.max,
       isFocused,
       rootKey, scale,
-      isSnapped: isSnappedRef.current,  // Phase 11 (D-11)
+      isSnapped,  // Phase 11 gap fix: read from state (not ref) so effect closure is always current
     }
 
     // Primary draw
@@ -779,7 +780,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selecte
       drawLaneCanvas(ctx, primaryWidthPx, canvas.height, curve, property, null, undefined, undefined, { ...primaryOptions, isGhostRegion: true })
       ctx.restore()
     }
-  }, [curve, property, selectedPointIdx, canvasSize, yViewport, isFocused, scaleRootKey, scaleName])
+  }, [curve, property, selectedPointIdx, canvasSize, yViewport, isFocused, scaleRootKey, scaleName, isSnapped])
 
   function getPropertyRange(prop: AnimatableProperty): [number, number] {
     return prop === 'hue' ? [0, 360] : [0, 100]
@@ -854,8 +855,10 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selecte
         }
         newPoint = { beat: snappedBeat, value: snappedValue }
         isSnappedRef.current = true
+        setIsSnapped(true)
       } else {
         isSnappedRef.current = false  // no snap on free insert
+        setIsSnapped(false)
       }
 
       const newPoints = [...curve.points, newPoint].sort((a, b) => a.beat - b.beat)
@@ -891,8 +894,10 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selecte
       }
       updated = { beat: snappedBeat, value: snappedValue }
       isSnappedRef.current = true
+      setIsSnapped(true)
     } else {
       isSnappedRef.current = false  // D-03: releasing Shift returns immediately to free-drag
+      setIsSnapped(false)
     }
 
     const newPoints = curve.points.map((p, i) => i === selectedPointIdx ? updated : p)
@@ -902,6 +907,7 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selecte
   function handleCanvasPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     isDraggingPoint.current = false
     isSnappedRef.current = false  // Phase 11: clear snap state so next static draw is clean (Pitfall 1)
+    setIsSnapped(false)
     canvasRef.current?.releasePointerCapture(e.pointerId)
   }
 
