@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Animation Panel improvements
 status: in_progress
-stopped_at: "Completed Phase 10 Plan 01 — foundation (noteHue, yViewport, DrawOptions, onWheel, call sites)"
-last_updated: "2026-04-28T13:00:00Z"
+stopped_at: "Phase 10 Plan 02 — paused at Task 3 (human-verify checkpoint); beat grid + hue scale grid + Y indicator drawing passes complete"
+last_updated: "2026-04-28T10:57:22Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 6
-  completed_plans: 6
-  percent: 87
+  completed_plans: 7
+  percent: 92
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 10 — Visual Reference Grids (in progress — Plan 01 complete)
-Next: Execute Phase 10 Plan 02 (beat grid + hue scale grid drawing passes)
-Status: Phase 10 Plan 01 complete — scaleNoteHues utility, yViewport store extension, DrawOptions interface, Y-axis toPixel transform, onWheel handler, all 6 ghost call sites updated
-Last activity: 2026-04-28 — Phase 10 Plan 01 executed (3 tasks, 5 files, 201 tests passing)
+Phase: 10 — Visual Reference Grids (in progress — Plan 02 complete, awaiting human-verify checkpoint)
+Next: Human verification of Phase 10 visual features (Task 3 checkpoint), then Phase 11
+Status: Phase 10 Plan 02 complete — beat grid lines (ANIM-12), hue scale grid (ANIM-13), and Y-axis zoom indicator drawing passes added to drawLaneCanvas; paused at checkpoint Task 3 for user visual verification
+Last activity: 2026-04-28 — Phase 10 Plan 02 executed (2 tasks, 1 file, 199 tests passing)
 
-Progress: [########__] 87%
+Progress: [#########_] 92%
 
 ## Accumulated Context
 
@@ -56,6 +56,10 @@ Recent decisions affecting current work:
 - [10-01]: yViewport stored as Partial<Record<AnimatableProperty, {min,max}>> in uiStore; absent key = full range default
 - [10-01]: onWheel handler uses imperative addEventListener with passive:false; delta capped at 50 for trackpad/mouse normalization
 - [10-01]: RAF tick and stopped-state draw both read yViewport+scaleStore.getState() per prop each frame — no new subscriptions
+- [10-02]: Beat grid block uses block scope {} to isolate pxPerBeat/beatCount locals without polluting drawLaneCanvas function scope
+- [10-02]: Hue scale grid guard is property === hue && rootKey !== undefined && scale !== undefined — prevents drawing on non-hue lanes
+- [10-02]: Y indicator thumbTop uses (1 - yMax / fullMax) * h because fullMin is always 0 for both hue and non-hue properties
+- [10-02]: ctx.save/restore wraps every individual stroke/fill in multi-item loops — no lineDash or globalAlpha leaks between layers
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-28T13:00:00Z
-Stopped at: Completed Phase 10 Plan 01 — foundation complete; next is Plan 02 (drawing passes)
+Last session: 2026-04-28T10:57:22Z
+Stopped at: Phase 10 Plan 02 Tasks 1 and 2 complete — paused at checkpoint Task 3 (human-verify); type "approved" if visual checks pass
 Resume file: None
