@@ -12,6 +12,7 @@ import type { AnimatableProperty, SplineCurve, SplinePoint } from '../store/anim
 import { uiStore, useUiStore } from '../store/uiStore'
 import { scaleStore } from '../store/scaleStore'
 import type { ScaleName } from '../store/scaleStore'
+import { scaleNoteHues } from '../engine/noteHue'
 
 const PANEL_MIN = 40    // px — only handle visible when collapsed
 const PANEL_DEFAULT = 188  // px — 8 handle + 36 header + 144 lanes
@@ -404,6 +405,42 @@ function drawLaneCanvas(
   const yMax = options?.yMax ?? fullMax   // Phase 10: Y-axis viewport (D-11)
   const xDenominator = zoomBeats ?? curve.duration   // Phase 9 (D-07)
 
+  // ── Layer 2: Hue scale grid (ANIM-13) — hue lane only ───────────────────────
+  if (property === 'hue' && options?.rootKey !== undefined && options?.scale !== undefined) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    const notes = scaleNoteHues(options.rootKey, options.scale)
+
+    for (const note of notes) {
+      // Only draw lines within the current Y viewport range (REQUIREMENTS ANIM-13)
+      if (note.hue < yMin || note.hue > yMax) continue
+
+      // Convert hue value to canvas Y pixel using the same yMin/yMax as toPixel
+      const y = ((yMax - note.hue) / (yMax - yMin)) * h
+
+      ctx.save()
+      ctx.strokeStyle = `hsl(${note.hue}, 100%, 60%)`
+      ctx.lineWidth = note.isRoot ? 1.5 : 1
+      ctx.globalAlpha = note.isRoot ? 0.60 : 0.28   // D-09, UI-SPEC
+      ctx.beginPath()
+      ctx.moveTo(0, y)
+      ctx.lineTo(w, y)
+      ctx.stroke()
+      ctx.restore()
+
+      // Note name label — only when isFocused (D-07, UI-SPEC)
+      if (options?.isFocused) {
+        ctx.save()
+        ctx.font = '10px monospace'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = `hsl(${note.hue}, 100%, 70%)`
+        ctx.globalAlpha = 0.85
+        ctx.fillText(noteNames[note.semitone], 4, y)
+        ctx.restore()
+      }
+    }
+  }
+  // ── End hue scale grid ────────────────────────────────────────────────────────
+
   // ── Layer 3: Beat indicator lines (ANIM-12) ──────────────────────────────────
   {
     const pxPerBeat = w / xDenominator
@@ -547,6 +584,19 @@ function drawLaneCanvas(
   ctx.moveTo(phX, 0)
   ctx.lineTo(phX, h)
   ctx.stroke()
+
+  // ── Layer 8: Y-axis zoom indicator strip (Claude's discretion, UI-SPEC) ──────
+  if (yMin > fullMin || yMax < fullMax) {
+    const STRIP_WIDTH = 3
+    const thumbTop = (1 - yMax / fullMax) * h
+    const thumbHeight = Math.max(4, ((yMax - yMin) / (fullMax - fullMin)) * h)
+
+    ctx.save()
+    ctx.fillStyle = 'rgba(99,102,241,0.40)'  // --color-accent at 40%
+    ctx.fillRect(0, thumbTop, STRIP_WIDTH, thumbHeight)
+    ctx.restore()
+  }
+  // ── End Y indicator ───────────────────────────────────────────────────────────
 }
 
 // ── AnimLane sub-component ────────────────────────────────────────────────────
