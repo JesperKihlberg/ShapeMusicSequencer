@@ -51,6 +51,9 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
   // Ref map: property → canvas element — populated by AnimLane registration callbacks (D-02)
   const laneCanvasRefs = useRef<Map<AnimatableProperty, HTMLCanvasElement>>(new Map())
 
+  // Ref map: property → isSnappedRef — so the RAF loop can read snap state per lane (Phase 11)
+  const laneSnappedRefs = useRef<Map<AnimatableProperty, React.MutableRefObject<boolean>>>(new Map())
+
   // Stable callback so AnimLane useEffect deps don't fire on every render
   const handleCanvasRef = useCallback(
     (property: AnimatableProperty, el: HTMLCanvasElement | null) => {
@@ -58,6 +61,17 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         laneCanvasRefs.current.set(property, el)
       } else {
         laneCanvasRefs.current.delete(property)
+      }
+    },
+    []
+  )
+
+  const handleSnappedRef = useCallback(
+    (property: AnimatableProperty, ref: React.MutableRefObject<boolean> | null) => {
+      if (ref) {
+        laneSnappedRefs.current.set(property, ref)
+      } else {
+        laneSnappedRefs.current.delete(property)
       }
     },
     []
@@ -92,6 +106,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         const primaryOptions: DrawOptions = {
           yMin: yVp.min, yMax: yVp.max,
           rootKey, scale,
+          isSnapped: laneSnappedRefs.current.get(prop)?.current ?? false,  // Phase 11
         }
 
         // Primary draw — uses zoomBeats for X-axis scaling (D-07)
@@ -152,6 +167,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
         const stoppedOptions: DrawOptions = {
           yMin: stoppedYVp.min, yMax: stoppedYVp.max,
           rootKey: stoppedRootKey, scale: stoppedScale,
+          isSnapped: laneSnappedRefs.current.get(prop)?.current ?? false,  // Phase 11
         }
 
         // Primary draw with current zoom (D-07)
@@ -361,6 +377,7 @@ export function AnimationPanel({ panelHeight, onHeightChange }: AnimationPanelPr
                 curve={shapeCurves[property]!}
                 shapeId={shape!.id}
                 onCanvasRef={handleCanvasRef}
+                onSnappedRef={handleSnappedRef}
                 selectedPointIdx={selectedPoints[property] ?? null}
                 onSelectedPointChange={(idx) => setSelectedPoints(prev => ({ ...prev, [property]: idx }))}
               />
@@ -619,11 +636,12 @@ interface AnimLaneProps {
   curve: SplineCurve
   shapeId: string
   onCanvasRef: (property: AnimatableProperty, ref: HTMLCanvasElement | null) => void
+  onSnappedRef: (property: AnimatableProperty, ref: React.MutableRefObject<boolean> | null) => void
   selectedPointIdx: number | null
   onSelectedPointChange: (idx: number | null) => void
 }
 
-function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onSelectedPointChange }: AnimLaneProps) {
+function AnimLane({ property, curve, shapeId, onCanvasRef, onSnappedRef, selectedPointIdx, onSelectedPointChange }: AnimLaneProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const isDraggingPoint = useRef(false)
@@ -651,6 +669,12 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
     onCanvasRef(property, canvasRef.current)
     return () => { onCanvasRef(property, null) }
   }, [property, onCanvasRef])
+
+  // Register isSnappedRef with parent so RAF loop can read snap state (Phase 11)
+  useEffect(() => {
+    onSnappedRef(property, isSnappedRef)
+    return () => { onSnappedRef(property, null) }
+  }, [property, onSnappedRef])
 
   // Track canvas dimensions so the draw effect re-fires after first resize
   const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 })
