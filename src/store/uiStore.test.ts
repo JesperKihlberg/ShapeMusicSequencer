@@ -1,5 +1,5 @@
 // src/store/uiStore.test.ts
-// Covers: ANIM-08 (zoomBeats state), ANIM-09 (ghost geometry formulas), ANIM-11 (focusedLane state)
+// Covers: ANIM-08 (zoomBeats state), ANIM-09 (ghost geometry formulas), ANIM-11 (focusedLane state), ANIM-10 (yViewport)
 import { describe, it, expect, beforeEach } from 'vitest'
 import { uiStore } from './uiStore'
 
@@ -100,5 +100,27 @@ describe('uiStore — ghost geometry formulas (ANIM-09)', () => {
     const primaryRegionWidth = (curveDuration / zoomBeats) * canvasWidth
     const px = 199
     expect(px > primaryRegionWidth).toBe(false)
+  })
+})
+
+describe('uiStore — yViewport (ANIM-10)', () => {
+  beforeEach(() => {
+    uiStore.setState({ zoomBeats: 4, focusedLane: null, yViewport: {} })
+  })
+
+  it('setYViewport stores per-lane viewport', () => {
+    uiStore.getState().setYViewport('hue', { min: 90, max: 270 })
+    expect(uiStore.getState().yViewport['hue']).toEqual({ min: 90, max: 270 })
+  })
+
+  it('yViewport key absent when not set (full range default)', () => {
+    expect(uiStore.getState().yViewport['size']).toBeUndefined()
+  })
+
+  it('setYViewport for multiple lanes stores independently', () => {
+    uiStore.getState().setYViewport('size', { min: 20, max: 80 })
+    uiStore.getState().setYViewport('hue', { min: 0, max: 180 })
+    expect(uiStore.getState().yViewport['size']).toEqual({ min: 20, max: 80 })
+    expect(uiStore.getState().yViewport['hue']).toEqual({ min: 0, max: 180 })
   })
 })
