@@ -26,7 +26,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 - [x] **Phase 8: Beat Clock and Playhead** - RAF-derived beat position and visible playhead line across all lanes — completed 2026-04-24
 - [x] **Phase 9: Timeline Zoom, Ghosts, and Lane Focus** - Global zoom control, ghost curve repetitions, and per-lane focus toggle — completed 2026-04-27
-- [ ] **Phase 10: Visual Reference Grids** - Beat indicator lines, hue scale grid, and Y-axis scroll/zoom per lane
+- [x] **Phase 10: Visual Reference Grids** - Beat indicator lines, hue scale grid, and Y-axis scroll/zoom per lane — completed 2026-04-28
 - [ ] **Phase 11: Shift+Drag Snapping** - Shift-key snap of control points to beat lines and scale note lines
 
 ---
@@ -106,5 +106,5 @@ Plans:
 | 7. Composition Tools | v1.0 | 6/6+FIX | Complete | 2026-04-24 |
 | 8. Beat Clock and Playhead | v1.1 | 2/2 | Complete | 2026-04-24 |
 | 9. Timeline Zoom, Ghosts, and Lane Focus | v1.1 | 2/2 | Complete | 2026-04-27 |
-| 10. Visual Reference Grids | v1.1 | 2/2 | Awaiting verification | - |
+| 10. Visual Reference Grids | v1.1 | 2/2 | Complete | 2026-04-28 |
 | 11. Shift+Drag Snapping | v1.1 | 0/? | Not started | - |
