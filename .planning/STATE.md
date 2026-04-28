@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Animation Panel improvements
 status: in_progress
-stopped_at: "Phase 10 planned — 2 plans ready; execute with /gsd-execute-phase 10"
-last_updated: "2026-04-28T00:00:00Z"
+stopped_at: "Completed Phase 10 Plan 01 — foundation (noteHue, yViewport, DrawOptions, onWheel, call sites)"
+last_updated: "2026-04-28T13:00:00Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 50
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 6
+  percent: 87
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 9 — Timeline Zoom, Ghosts, and Lane Focus (complete)
-Next: Execute Phase 10 (Visual Reference Grids)
-Status: Phase 9 Plan 02 complete — all features verified (ghost rendering, lane focus, pointer exclusion confirmed from Plan 01)
-Last activity: 2026-04-27 — Phase 9 Plan 02 executed (verification pass, 0 tasks needed, all tests green)
+Phase: 10 — Visual Reference Grids (in progress — Plan 01 complete)
+Next: Execute Phase 10 Plan 02 (beat grid + hue scale grid drawing passes)
+Status: Phase 10 Plan 01 complete — scaleNoteHues utility, yViewport store extension, DrawOptions interface, Y-axis toPixel transform, onWheel handler, all 6 ghost call sites updated
+Last activity: 2026-04-28 — Phase 10 Plan 01 executed (3 tasks, 5 files, 201 tests passing)
 
-Progress: [#####_____] 50%
+Progress: [########__] 87%
 
 ## Accumulated Context
 
@@ -52,6 +52,10 @@ Recent decisions affecting current work:
 - [09-01]: selectedPointsRef fixes stale-closure bug in RAF loop without adding selectedPoints to effect deps
 - [09-01]: Ghost rendering + lane focus implemented in Plan 01 (Wave 1) alongside zoom — both depend on same zoomBeats wiring
 - [09-02]: Plan 02 was a verification pass only — all Wave 2 features were delivered in Wave 1 as Rule 2 auto-additions
+- [10-01]: DrawOptions interface added as optional 9th param to drawLaneCanvas — non-breaking; all existing callers pass undefined implicitly
+- [10-01]: yViewport stored as Partial<Record<AnimatableProperty, {min,max}>> in uiStore; absent key = full range default
+- [10-01]: onWheel handler uses imperative addEventListener with passive:false; delta capped at 50 for trackpad/mouse normalization
+- [10-01]: RAF tick and stopped-state draw both read yViewport+scaleStore.getState() per prop each frame — no new subscriptions
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-27T07:55:00Z
-Stopped at: Completed Phase 9 Plan 02 — all ANIM-08/09/11 features verified; Phase 9 complete
+Last session: 2026-04-28T13:00:00Z
+Stopped at: Completed Phase 10 Plan 01 — foundation complete; next is Plan 02 (drawing passes)
 Resume file: None
