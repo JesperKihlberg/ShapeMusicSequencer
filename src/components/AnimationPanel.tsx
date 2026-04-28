@@ -750,9 +750,10 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   function pixelToPoint(px: number, py: number): SplinePoint {
     const canvas = canvasRef.current!
     const [minVal, maxVal] = getPropertyRange(property)
-    const zoom = uiStore.getState().zoomBeats
-    const beat = (px / canvas.width) * zoom
-    const value = maxVal - (py / canvas.height) * (maxVal - minVal)
+    const { zoomBeats, yViewport } = uiStore.getState()
+    const yVp = yViewport[property] ?? { min: minVal, max: maxVal }
+    const beat = (px / canvas.width) * zoomBeats
+    const value = yVp.max - (py / canvas.height) * (yVp.max - yVp.min)  // D-09
     return {
       beat: Math.max(0, Math.min(curve.duration, beat)),
       value: Math.max(minVal, Math.min(maxVal, value)),
@@ -762,9 +763,10 @@ function AnimLane({ property, curve, shapeId, onCanvasRef, selectedPointIdx, onS
   // Convert (beat, value) → canvas pixel coords
   function pointToPixel(p: SplinePoint, w: number, h: number): [number, number] {
     const [minVal, maxVal] = getPropertyRange(property)
-    const zoom = uiStore.getState().zoomBeats
-    const px = (p.beat / zoom) * w
-    const py = ((maxVal - p.value) / (maxVal - minVal)) * h
+    const { zoomBeats, yViewport } = uiStore.getState()
+    const yVp = yViewport[property] ?? { min: minVal, max: maxVal }
+    const px = (p.beat / zoomBeats) * w
+    const py = ((yVp.max - p.value) / (yVp.max - yVp.min)) * h  // D-09 inverse
     return [px, py]
   }
 
