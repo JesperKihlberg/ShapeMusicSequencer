@@ -33,7 +33,7 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
   useEffect(() => {
     if (!shape) return
     setCleanMode(false)
-    setVoiceDistortionBypass(shape.id, false, shape.color.s)
+    setVoiceDistortionBypass(shape.id, false, shape.color.s, shape.color.l)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shape?.id])
 
@@ -118,7 +118,7 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
     if (!shape) return
     const next = !cleanMode
     setCleanMode(next)
-    setVoiceDistortionBypass(shape.id, next, shape.color.s)
+    setVoiceDistortionBypass(shape.id, next, shape.color.s, shape.color.l)
   }
 
   function handleAddShape(): void {
