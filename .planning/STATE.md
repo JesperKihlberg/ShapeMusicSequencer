@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 Phase: 11 — Shift+Drag Snapping (complete — all plans and human verification passed)
 Next: Milestone v1.1 complete — no further phases planned
 Status: Phase 11 fully complete — ANIM-16 satisfied; all 9/9 must-haves verified; snapped visual gap closed by 11-03 and human-approved 2026-04-28
-Last activity: 2026-04-29 — Completed quick task 260429-g90: bypass filter in clean mode
+Last activity: 2026-04-29 — Completed quick task 260429-gxf: re-apply clean mode after shape type change
 
 Progress: [##########] 100%
 
@@ -74,6 +74,7 @@ None.
 | 260429-c9h | Add per-voice AnalyserNode and live waveform canvas in CellPanel | 2026-04-29 | 8d00831 | [260429-c9h-add-per-voice-analysernode-to-audioengine-ts-and-a-live-wave](./quick/260429-c9h-add-per-voice-analysernode-to-audioengine-ts-and-a-live-wave/) |
 | 260429-n73 | Add Clean toggle to bypass waveshaper distortion in waveform view | 2026-04-29 | ecf85da | [260429-n73-clean-waveform-toggle](./quick/260429-n73-clean-waveform-toggle/) |
 | 260429-g90 | bypass filter in clean mode | 2026-04-29 | e12aa4d | [260429-g90-bypass-filter-in-clean-mode](./quick/260429-g90-bypass-filter-in-clean-mode/) |
+| 260429-gxf | re-apply clean mode after shape type change | 2026-04-29 | f644661 | [260429-gxf-re-apply-clean-mode-after-shape-type-cha](./quick/260429-gxf-re-apply-clean-mode-after-shape-type-cha/) |
 
 ### Blockers/Concerns
 
