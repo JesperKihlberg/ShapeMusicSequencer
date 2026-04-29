@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 Phase: 11 — Shift+Drag Snapping (complete — all plans and human verification passed)
 Next: Milestone v1.1 complete — no further phases planned
 Status: Phase 11 fully complete — ANIM-16 satisfied; all 9/9 must-haves verified; snapped visual gap closed by 11-03 and human-approved 2026-04-28
-Last activity: 2026-04-28 — Phase 11 Plan 03 human verification approved; Phase 11 marked complete; milestone v1.1 complete
+Last activity: 2026-04-29 — Completed quick task 260429-c9h: Add per-voice AnalyserNode and live waveform canvas in CellPanel
 
 Progress: [##########] 100%
 
@@ -71,6 +71,7 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260428 | when first adding an animation curve the curve is not drawn | 2026-04-28 | 766e7a3 | [260428-gfx-anim-curve-first-add-not-drawn](./quick/260428-gfx-anim-curve-first-add-not-drawn/) |
+| 260429-c9h | Add per-voice AnalyserNode and live waveform canvas in CellPanel | 2026-04-29 | 8d00831 | [260429-c9h-add-per-voice-analysernode-to-audioengine-ts-and-a-live-wave](./quick/260429-c9h-add-per-voice-analysernode-to-audioengine-ts-and-a-live-wave/) |
 
 ### Blockers/Concerns
 
