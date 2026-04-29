@@ -2,7 +2,8 @@
 // Right sidebar panel — shows cell content based on occupancy (D-06, CONTEXT.md)
 // Phase 4: occupied mode replaced with full interactive editor (PANL-01/02/03)
 // Phase 7: animRate beat-fraction selector replaced with Animate button (D-11)
-import { useMemo } from 'react'
+import { useMemo, useRef, useEffect } from 'react'
+import { getVoiceAnalyser } from '../engine/audioEngine'
 import { useSelectionStore } from '../store/selectionStore'
 import { selectionStore } from '../store/selectionStore'
 import { useShapeStore } from '../store/shapeStore'
@@ -24,6 +25,50 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
     [selectedCell?.col, selectedCell?.row],
   )
   const shape = useShapeStore(shapeSelector)
+
+  const waveCanvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!shape) return
+    const analyser = getVoiceAnalyser(shape.id)
+    if (!analyser) return
+
+    const canvas = waveCanvasRef.current
+    if (!canvas) return
+    const ctx2d = canvas.getContext('2d')
+    if (!ctx2d) return
+
+    const bufferLength = analyser.frequencyBinCount  // fftSize / 2 = 128
+    const dataArray = new Uint8Array(bufferLength)
+    let rafId: number
+
+    function draw() {
+      rafId = requestAnimationFrame(draw)
+      analyser!.getByteTimeDomainData(dataArray)
+
+      const w = canvas!.width
+      const h = canvas!.height
+      ctx2d!.clearRect(0, 0, w, h)
+
+      ctx2d!.beginPath()
+      ctx2d!.strokeStyle = 'var(--color-accent, #7c6af7)'
+      ctx2d!.lineWidth = 1.5
+
+      const sliceWidth = w / bufferLength
+      let x = 0
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0  // 0–2 range
+        const y = (v / 2) * h           // 0–h
+        if (i === 0) ctx2d!.moveTo(x, y)
+        else ctx2d!.lineTo(x, y)
+        x += sliceWidth
+      }
+      ctx2d!.stroke()
+    }
+
+    draw()
+    return () => cancelAnimationFrame(rafId)
+  }, [shape?.id])  // re-run when selected shape changes
 
   if (!selectedCell) return null
 
@@ -110,6 +155,18 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
           >
             Animate
           </button>
+
+          <hr className="cell-panel__divider" />
+
+          {/* Live waveform — Task 2 */}
+          <p className="cell-panel__section-heading">Waveform</p>
+          <canvas
+            ref={waveCanvasRef}
+            className="cell-panel__waveform"
+            width={200}
+            height={60}
+            aria-label="Live waveform of selected voice"
+          />
 
           <hr className="cell-panel__divider" />
 
