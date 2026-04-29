@@ -108,6 +108,7 @@ export interface AudioVoice {
   analyser?: AnalyserNode              // per-voice analyser for oscilloscope (c9h)
   panner: StereoPannerNode               // Phase 6 AUDI-03: column → stereo position
   noiseSource?: AudioBufferSourceNode  // blob only
+  bypassed?: boolean                   // true when Clean mode active (h18)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -316,11 +317,15 @@ export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
   // Filter cutoff — skip blob voices: blob uses a bandpass filter centred on pitch
   // frequency (set in createVoice); overwriting with a lightness-derived cutoff
   // detunes the resonant character. noiseSource is only set for blob voices.
-  if (!voice.noiseSource) {
+  // Also skip when Clean mode is active (bypassed=true) — preserves bypass state (h18)
+  if (!voice.noiseSource && !voice.bypassed) {
     voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(color.l), ctx.currentTime, 0.015)
   }
   // Distortion curve — direct assignment (WaveShaper.curve is not an AudioParam)
-  voice.waveshaper.curve = makeDistortionCurve(color.s)
+  // Skip when Clean mode is active (bypassed=true) — preserves null curve set by bypass (h18)
+  if (!voice.bypassed) {
+    voice.waveshaper.curve = makeDistortionCurve(color.s)
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -358,6 +363,7 @@ export function setVoiceDistortionBypass(shapeId: string, bypass: boolean, satur
   // bypass=true  → 20000 Hz (effectively open / transparent for the oscilloscope range)
   // bypass=false → restore to lightness-derived cutoff
   voice.filter.frequency.value = bypass ? 20000 : lightnessToFilterCutoff(lightness)
+  voice.bypassed = bypass
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
