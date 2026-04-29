@@ -29,13 +29,30 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
   const waveCanvasRef = useRef<HTMLCanvasElement>(null)
 
   const [cleanMode, setCleanMode] = useState(false)
+  const cleanModeRef = useRef(false)
 
   useEffect(() => {
     if (!shape) return
+    cleanModeRef.current = false
     setCleanMode(false)
     setVoiceDistortionBypass(shape.id, false, shape.color.s, shape.color.l)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shape?.id])
+
+  // Re-apply clean mode bypass after the engine destroys/recreates the AudioVoice on shape
+  // type change (~60ms ramp-out). We wait 80ms so the new voice exists in the voices map.
+  useEffect(() => {
+    if (!shape) return
+    if (!cleanModeRef.current) return
+    const id = shape.id
+    const s = shape.color.s
+    const l = shape.color.l
+    const timer = setTimeout(() => {
+      setVoiceDistortionBypass(id, true, s, l)
+    }, 80)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shape?.type, shape?.id])
 
   useEffect(() => {
     if (!shape) return
@@ -117,6 +134,7 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
   function handleCleanToggle(): void {
     if (!shape) return
     const next = !cleanMode
+    cleanModeRef.current = next
     setCleanMode(next)
     setVoiceDistortionBypass(shape.id, next, shape.color.s, shape.color.l)
   }
