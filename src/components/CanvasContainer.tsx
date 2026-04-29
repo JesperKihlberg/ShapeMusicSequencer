@@ -82,7 +82,7 @@ export function CanvasContainer() {
   }
 
   return (
-    <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+    <div ref={containerRef} style={{ flex: 1, minWidth: 0, position: 'relative', overflow: 'hidden' }}>
       <canvas
         ref={canvasRef}
         onClick={handleClick}
