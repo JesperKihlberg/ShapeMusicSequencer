@@ -2,8 +2,8 @@
 // Right sidebar panel — shows cell content based on occupancy (D-06, CONTEXT.md)
 // Phase 4: occupied mode replaced with full interactive editor (PANL-01/02/03)
 // Phase 7: animRate beat-fraction selector replaced with Animate button (D-11)
-import { useMemo, useRef, useEffect } from 'react'
-import { getVoiceAnalyser } from '../engine/audioEngine'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import { getVoiceAnalyser, setVoiceDistortionBypass } from '../engine/audioEngine'
 import { useSelectionStore } from '../store/selectionStore'
 import { selectionStore } from '../store/selectionStore'
 import { useShapeStore } from '../store/shapeStore'
@@ -28,37 +28,77 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
 
   const waveCanvasRef = useRef<HTMLCanvasElement>(null)
 
+  const [cleanMode, setCleanMode] = useState(false)
+
   useEffect(() => {
     if (!shape) return
-    const analyser = getVoiceAnalyser(shape.id)
-    if (!analyser) return
+    setCleanMode(false)
+    setVoiceDistortionBypass(shape.id, false, shape.color.s)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shape?.id])
+
+  useEffect(() => {
+    if (!shape) return
 
     const canvas = waveCanvasRef.current
     if (!canvas) return
     const ctx2d = canvas.getContext('2d')
     if (!ctx2d) return
 
-    const bufferLength = analyser.frequencyBinCount  // fftSize / 2 = 128
-    const dataArray = new Uint8Array(bufferLength)
     let rafId: number
+    // dataArray is sized to fftSize/2=128; re-allocated only when a new analyser appears
+    let dataArray: Uint8Array | null = null
+    let lastAnalyser: AnalyserNode | null = null
+
+    // Fill background once before the loop starts
+    const w = canvas.width
+    const h = canvas.height
+    ctx2d.fillStyle = '#0a0f0a'
+    ctx2d.fillRect(0, 0, w, h)
 
     function draw() {
       rafId = requestAnimationFrame(draw)
-      analyser!.getByteTimeDomainData(dataArray)
 
-      const w = canvas!.width
-      const h = canvas!.height
-      ctx2d!.clearRect(0, 0, w, h)
+      // Re-fetch every frame — voice may not exist yet (context not running) or may have
+      // been replaced by a type change (same shape.id, new AudioVoice after 60ms timeout)
+      const analyser = getVoiceAnalyser(shape!.id)
+      if (!analyser) return
+      if (analyser !== lastAnalyser) {
+        lastAnalyser = analyser
+        dataArray = new Uint8Array(analyser.frequencyBinCount)
+      }
 
+      analyser.getByteTimeDomainData(dataArray!)
+
+      const cw = canvas!.width
+      const ch = canvas!.height
+
+      // Phosphor persistence: semi-transparent dark fill decays old traces
+      ctx2d!.fillStyle = 'rgba(10, 15, 10, 0.35)'
+      ctx2d!.fillRect(0, 0, cw, ch)
+
+      // Glow pass — wide, low-opacity stroke
       ctx2d!.beginPath()
-      ctx2d!.strokeStyle = 'var(--color-accent, #7c6af7)'
-      ctx2d!.lineWidth = 1.5
+      ctx2d!.strokeStyle = 'rgba(0, 255, 80, 0.18)'
+      ctx2d!.lineWidth = 4
 
-      const sliceWidth = w / bufferLength
+      const sliceWidth = cw / dataArray!.length
       let x = 0
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0  // 0–2 range
-        const y = (v / 2) * h           // 0–h
+      for (let i = 0; i < dataArray!.length; i++) {
+        const y = ((dataArray![i] / 128.0) - 1) * (ch * 0.42) + ch / 2
+        if (i === 0) ctx2d!.moveTo(x, y)
+        else ctx2d!.lineTo(x, y)
+        x += sliceWidth
+      }
+      ctx2d!.stroke()
+
+      // Sharp core pass
+      ctx2d!.beginPath()
+      ctx2d!.strokeStyle = 'rgba(0, 255, 80, 0.9)'
+      ctx2d!.lineWidth = 1.5
+      x = 0
+      for (let i = 0; i < dataArray!.length; i++) {
+        const y = ((dataArray![i] / 128.0) - 1) * (ch * 0.42) + ch / 2
         if (i === 0) ctx2d!.moveTo(x, y)
         else ctx2d!.lineTo(x, y)
         x += sliceWidth
@@ -73,6 +113,13 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
   if (!selectedCell) return null
 
   const { col, row } = selectedCell
+
+  function handleCleanToggle(): void {
+    if (!shape) return
+    const next = !cleanMode
+    setCleanMode(next)
+    setVoiceDistortionBypass(shape.id, next, shape.color.s)
+  }
 
   function handleAddShape(): void {
     shapeStore.getState().addShape(col, row)
@@ -158,13 +205,20 @@ export function CellPanel({ onAnimate }: CellPanelProps = {}) {
 
           <hr className="cell-panel__divider" />
 
-          {/* Live waveform — Task 2 */}
+          {/* Live waveform — Clean toggle + oscilloscope canvas */}
           <p className="cell-panel__section-heading">Waveform</p>
+          <button
+            className={cleanMode ? 'btn btn--accent' : 'btn'}
+            aria-label={cleanMode ? 'Clean mode on — click to restore distortion' : 'Clean mode off — click to bypass distortion'}
+            onClick={handleCleanToggle}
+          >
+            Clean
+          </button>
           <canvas
             ref={waveCanvasRef}
             className="cell-panel__waveform"
             width={200}
-            height={60}
+            height={80}
             aria-label="Live waveform of selected voice"
           />
 

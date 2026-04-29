@@ -343,6 +343,17 @@ export function getVoiceAnalyser(shapeId: string): AnalyserNode | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// setVoiceDistortionBypass — bypass or restore waveshaper distortion for a voice
+// bypass=true  → waveshaper.curve = null (transparent pass-through)
+// bypass=false → waveshaper.curve = makeDistortionCurve(saturation) (restore)
+// ─────────────────────────────────────────────────────────────────────────────
+export function setVoiceDistortionBypass(shapeId: string, bypass: boolean, saturation = 0): void {
+  const voice = voices.get(shapeId)
+  if (!voice) return
+  voice.waveshaper.curve = bypass ? null : makeDistortionCurve(saturation)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // initAudioEngine — call once from CanvasContainer useEffect (mirrors initCanvasEngine)
 // Returns destroy() for React useEffect cleanup
 // ─────────────────────────────────────────────────────────────────────────────
