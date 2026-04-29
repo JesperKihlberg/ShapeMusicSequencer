@@ -343,14 +343,21 @@ export function getVoiceAnalyser(shapeId: string): AnalyserNode | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// setVoiceDistortionBypass — bypass or restore waveshaper distortion for a voice
+// setVoiceDistortionBypass — bypass or restore waveshaper distortion and filter for a voice
 // bypass=true  → waveshaper.curve = null (transparent pass-through)
+//               voice.filter.frequency.value = 20000 (effectively open for oscilloscope range)
 // bypass=false → waveshaper.curve = makeDistortionCurve(saturation) (restore)
+//               voice.filter.frequency.value = lightnessToFilterCutoff(lightness) (restore)
+// Direct assignment used for both (no AudioParam ramp) — user just pressed a button (g90)
 // ─────────────────────────────────────────────────────────────────────────────
-export function setVoiceDistortionBypass(shapeId: string, bypass: boolean, saturation = 0): void {
+export function setVoiceDistortionBypass(shapeId: string, bypass: boolean, saturation = 0, lightness = 50): void {
   const voice = voices.get(shapeId)
   if (!voice) return
   voice.waveshaper.curve = bypass ? null : makeDistortionCurve(saturation)
+  // Also bypass / restore the filter so the waveform is truly clean (g90)
+  // bypass=true  → 20000 Hz (effectively open / transparent for the oscilloscope range)
+  // bypass=false → restore to lightness-derived cutoff
+  voice.filter.frequency.value = bypass ? 20000 : lightnessToFilterCutoff(lightness)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
