@@ -105,6 +105,7 @@ export interface AudioVoice {
   waveshaper: WaveShaperNode
   filter: BiquadFilterNode
   gainNode: GainNode
+  analyser?: AnalyserNode              // per-voice analyser for oscilloscope (c9h)
   panner: StereoPannerNode               // Phase 6 AUDI-03: column → stereo position
   noiseSource?: AudioBufferSourceNode  // blob only
 }
@@ -214,6 +215,12 @@ function createVoice(shape: Shape): void {
 
   const gainNode = ctx.createGain()
 
+  // Per-voice AnalyserNode — inserted between gainNode and panner (c9h)
+  // Reads post-gain signal (actual audible level); fftSize=256 → 128 time-domain samples
+  const analyser = ctx.createAnalyser()
+  analyser.fftSize = 256
+  analyser.smoothingTimeConstant = 0  // raw waveform, no smoothing
+
   const waveDesc = shapeTypeToWave(shape.type)
   const freq = colorToFrequency(shape.color)
 
@@ -248,7 +255,8 @@ function createVoice(shape: Shape): void {
     filter.connect(gainNode)
     const panner = ctx.createStereoPanner()
     panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0 (hard left), col 3 → +1.0 (hard right)
-    gainNode.connect(panner)
+    gainNode.connect(analyser)
+    analyser.connect(panner)
     panner.connect(mg)
 
     noiseSource.start()
@@ -257,7 +265,7 @@ function createVoice(shape: Shape): void {
     const baseGain = (shape.size / 100) * 0.8  // size=50 → 0.4 (D-15)
     gainNode.gain.setValueAtTime(0, ctx.currentTime)
     gainNode.gain.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)  // 10ms ramp-in (click-free)
-    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, panner, noiseSource })
+    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, analyser, panner, noiseSource })
   } else {
     // Standard oscillator path (circle, triangle, square, star, diamond)
     const osc = ctx.createOscillator()
@@ -274,7 +282,8 @@ function createVoice(shape: Shape): void {
     filter.connect(gainNode)
     const panner = ctx.createStereoPanner()
     panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0, col 3 → +1.0
-    gainNode.connect(panner)
+    gainNode.connect(analyser)
+    analyser.connect(panner)
     panner.connect(mg)
 
     osc.start()
@@ -282,7 +291,7 @@ function createVoice(shape: Shape): void {
     const baseGain = (shape.size / 100) * 0.8  // size=50 → 0.4 (D-15)
     gainNode.gain.setValueAtTime(0, ctx.currentTime)
     gainNode.gain.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)  // 10ms ramp-in (click-free)
-    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, panner })
+    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, analyser, panner })
   }
 }
 
@@ -323,6 +332,14 @@ export function updateVoiceSize(shapeId: string, size: number): void {
   if (!voice || !ctx) return
   const newBase = (size / 100) * 0.8  // size=50 → 0.4, size=100 → 0.8
   voice.gainNode.gain.setTargetAtTime(newBase, ctx.currentTime, 0.015)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getVoiceAnalyser — returns the AnalyserNode for a given shape ID (c9h)
+// Returns null if the voice does not exist or has no analyser
+// ─────────────────────────────────────────────────────────────────────────────
+export function getVoiceAnalyser(shapeId: string): AnalyserNode | null {
+  return voices.get(shapeId)?.analyser ?? null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

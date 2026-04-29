@@ -836,3 +836,13 @@ body {
 .anim-lane__label-col {
   cursor: pointer;
 }
+
+/* ── Waveform canvas (CellPanel) ───────────────────────────── */
+.cell-panel__waveform {
+  display: block;
+  width: 100%;
+  height: 60px;
+  background: var(--color-bg-secondary, #1a1a2e);
+  border-radius: 4px;
+  border: 1px solid var(--color-border, #333);
+}
