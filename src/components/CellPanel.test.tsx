@@ -81,62 +81,62 @@ describe('CellPanel', () => {
 // Phase 4 occupied mode controls — RED until Wave 3 replaces CellPanel occupied mode
 describe('CellPanel — Phase 4 occupied mode controls', () => {
   beforeEach(() => {
-    selectionStore.setState({ selectedCell: null })
-    shapeStore.setState({ shapes: [] })
-  })
+    selectionStore.setState({ selectedCell: null });
+    shapeStore.setState({ shapes: [] });
+  });
 
-  it('renders Hue slider in occupied mode', () => {
-    shapeStore.getState().addShape(0, 0)
-    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
-    render(<CellPanel />)
+  it("renders Hue slider in occupied mode", () => {
+    shapeStore.getState().addShape(0, 0);
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } });
+    render(<CellPanel />);
     // After Wave 3: HsvSliders renders an input with aria-label "Hue, 0 to 360"
-    expect(screen.queryByLabelText(/Hue, 0 to 360/i)).toBeTruthy()
-  })
+    expect(screen.queryByLabelText(/Hue, 0 to 360/i)).toBeTruthy();
+  });
 
-  it('renders Size slider in occupied mode', () => {
-    shapeStore.getState().addShape(0, 0)
-    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
-    render(<CellPanel />)
-    expect(screen.queryByLabelText(/Size, 0 to 100/i)).toBeTruthy()
-  })
+  it("renders Size slider in occupied mode", () => {
+    shapeStore.getState().addShape(0, 0);
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } });
+    render(<CellPanel />);
+    expect(screen.queryByLabelText(/Size, 0 to 100/i)).toBeTruthy();
+  });
 
-  it('renders animation rate beat-fraction selector in occupied mode (D-13)', () => {
-    shapeStore.getState().addShape(0, 0)
-    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
-    render(<CellPanel />)
-    expect(screen.queryByRole('group', { name: /Animation rate/i })).toBeTruthy()
-  })
+  // it('renders animation rate beat-fraction selector in occupied mode (D-13)', () => {
+  //   shapeStore.getState().addShape(0, 0)
+  //   selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+  //   render(<CellPanel />)
+  //   expect(screen.queryByRole('group', { name: /Animation rate/i })).toBeTruthy()
+  // })
 
-  it('renders 5 beat-fraction buttons in animation rate selector (D-13)', () => {
-    shapeStore.getState().addShape(0, 0)
-    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
-    render(<CellPanel />)
-    const group = screen.queryByRole('group', { name: /Animation rate/i })
-    expect(group).toBeTruthy()
-    const buttons = group?.querySelectorAll('button') ?? []
-    expect(buttons.length).toBe(5)
-    // Labels: 1/1, 1/2, 1/4, 1/8, 1/16
-    const labels = Array.from(buttons).map(b => b.textContent)
-    expect(labels).toContain('1/1')
-    expect(labels).toContain('1/4')
-    expect(labels).toContain('1/16')
-  })
+  // it('renders 5 beat-fraction buttons in animation rate selector (D-13)', () => {
+  //   shapeStore.getState().addShape(0, 0)
+  //   selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
+  //   render(<CellPanel />)
+  //   const group = screen.queryByRole('group', { name: /Animation rate/i })
+  //   expect(group).toBeTruthy()
+  //   const buttons = group?.querySelectorAll('button') ?? []
+  //   expect(buttons.length).toBe(5)
+  //   // Labels: 1/1, 1/2, 1/4, 1/8, 1/16
+  //   const labels = Array.from(buttons).map(b => b.textContent)
+  //   expect(labels).toContain('1/1')
+  //   expect(labels).toContain('1/4')
+  //   expect(labels).toContain('1/16')
+  // })
 
-  it('renders 6 shape type buttons in occupied mode', () => {
-    shapeStore.getState().addShape(0, 0)
-    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
-    const { container } = render(<CellPanel />)
+  it("renders 6 shape type buttons in occupied mode", () => {
+    shapeStore.getState().addShape(0, 0);
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } });
+    const { container } = render(<CellPanel />);
     // After Wave 3: ShapeTypeSelector renders 6 buttons with aria-label "{type} shape"
-    const typeButtons = container.querySelectorAll('[aria-label$=" shape"]')
-    expect(typeButtons.length).toBeGreaterThanOrEqual(6)
-  })
+    const typeButtons = container.querySelectorAll('[aria-label$=" shape"]');
+    expect(typeButtons.length).toBeGreaterThanOrEqual(6);
+  });
 
-  it('Remove Shape button still present in Phase 4 occupied mode', () => {
-    shapeStore.getState().addShape(0, 0)
-    selectionStore.setState({ selectedCell: { col: 0, row: 0 } })
-    render(<CellPanel />)
-    expect(screen.getByText('Remove Shape')).toBeTruthy()
-  })
+  it("Remove Shape button still present in Phase 4 occupied mode", () => {
+    shapeStore.getState().addShape(0, 0);
+    selectionStore.setState({ selectedCell: { col: 0, row: 0 } });
+    render(<CellPanel />);
+    expect(screen.getByText("Remove Shape")).toBeTruthy();
+  });
 })
 
 // Phase 7: beat-selector removal + Animate button (D-03, D-11)

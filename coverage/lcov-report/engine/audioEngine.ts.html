@@ -1,0 +1,1798 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for engine/audioEngine.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">engine</a> audioEngine.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">21.89% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>67/306</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">14.18% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>20/141</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">38.46% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>10/26</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">22.54% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>62/275</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a>
+<a name='L291'></a><a href='#L291'>291</a>
+<a name='L292'></a><a href='#L292'>292</a>
+<a name='L293'></a><a href='#L293'>293</a>
+<a name='L294'></a><a href='#L294'>294</a>
+<a name='L295'></a><a href='#L295'>295</a>
+<a name='L296'></a><a href='#L296'>296</a>
+<a name='L297'></a><a href='#L297'>297</a>
+<a name='L298'></a><a href='#L298'>298</a>
+<a name='L299'></a><a href='#L299'>299</a>
+<a name='L300'></a><a href='#L300'>300</a>
+<a name='L301'></a><a href='#L301'>301</a>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a>
+<a name='L304'></a><a href='#L304'>304</a>
+<a name='L305'></a><a href='#L305'>305</a>
+<a name='L306'></a><a href='#L306'>306</a>
+<a name='L307'></a><a href='#L307'>307</a>
+<a name='L308'></a><a href='#L308'>308</a>
+<a name='L309'></a><a href='#L309'>309</a>
+<a name='L310'></a><a href='#L310'>310</a>
+<a name='L311'></a><a href='#L311'>311</a>
+<a name='L312'></a><a href='#L312'>312</a>
+<a name='L313'></a><a href='#L313'>313</a>
+<a name='L314'></a><a href='#L314'>314</a>
+<a name='L315'></a><a href='#L315'>315</a>
+<a name='L316'></a><a href='#L316'>316</a>
+<a name='L317'></a><a href='#L317'>317</a>
+<a name='L318'></a><a href='#L318'>318</a>
+<a name='L319'></a><a href='#L319'>319</a>
+<a name='L320'></a><a href='#L320'>320</a>
+<a name='L321'></a><a href='#L321'>321</a>
+<a name='L322'></a><a href='#L322'>322</a>
+<a name='L323'></a><a href='#L323'>323</a>
+<a name='L324'></a><a href='#L324'>324</a>
+<a name='L325'></a><a href='#L325'>325</a>
+<a name='L326'></a><a href='#L326'>326</a>
+<a name='L327'></a><a href='#L327'>327</a>
+<a name='L328'></a><a href='#L328'>328</a>
+<a name='L329'></a><a href='#L329'>329</a>
+<a name='L330'></a><a href='#L330'>330</a>
+<a name='L331'></a><a href='#L331'>331</a>
+<a name='L332'></a><a href='#L332'>332</a>
+<a name='L333'></a><a href='#L333'>333</a>
+<a name='L334'></a><a href='#L334'>334</a>
+<a name='L335'></a><a href='#L335'>335</a>
+<a name='L336'></a><a href='#L336'>336</a>
+<a name='L337'></a><a href='#L337'>337</a>
+<a name='L338'></a><a href='#L338'>338</a>
+<a name='L339'></a><a href='#L339'>339</a>
+<a name='L340'></a><a href='#L340'>340</a>
+<a name='L341'></a><a href='#L341'>341</a>
+<a name='L342'></a><a href='#L342'>342</a>
+<a name='L343'></a><a href='#L343'>343</a>
+<a name='L344'></a><a href='#L344'>344</a>
+<a name='L345'></a><a href='#L345'>345</a>
+<a name='L346'></a><a href='#L346'>346</a>
+<a name='L347'></a><a href='#L347'>347</a>
+<a name='L348'></a><a href='#L348'>348</a>
+<a name='L349'></a><a href='#L349'>349</a>
+<a name='L350'></a><a href='#L350'>350</a>
+<a name='L351'></a><a href='#L351'>351</a>
+<a name='L352'></a><a href='#L352'>352</a>
+<a name='L353'></a><a href='#L353'>353</a>
+<a name='L354'></a><a href='#L354'>354</a>
+<a name='L355'></a><a href='#L355'>355</a>
+<a name='L356'></a><a href='#L356'>356</a>
+<a name='L357'></a><a href='#L357'>357</a>
+<a name='L358'></a><a href='#L358'>358</a>
+<a name='L359'></a><a href='#L359'>359</a>
+<a name='L360'></a><a href='#L360'>360</a>
+<a name='L361'></a><a href='#L361'>361</a>
+<a name='L362'></a><a href='#L362'>362</a>
+<a name='L363'></a><a href='#L363'>363</a>
+<a name='L364'></a><a href='#L364'>364</a>
+<a name='L365'></a><a href='#L365'>365</a>
+<a name='L366'></a><a href='#L366'>366</a>
+<a name='L367'></a><a href='#L367'>367</a>
+<a name='L368'></a><a href='#L368'>368</a>
+<a name='L369'></a><a href='#L369'>369</a>
+<a name='L370'></a><a href='#L370'>370</a>
+<a name='L371'></a><a href='#L371'>371</a>
+<a name='L372'></a><a href='#L372'>372</a>
+<a name='L373'></a><a href='#L373'>373</a>
+<a name='L374'></a><a href='#L374'>374</a>
+<a name='L375'></a><a href='#L375'>375</a>
+<a name='L376'></a><a href='#L376'>376</a>
+<a name='L377'></a><a href='#L377'>377</a>
+<a name='L378'></a><a href='#L378'>378</a>
+<a name='L379'></a><a href='#L379'>379</a>
+<a name='L380'></a><a href='#L380'>380</a>
+<a name='L381'></a><a href='#L381'>381</a>
+<a name='L382'></a><a href='#L382'>382</a>
+<a name='L383'></a><a href='#L383'>383</a>
+<a name='L384'></a><a href='#L384'>384</a>
+<a name='L385'></a><a href='#L385'>385</a>
+<a name='L386'></a><a href='#L386'>386</a>
+<a name='L387'></a><a href='#L387'>387</a>
+<a name='L388'></a><a href='#L388'>388</a>
+<a name='L389'></a><a href='#L389'>389</a>
+<a name='L390'></a><a href='#L390'>390</a>
+<a name='L391'></a><a href='#L391'>391</a>
+<a name='L392'></a><a href='#L392'>392</a>
+<a name='L393'></a><a href='#L393'>393</a>
+<a name='L394'></a><a href='#L394'>394</a>
+<a name='L395'></a><a href='#L395'>395</a>
+<a name='L396'></a><a href='#L396'>396</a>
+<a name='L397'></a><a href='#L397'>397</a>
+<a name='L398'></a><a href='#L398'>398</a>
+<a name='L399'></a><a href='#L399'>399</a>
+<a name='L400'></a><a href='#L400'>400</a>
+<a name='L401'></a><a href='#L401'>401</a>
+<a name='L402'></a><a href='#L402'>402</a>
+<a name='L403'></a><a href='#L403'>403</a>
+<a name='L404'></a><a href='#L404'>404</a>
+<a name='L405'></a><a href='#L405'>405</a>
+<a name='L406'></a><a href='#L406'>406</a>
+<a name='L407'></a><a href='#L407'>407</a>
+<a name='L408'></a><a href='#L408'>408</a>
+<a name='L409'></a><a href='#L409'>409</a>
+<a name='L410'></a><a href='#L410'>410</a>
+<a name='L411'></a><a href='#L411'>411</a>
+<a name='L412'></a><a href='#L412'>412</a>
+<a name='L413'></a><a href='#L413'>413</a>
+<a name='L414'></a><a href='#L414'>414</a>
+<a name='L415'></a><a href='#L415'>415</a>
+<a name='L416'></a><a href='#L416'>416</a>
+<a name='L417'></a><a href='#L417'>417</a>
+<a name='L418'></a><a href='#L418'>418</a>
+<a name='L419'></a><a href='#L419'>419</a>
+<a name='L420'></a><a href='#L420'>420</a>
+<a name='L421'></a><a href='#L421'>421</a>
+<a name='L422'></a><a href='#L422'>422</a>
+<a name='L423'></a><a href='#L423'>423</a>
+<a name='L424'></a><a href='#L424'>424</a>
+<a name='L425'></a><a href='#L425'>425</a>
+<a name='L426'></a><a href='#L426'>426</a>
+<a name='L427'></a><a href='#L427'>427</a>
+<a name='L428'></a><a href='#L428'>428</a>
+<a name='L429'></a><a href='#L429'>429</a>
+<a name='L430'></a><a href='#L430'>430</a>
+<a name='L431'></a><a href='#L431'>431</a>
+<a name='L432'></a><a href='#L432'>432</a>
+<a name='L433'></a><a href='#L433'>433</a>
+<a name='L434'></a><a href='#L434'>434</a>
+<a name='L435'></a><a href='#L435'>435</a>
+<a name='L436'></a><a href='#L436'>436</a>
+<a name='L437'></a><a href='#L437'>437</a>
+<a name='L438'></a><a href='#L438'>438</a>
+<a name='L439'></a><a href='#L439'>439</a>
+<a name='L440'></a><a href='#L440'>440</a>
+<a name='L441'></a><a href='#L441'>441</a>
+<a name='L442'></a><a href='#L442'>442</a>
+<a name='L443'></a><a href='#L443'>443</a>
+<a name='L444'></a><a href='#L444'>444</a>
+<a name='L445'></a><a href='#L445'>445</a>
+<a name='L446'></a><a href='#L446'>446</a>
+<a name='L447'></a><a href='#L447'>447</a>
+<a name='L448'></a><a href='#L448'>448</a>
+<a name='L449'></a><a href='#L449'>449</a>
+<a name='L450'></a><a href='#L450'>450</a>
+<a name='L451'></a><a href='#L451'>451</a>
+<a name='L452'></a><a href='#L452'>452</a>
+<a name='L453'></a><a href='#L453'>453</a>
+<a name='L454'></a><a href='#L454'>454</a>
+<a name='L455'></a><a href='#L455'>455</a>
+<a name='L456'></a><a href='#L456'>456</a>
+<a name='L457'></a><a href='#L457'>457</a>
+<a name='L458'></a><a href='#L458'>458</a>
+<a name='L459'></a><a href='#L459'>459</a>
+<a name='L460'></a><a href='#L460'>460</a>
+<a name='L461'></a><a href='#L461'>461</a>
+<a name='L462'></a><a href='#L462'>462</a>
+<a name='L463'></a><a href='#L463'>463</a>
+<a name='L464'></a><a href='#L464'>464</a>
+<a name='L465'></a><a href='#L465'>465</a>
+<a name='L466'></a><a href='#L466'>466</a>
+<a name='L467'></a><a href='#L467'>467</a>
+<a name='L468'></a><a href='#L468'>468</a>
+<a name='L469'></a><a href='#L469'>469</a>
+<a name='L470'></a><a href='#L470'>470</a>
+<a name='L471'></a><a href='#L471'>471</a>
+<a name='L472'></a><a href='#L472'>472</a>
+<a name='L473'></a><a href='#L473'>473</a>
+<a name='L474'></a><a href='#L474'>474</a>
+<a name='L475'></a><a href='#L475'>475</a>
+<a name='L476'></a><a href='#L476'>476</a>
+<a name='L477'></a><a href='#L477'>477</a>
+<a name='L478'></a><a href='#L478'>478</a>
+<a name='L479'></a><a href='#L479'>479</a>
+<a name='L480'></a><a href='#L480'>480</a>
+<a name='L481'></a><a href='#L481'>481</a>
+<a name='L482'></a><a href='#L482'>482</a>
+<a name='L483'></a><a href='#L483'>483</a>
+<a name='L484'></a><a href='#L484'>484</a>
+<a name='L485'></a><a href='#L485'>485</a>
+<a name='L486'></a><a href='#L486'>486</a>
+<a name='L487'></a><a href='#L487'>487</a>
+<a name='L488'></a><a href='#L488'>488</a>
+<a name='L489'></a><a href='#L489'>489</a>
+<a name='L490'></a><a href='#L490'>490</a>
+<a name='L491'></a><a href='#L491'>491</a>
+<a name='L492'></a><a href='#L492'>492</a>
+<a name='L493'></a><a href='#L493'>493</a>
+<a name='L494'></a><a href='#L494'>494</a>
+<a name='L495'></a><a href='#L495'>495</a>
+<a name='L496'></a><a href='#L496'>496</a>
+<a name='L497'></a><a href='#L497'>497</a>
+<a name='L498'></a><a href='#L498'>498</a>
+<a name='L499'></a><a href='#L499'>499</a>
+<a name='L500'></a><a href='#L500'>500</a>
+<a name='L501'></a><a href='#L501'>501</a>
+<a name='L502'></a><a href='#L502'>502</a>
+<a name='L503'></a><a href='#L503'>503</a>
+<a name='L504'></a><a href='#L504'>504</a>
+<a name='L505'></a><a href='#L505'>505</a>
+<a name='L506'></a><a href='#L506'>506</a>
+<a name='L507'></a><a href='#L507'>507</a>
+<a name='L508'></a><a href='#L508'>508</a>
+<a name='L509'></a><a href='#L509'>509</a>
+<a name='L510'></a><a href='#L510'>510</a>
+<a name='L511'></a><a href='#L511'>511</a>
+<a name='L512'></a><a href='#L512'>512</a>
+<a name='L513'></a><a href='#L513'>513</a>
+<a name='L514'></a><a href='#L514'>514</a>
+<a name='L515'></a><a href='#L515'>515</a>
+<a name='L516'></a><a href='#L516'>516</a>
+<a name='L517'></a><a href='#L517'>517</a>
+<a name='L518'></a><a href='#L518'>518</a>
+<a name='L519'></a><a href='#L519'>519</a>
+<a name='L520'></a><a href='#L520'>520</a>
+<a name='L521'></a><a href='#L521'>521</a>
+<a name='L522'></a><a href='#L522'>522</a>
+<a name='L523'></a><a href='#L523'>523</a>
+<a name='L524'></a><a href='#L524'>524</a>
+<a name='L525'></a><a href='#L525'>525</a>
+<a name='L526'></a><a href='#L526'>526</a>
+<a name='L527'></a><a href='#L527'>527</a>
+<a name='L528'></a><a href='#L528'>528</a>
+<a name='L529'></a><a href='#L529'>529</a>
+<a name='L530'></a><a href='#L530'>530</a>
+<a name='L531'></a><a href='#L531'>531</a>
+<a name='L532'></a><a href='#L532'>532</a>
+<a name='L533'></a><a href='#L533'>533</a>
+<a name='L534'></a><a href='#L534'>534</a>
+<a name='L535'></a><a href='#L535'>535</a>
+<a name='L536'></a><a href='#L536'>536</a>
+<a name='L537'></a><a href='#L537'>537</a>
+<a name='L538'></a><a href='#L538'>538</a>
+<a name='L539'></a><a href='#L539'>539</a>
+<a name='L540'></a><a href='#L540'>540</a>
+<a name='L541'></a><a href='#L541'>541</a>
+<a name='L542'></a><a href='#L542'>542</a>
+<a name='L543'></a><a href='#L543'>543</a>
+<a name='L544'></a><a href='#L544'>544</a>
+<a name='L545'></a><a href='#L545'>545</a>
+<a name='L546'></a><a href='#L546'>546</a>
+<a name='L547'></a><a href='#L547'>547</a>
+<a name='L548'></a><a href='#L548'>548</a>
+<a name='L549'></a><a href='#L549'>549</a>
+<a name='L550'></a><a href='#L550'>550</a>
+<a name='L551'></a><a href='#L551'>551</a>
+<a name='L552'></a><a href='#L552'>552</a>
+<a name='L553'></a><a href='#L553'>553</a>
+<a name='L554'></a><a href='#L554'>554</a>
+<a name='L555'></a><a href='#L555'>555</a>
+<a name='L556'></a><a href='#L556'>556</a>
+<a name='L557'></a><a href='#L557'>557</a>
+<a name='L558'></a><a href='#L558'>558</a>
+<a name='L559'></a><a href='#L559'>559</a>
+<a name='L560'></a><a href='#L560'>560</a>
+<a name='L561'></a><a href='#L561'>561</a>
+<a name='L562'></a><a href='#L562'>562</a>
+<a name='L563'></a><a href='#L563'>563</a>
+<a name='L564'></a><a href='#L564'>564</a>
+<a name='L565'></a><a href='#L565'>565</a>
+<a name='L566'></a><a href='#L566'>566</a>
+<a name='L567'></a><a href='#L567'>567</a>
+<a name='L568'></a><a href='#L568'>568</a>
+<a name='L569'></a><a href='#L569'>569</a>
+<a name='L570'></a><a href='#L570'>570</a>
+<a name='L571'></a><a href='#L571'>571</a>
+<a name='L572'></a><a href='#L572'>572</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-yes">1280x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2816x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/engine/audioEngine.ts
+// Pure color-to-audio mapping functions — no AudioContext, no side effects
+// These are the mathematical heart of the audio engine, testable in jsdom.
+// COLR-01: hue → frequency (direct linear mapping, no scale quantization); COLR-02: saturation → distortion; COLR-03: lightness → filter
+// SHPE-01: shape type → waveform descriptor
+import type { ShapeColor, ShapeType, Shape } from '../store/shapeStore'
+import { shapeStore } from '../store/shapeStore'
+import { playbackStore } from '../store/playbackStore'
+import { animationStore } from '../store/animationStore'
+import type { AnimatableProperty, SplineCurve } from '../store/animationStore'
+import { getCurrentBeat, markPlaybackStart } from './beatClock'
+&nbsp;
+// Wave type string used internally — 'pulse' and 'blob' are non-standard OscillatorType values
+// 'pulse' → createPeriodicWave (square-ish with PWM)
+// 'blob'  → noise + sine mix
+export type WaveDescriptor = OscillatorType | 'pulse' | 'blob'
+&nbsp;
+// COLR-01: color → frequency (Hz)
+// lightness selects octave (0–100 → MIDI octaves C1–C8, i.e. base notes 24, 36, 48, 60, 72, 84, 96, 108)
+// hue provides fine-grained pitch within that octave (0–359° → 0–11.97 semitones, continuous, no snapping)
+// Combined: midiNote = octaveBase + hueSemitone (both continuous — no scale quantization)
+export function colorToFrequency(color: ShapeColor): number {
+  const hClamped = Math.max(0, Math.min(359, color.h))
+  const lClamped = Math.max(0, Math.min(100, color.l))
+  const octaveBase = 24 + Math.floor((lClamped / 100) * 7) * 12  // C1(24) to C8(108)
+  const hueSemitone = (hClamped / 360) * 12                       // 0–11.97 within the octave
+  const midiNote = octaveBase + hueSemitone
+  return 440 * Math.pow(2, (midiNote - 69) / 12)
+}
+&nbsp;
+// COLR-02: saturation → WaveShaper distortion curve (Float32Array, 256 samples)
+// Two-stage algorithm (Phase 6 CONTEXT.md):
+//   Stage 1 (s 0–50): Chebyshev T2/T3 harmonic blend — warm 2nd/3rd harmonics
+//   Stage 2 (s 50–100): soft-clip limiter — increasingly compressed character
+// saturation=0 → identity (linear passthrough, no distortion)
+// saturation=100 → full harmonic stack + soft-clip
+export function makeDistortionCurve(saturation: number): Float32Array {
+  const SAMPLES = 256
+  const curve = new Float32Array(SAMPLES)
+  const t = Math.max(0, Math.min(100, saturation)) / 100
+&nbsp;
+  // Stage 1: Chebyshev T2/T3 harmonic blend
+  // blend=0 at s=0 (pure fundamental — identity), blend=1 at s=50 (full harmonic stack)
+  const blend = Math.min(1, t / 0.5)
+&nbsp;
+  // Stage 2: soft-clip strength
+  // k=0 at s≤50 (no clip), k=50 at s=100 (full character soft-clip)
+  const k = Math.max(0, (t - 0.5) / 0.5) * 50
+&nbsp;
+  const softClip = (x: number): number =&gt; {
+    if (k === 0) return x
+    return ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x))
+  }
+&nbsp;
+  for (let i = 0; i &lt; SAMPLES; i++) {
+    const x = (i * 2) / SAMPLES - 1  // maps [0, SAMPLES) → [-1.0, ~+1.0)
+&nbsp;
+    // Chebyshev T1 (fundamental), T2 (2nd harmonic), T3 (3rd harmonic)
+    const T1 = x
+    const T2 = 2 * x * x - 1
+    const T3 = x * (4 * x * x - 3)
+&nbsp;
+    // Normalise: at blend=0 weight is 1.0 so T1/1.0 = x (identity).
+    // At blend=1 weight is 1.8 (T2 weight 0.5, T3 weight 0.3).
+    const harmonicWeight = 1.0 + blend * (0.5 + 0.3)
+    const chebyshev = (T1 + blend * 0.5 * T2 + blend * 0.3 * T3) / harmonicWeight
+&nbsp;
+    curve[i] = Math.max(-1, Math.min(1, softClip(chebyshev)))
+  }
+&nbsp;
+  return curve
+}
+&nbsp;
+// COLR-03: lightness → filter cutoff frequency (Hz)
+// Exponential mapping: minHz=100, maxHz=8000
+// Formula: 100 * (8000/100)^t where t = l/100
+// Low l = dark/muffled (100 Hz); high l = bright/open (8000 Hz)
+export function lightnessToFilterCutoff(l: number): number {
+  const minHz = 100
+  const maxHz = 8000
+  const t = Math.max(0, Math.min(100, l)) / 100
+  return minHz * Math.pow(maxHz / minHz, t)
+}
+&nbsp;
+// SHPE-01 + D-05: shape type → base waveform descriptor
+// 'pulse' and 'blob' are handled specially in createVoice (Plan 03)
+export function shapeTypeToWave(type: ShapeType): WaveDescriptor {
+  switch (type) {
+    case 'circle':   return 'sine'
+    case 'triangle': return 'triangle'
+    case 'square':   return 'square'
+    case 'star':     return 'sawtooth'
+    case 'diamond':  return 'pulse'
+    case 'blob':     return 'blob'
+  }
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// AudioVoice — nodes owned by one shape's voice (D-09)
+// noiseSource is only present for blob shapes
+// Phase 7: LFO nodes removed — gain driven directly (no dcOffset/lfoOscillator/lfoGain)
+// ─────────────────────────────────────────────────────────────────────────────
+export interface AudioVoice {
+  oscillator: OscillatorNode | AudioBufferSourceNode  // OscillatorNode for all types except blob
+  waveshaper: WaveShaperNode
+  filter: BiquadFilterNode
+  gainNode: GainNode
+  analyser?: AnalyserNode              // per-voice analyser for oscilloscope (c9h)
+  panner: StereoPannerNode               // Phase 6 AUDI-03: column → stereo position
+  noiseSource?: AudioBufferSourceNode  // blob only
+  bypassed?: boolean                   // true when Clean mode active (h18)
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// Module-level singletons (D-12)
+// ─────────────────────────────────────────────────────────────────────────────
+let audioCtx: AudioContext | null = null
+let masterGain: GainNode | null = null
+const voices = new Map&lt;string, AudioVoice&gt;()
+&nbsp;
+// D-11: lazy-init — MUST be called inside a user-gesture callback (shapeStore.subscribe
+// fires because the user clicked a grid cell)
+// Returns null if AudioContext is unavailable (e.g., jsdom test environment, headless browser)
+function <span class="fstat-no" title="function not covered" >getAudioContext(): AudioContext | null {</span>
+<span class="cstat-no" title="statement not covered" >  if (typeof AudioContext === 'undefined') <span class="cstat-no" title="statement not covered" >return null</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!audioCtx) {</span>
+<span class="cstat-no" title="statement not covered" >    audioCtx = new AudioContext()</span>
+<span class="cstat-no" title="statement not covered" >    masterGain = audioCtx.createGain()</span>
+<span class="cstat-no" title="statement not covered" >    masterGain.gain.value = 0.15  // headroom for 16 simultaneous voices (Pitfall 6)</span>
+<span class="cstat-no" title="statement not covered" >    masterGain.connect(audioCtx.destination)</span>
+  }
+<span class="cstat-no" title="statement not covered" >  if (audioCtx.state === 'suspended') {</span>
+<span class="cstat-no" title="statement not covered" >    void audioCtx.resume()</span>
+  }
+<span class="cstat-no" title="statement not covered" >  return audioCtx</span>
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// Pulse wave helper — cached per AudioContext (D-05, Pattern 7)
+// 25% duty cycle via Fourier series: b_n = (2/(n*PI)) * sin(n*PI*0.25)
+// ─────────────────────────────────────────────────────────────────────────────
+let cachedPulseWave: PeriodicWave | null = null
+function <span class="fstat-no" title="function not covered" >getPulseWave(c</span>tx: AudioContext): PeriodicWave {
+<span class="cstat-no" title="statement not covered" >  if (cachedPulseWave) <span class="cstat-no" title="statement not covered" >return cachedPulseWave</span></span>
+  const N = <span class="cstat-no" title="statement not covered" >16</span>
+  const D = <span class="cstat-no" title="statement not covered" >0.25</span>
+  const real = <span class="cstat-no" title="statement not covered" >new Float32Array(N)</span>
+  const imag = <span class="cstat-no" title="statement not covered" >new Float32Array(N)</span>
+<span class="cstat-no" title="statement not covered" >  real[0] = 0</span>
+<span class="cstat-no" title="statement not covered" >  imag[0] = 0</span>
+<span class="cstat-no" title="statement not covered" >  for (let n = <span class="cstat-no" title="statement not covered" >1; n</span> &lt; N; n++) {</span>
+<span class="cstat-no" title="statement not covered" >    imag[n] = (2 / (n * Math.PI)) * Math.sin(n * Math.PI * D)</span>
+  }
+<span class="cstat-no" title="statement not covered" >  cachedPulseWave = ctx.createPeriodicWave(real, imag, { disableNormalization: false })</span>
+<span class="cstat-no" title="statement not covered" >  return cachedPulseWave</span>
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// White noise buffer — 2s loop (Pattern 8, RESEARCH.md)
+// ─────────────────────────────────────────────────────────────────────────────
+function <span class="fstat-no" title="function not covered" >createNoiseBuffer(c</span>tx: AudioContext): AudioBuffer {
+  const len = <span class="cstat-no" title="statement not covered" >ctx.sampleRate * 2</span>
+  const buf = <span class="cstat-no" title="statement not covered" >ctx.createBuffer(1, len, ctx.sampleRate)</span>
+  const data = <span class="cstat-no" title="statement not covered" >buf.getChannelData(0)</span>
+<span class="cstat-no" title="statement not covered" >  for (let i = <span class="cstat-no" title="statement not covered" >0; i</span> &lt; len; i++) <span class="cstat-no" title="statement not covered" >data[i] = Math.random() * 2 - 1</span></span>
+<span class="cstat-no" title="statement not covered" >  return buf</span>
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// evalCurveAtBeat — evaluate a SplineCurve at a given beat position (looping).
+// Linear interpolation between the two nearest in-window control points.
+// Points with beat &gt; duration are excluded (outside the loop window).
+// ─────────────────────────────────────────────────────────────────────────────
+export function evalCurveAtBeat(curve: SplineCurve, beatPos: number): number {
+  const pos = curve.duration &gt; 0 ? beatPos % curve.duration : <span class="branch-1 cbranch-no" title="branch not covered" >0</span>
+  const active = curve.points
+    .filter((p) =&gt; p.beat &lt;= curve.duration)
+    .sort((a, b) =&gt; a.beat - b.beat)
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (active.length === 0) <span class="cstat-no" title="statement not covered" >return 0</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (active.length === 1) <span class="cstat-no" title="statement not covered" >return active[0].value</span>
+  let lo = active[active.length - 1]
+  let hi = active[0]
+  for (let i = 0; i &lt; active.length - 1; i++) {
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (active[i].beat &lt;= pos &amp;&amp; pos &lt; active[i + 1].beat) {
+      lo = active[i]
+      hi = active[i + 1]
+      break
+    }
+  }
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (lo.beat === hi.beat) <span class="cstat-no" title="statement not covered" >return lo.value</span>
+  const segLength = hi.beat - lo.beat
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (segLength &lt;= 0) <span class="cstat-no" title="statement not covered" >return lo.value</span>
+  const t = (pos - lo.beat) / segLength
+  return lo.value + t * (hi.value - lo.value)
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// createVoice — builds the signal chain for one shape (D-09, Pattern 4)
+// Signal path (standard): OscillatorNode → WaveShaperNode → BiquadFilterNode → GainNode → masterGain
+// Signal path (blob):      [noiseSource + sineOsc] → mixer GainNode → WaveShaperNode → BiquadFilterNode → GainNode → masterGain
+// Phase 7: Direct gainNode.gain ramp-in (no LFO/dcOffset)
+// ─────────────────────────────────────────────────────────────────────────────
+function <span class="fstat-no" title="function not covered" >createVoice(s</span>hape: Shape): void {
+  const ctx = <span class="cstat-no" title="statement not covered" >getAudioContext()</span>
+<span class="cstat-no" title="statement not covered" >  if (!ctx) <span class="cstat-no" title="statement not covered" >return  // No Web Audio API (e.g., jsdom) — skip silently</span></span>
+  const mg = <span class="cstat-no" title="statement not covered" >masterGain!</span>
+&nbsp;
+  const waveshaper = <span class="cstat-no" title="statement not covered" >ctx.createWaveShaper()</span>
+<span class="cstat-no" title="statement not covered" >  waveshaper.curve = makeDistortionCurve(shape.color.s)</span>
+<span class="cstat-no" title="statement not covered" >  waveshaper.oversample = '2x'</span>
+&nbsp;
+  const filter = <span class="cstat-no" title="statement not covered" >ctx.createBiquadFilter()</span>
+<span class="cstat-no" title="statement not covered" >  filter.type = 'lowpass'</span>
+<span class="cstat-no" title="statement not covered" >  filter.frequency.value = lightnessToFilterCutoff(shape.color.l)</span>
+<span class="cstat-no" title="statement not covered" >  filter.Q.value = 1</span>
+&nbsp;
+  const gainNode = <span class="cstat-no" title="statement not covered" >ctx.createGain()</span>
+&nbsp;
+  // Per-voice AnalyserNode — inserted between gainNode and panner (c9h)
+  // Reads post-gain signal (actual audible level); fftSize=256 → 128 time-domain samples
+  const analyser = <span class="cstat-no" title="statement not covered" >ctx.createAnalyser()</span>
+<span class="cstat-no" title="statement not covered" >  analyser.fftSize = 256</span>
+<span class="cstat-no" title="statement not covered" >  analyser.smoothingTimeConstant = 0  // raw waveform, no smoothing</span>
+&nbsp;
+  const waveDesc = <span class="cstat-no" title="statement not covered" >shapeTypeToWave(shape.type)</span>
+  const freq = <span class="cstat-no" title="statement not covered" >colorToFrequency(shape.color)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if (waveDesc === 'blob') {</span>
+    // Blob: 70% noise + 30% sine (Pattern 8)
+    const noiseSource = <span class="cstat-no" title="statement not covered" >ctx.createBufferSource()</span>
+<span class="cstat-no" title="statement not covered" >    noiseSource.buffer = createNoiseBuffer(ctx)</span>
+<span class="cstat-no" title="statement not covered" >    noiseSource.loop = true</span>
+&nbsp;
+    const sineOsc = <span class="cstat-no" title="statement not covered" >ctx.createOscillator()</span>
+<span class="cstat-no" title="statement not covered" >    sineOsc.type = 'sine'</span>
+<span class="cstat-no" title="statement not covered" >    sineOsc.frequency.value = freq</span>
+&nbsp;
+    const noiseGain = <span class="cstat-no" title="statement not covered" >ctx.createGain()</span>
+<span class="cstat-no" title="statement not covered" >    noiseGain.gain.value = 0.7</span>
+    const sineGain = <span class="cstat-no" title="statement not covered" >ctx.createGain()</span>
+<span class="cstat-no" title="statement not covered" >    sineGain.gain.value = 0.3</span>
+    const mixer = <span class="cstat-no" title="statement not covered" >ctx.createGain()</span>
+<span class="cstat-no" title="statement not covered" >    mixer.gain.value = 1</span>
+&nbsp;
+    // Override filter type for blob — bandpass gives drum-like character
+<span class="cstat-no" title="statement not covered" >    filter.type = 'bandpass'</span>
+<span class="cstat-no" title="statement not covered" >    filter.frequency.value = freq</span>
+<span class="cstat-no" title="statement not covered" >    filter.Q.value = 2</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    noiseSource.connect(noiseGain)</span>
+<span class="cstat-no" title="statement not covered" >    noiseGain.connect(mixer)</span>
+<span class="cstat-no" title="statement not covered" >    sineOsc.connect(sineGain)</span>
+<span class="cstat-no" title="statement not covered" >    sineGain.connect(mixer)</span>
+<span class="cstat-no" title="statement not covered" >    mixer.connect(waveshaper)</span>
+<span class="cstat-no" title="statement not covered" >    waveshaper.connect(filter)</span>
+<span class="cstat-no" title="statement not covered" >    filter.connect(gainNode)</span>
+    const panner = <span class="cstat-no" title="statement not covered" >ctx.createStereoPanner()</span>
+<span class="cstat-no" title="statement not covered" >    panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0 (hard left), col 3 → +1.0 (hard right)</span>
+<span class="cstat-no" title="statement not covered" >    gainNode.connect(analyser)</span>
+<span class="cstat-no" title="statement not covered" >    analyser.connect(panner)</span>
+<span class="cstat-no" title="statement not covered" >    panner.connect(mg)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    noiseSource.start()</span>
+<span class="cstat-no" title="statement not covered" >    sineOsc.start()</span>
+&nbsp;
+    const baseGain = (<span class="cstat-no" title="statement not covered" >shape.size / 100) * 0.8  // size=50 → 0.4 (D-15)</span>
+<span class="cstat-no" title="statement not covered" >    gainNode.gain.setValueAtTime(0, ctx.currentTime)</span>
+<span class="cstat-no" title="statement not covered" >    gainNode.gain.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)  // 10ms ramp-in (click-free)</span>
+<span class="cstat-no" title="statement not covered" >    voices.set(shape.id, { oscillator: sineOsc, waveshaper, filter, gainNode, analyser, panner, noiseSource })</span>
+  } else {
+    // Standard oscillator path (circle, triangle, square, star, diamond)
+    const osc = <span class="cstat-no" title="statement not covered" >ctx.createOscillator()</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    if (waveDesc === 'pulse') {</span>
+<span class="cstat-no" title="statement not covered" >      osc.setPeriodicWave(getPulseWave(ctx))</span>
+    } else {
+<span class="cstat-no" title="statement not covered" >      osc.type = waveDesc as OscillatorType</span>
+    }
+<span class="cstat-no" title="statement not covered" >    osc.frequency.value = freq</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    osc.connect(waveshaper)</span>
+<span class="cstat-no" title="statement not covered" >    waveshaper.connect(filter)</span>
+<span class="cstat-no" title="statement not covered" >    filter.connect(gainNode)</span>
+    const panner = <span class="cstat-no" title="statement not covered" >ctx.createStereoPanner()</span>
+<span class="cstat-no" title="statement not covered" >    panner.pan.value = (shape.col / 3) * 2 - 1  // col 0 → -1.0, col 3 → +1.0</span>
+<span class="cstat-no" title="statement not covered" >    gainNode.connect(analyser)</span>
+<span class="cstat-no" title="statement not covered" >    analyser.connect(panner)</span>
+<span class="cstat-no" title="statement not covered" >    panner.connect(mg)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    osc.start()</span>
+&nbsp;
+    const baseGain = (<span class="cstat-no" title="statement not covered" >shape.size / 100) * 0.8  // size=50 → 0.4 (D-15)</span>
+<span class="cstat-no" title="statement not covered" >    gainNode.gain.setValueAtTime(0, ctx.currentTime)</span>
+<span class="cstat-no" title="statement not covered" >    gainNode.gain.linearRampToValueAtTime(baseGain, ctx.currentTime + 0.01)  // 10ms ramp-in (click-free)</span>
+<span class="cstat-no" title="statement not covered" >    voices.set(shape.id, { oscillator: osc, waveshaper, filter, gainNode, analyser, panner })</span>
+  }
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// updateVoiceColor — glitch-free color parameter update on a live voice (D-13)
+// Uses setTargetAtTime (τ=0.015s) for smooth transitions (Pattern 2)
+// WaveShaper.curve is NOT an AudioParam — direct assignment is correct (Pitfall 2)
+// ─────────────────────────────────────────────────────────────────────────────
+export function updateVoiceColor(shapeId: string, color: ShapeColor): void {
+  const voice = voices.get(shapeId)
+  const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
+  // getAudioContext() resumes a suspended context, overriding the user's Stop action.
+  // setTargetAtTime is safe on a suspended context — values are buffered.
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!voice || <span class="branch-1 cbranch-no" title="branch not covered" >!ctx) r</span>eturn
+  // Frequency — only OscillatorNode has frequency AudioParam (not blob's BufferSource)
+  // COLR-01: direct hue-to-frequency mapping; no scale quantization
+<span class="cstat-no" title="statement not covered" >  if (voice.oscillator instanceof OscillatorNode) {</span>
+<span class="cstat-no" title="statement not covered" >    voice.oscillator.frequency.setTargetAtTime(</span>
+      colorToFrequency(color), ctx.currentTime, 0.015
+    )
+  }
+  // Filter cutoff — skip blob voices: blob uses a bandpass filter centred on pitch
+  // frequency (set in createVoice); overwriting with a lightness-derived cutoff
+  // detunes the resonant character. noiseSource is only set for blob voices.
+  // Also skip when Clean mode is active (bypassed=true) — preserves bypass state (h18)
+<span class="cstat-no" title="statement not covered" >  if (!voice.noiseSource &amp;&amp; !voice.bypassed) {</span>
+<span class="cstat-no" title="statement not covered" >    voice.filter.frequency.setTargetAtTime(lightnessToFilterCutoff(color.l), ctx.currentTime, 0.015)</span>
+  }
+  // Distortion curve — direct assignment (WaveShaper.curve is not an AudioParam)
+  // Skip when Clean mode is active (bypassed=true) — preserves null curve set by bypass (h18)
+<span class="cstat-no" title="statement not covered" >  if (!voice.bypassed) {</span>
+<span class="cstat-no" title="statement not covered" >    voice.waveshaper.curve = makeDistortionCurve(color.s)</span>
+  }
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// updateVoiceSize — set base gain directly on gainNode (no LFO in Phase 7)
+// ─────────────────────────────────────────────────────────────────────────────
+export function updateVoiceSize(shapeId: string, size: number): void {
+  const voice = voices.get(shapeId)
+  const ctx = audioCtx  // direct null check — do NOT use getAudioContext() here;
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!voice || <span class="branch-1 cbranch-no" title="branch not covered" >!ctx) r</span>eturn
+  const newBase = (<span class="cstat-no" title="statement not covered" >size / 100) * 0.8  // size=50 → 0.4, size=100 → 0.8</span>
+<span class="cstat-no" title="statement not covered" >  voice.gainNode.gain.setTargetAtTime(newBase, ctx.currentTime, 0.015)</span>
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// getVoiceAnalyser — returns the AnalyserNode for a given shape ID (c9h)
+// Returns null if the voice does not exist or has no analyser
+// ─────────────────────────────────────────────────────────────────────────────
+export function <span class="fstat-no" title="function not covered" >getVoiceAnalyser(s</span>hapeId: string): AnalyserNode | null {
+<span class="cstat-no" title="statement not covered" >  return voices.get(shapeId)?.analyser ?? null</span>
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// setVoiceDistortionBypass — bypass or restore waveshaper distortion and filter for a voice
+// bypass=true  → waveshaper.curve = null (transparent pass-through)
+//               voice.filter.frequency.value = 20000 (effectively open for oscilloscope range)
+// bypass=false → waveshaper.curve = makeDistortionCurve(saturation) (restore)
+//               voice.filter.frequency.value = lightnessToFilterCutoff(lightness) (restore)
+// Direct assignment used for both (no AudioParam ramp) — user just pressed a button (g90)
+// ─────────────────────────────────────────────────────────────────────────────
+export function <span class="fstat-no" title="function not covered" >setVoiceDistortionBypass(s</span>hapeId: string, bypass: boolean, saturation = <span class="branch-0 cbranch-no" title="branch not covered" >0, l</span>ightness = <span class="branch-0 cbranch-no" title="branch not covered" >50): void {</span>
+  const voice = <span class="cstat-no" title="statement not covered" >voices.get(shapeId)</span>
+<span class="cstat-no" title="statement not covered" >  if (!voice) <span class="cstat-no" title="statement not covered" >return</span></span>
+<span class="cstat-no" title="statement not covered" >  voice.waveshaper.curve = bypass ? null : makeDistortionCurve(saturation)</span>
+  // Also bypass / restore the filter so the waveform is truly clean (g90)
+  // bypass=true  → 20000 Hz (effectively open / transparent for the oscilloscope range)
+  // bypass=false → restore to lightness-derived cutoff
+<span class="cstat-no" title="statement not covered" >  voice.filter.frequency.value = bypass ? 20000 : lightnessToFilterCutoff(lightness)</span>
+<span class="cstat-no" title="statement not covered" >  voice.bypassed = bypass</span>
+}
+&nbsp;
+// ─────────────────────────────────────────────────────────────────────────────
+// initAudioEngine — call once from CanvasContainer useEffect (mirrors initCanvasEngine)
+// Returns destroy() for React useEffect cleanup
+// ─────────────────────────────────────────────────────────────────────────────
+export function <span class="fstat-no" title="function not covered" >initAudioEngine(): () =&gt; void {</span>
+  let prevShapes = <span class="cstat-no" title="statement not covered" >new Map&lt;string, Shape&gt;() </span> // tracks previous shape values for change detection
+<span class="cstat-no" title="statement not covered" >console.log("fisk");</span>
+  const unsubscribe = <span class="cstat-no" title="statement not covered" >shapeStore.<span class="fstat-no" title="function not covered" >subscribe((s</span>tate) =&gt; {</span>
+    const curr = <span class="cstat-no" title="statement not covered" >state.shapes</span>
+    const currIds = <span class="cstat-no" title="statement not covered" >new Set(curr.<span class="fstat-no" title="function not covered" >map((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.id))</span></span>
+    const ctx = <span class="cstat-no" title="statement not covered" >audioCtx  // direct null check — do NOT use getAudioContext() here;</span>
+    // getAudioContext() resumes a suspended context, overriding the user's Stop action.
+    // Voices are still created correctly: createVoice() calls getAudioContext() itself,
+    // which is fine for new additions (user just clicked a cell = user gesture).
+&nbsp;
+    // Detect additions — create voice for any shape not yet in voices Map.
+    // Guard: skip createVoice when context is suspended — createVoice() calls getAudioContext()
+    // which resumes a suspended context, overriding the user's Stop action.
+    // Voiceless shapes added while stopped are caught by the resume path in unsubscribePlayback.
+    const contextAllowsCreate = <span class="cstat-no" title="statement not covered" >!audioCtx || audioCtx.state === 'running'</span>
+<span class="cstat-no" title="statement not covered" >    for (const shape of curr) {</span>
+<span class="cstat-no" title="statement not covered" >      if (!voices.has(shape.id) &amp;&amp; contextAllowsCreate) {</span>
+<span class="cstat-no" title="statement not covered" >        createVoice(shape)</span>
+<span class="cstat-no" title="statement not covered" >        prevShapes.set(shape.id, shape)</span>
+      }
+    }
+&nbsp;
+    // Detect property changes on existing voices (Phase 4 — color, size, type)
+<span class="cstat-no" title="statement not covered" >    for (const shape of curr) {</span>
+      const prev = <span class="cstat-no" title="statement not covered" >prevShapes.get(shape.id)</span>
+<span class="cstat-no" title="statement not covered" >      if (prev &amp;&amp; voices.has(shape.id)) {</span>
+        // Color change — update frequency, filter, distortion (D-13)
+<span class="cstat-no" title="statement not covered" >        if (shape.color.h !== prev.color.h ||</span>
+            shape.color.s !== prev.color.s ||
+            shape.color.l !== prev.color.l) {
+<span class="cstat-no" title="statement not covered" >          updateVoiceColor(shape.id, shape.color)</span>
+        }
+        // Size change — update gain (D-13)
+<span class="cstat-no" title="statement not covered" >        if (shape.size !== prev.size) {</span>
+<span class="cstat-no" title="statement not covered" >          updateVoiceSize(shape.id, shape.size)</span>
+        }
+        // Type change — destroy entire voice, re-create with new waveform (D-08)
+<span class="cstat-no" title="statement not covered" >        if (shape.type !== prev.type) {</span>
+          const voice = <span class="cstat-no" title="statement not covered" >voices.get(shape.id)</span>
+<span class="cstat-no" title="statement not covered" >          if (voice &amp;&amp; ctx) {</span>
+<span class="cstat-no" title="statement not covered" >            voice.gainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.015)</span>
+            const idToRecreate = <span class="cstat-no" title="statement not covered" >shape.id</span>
+            const shapeSnapshot: Shape = <span class="cstat-no" title="statement not covered" >{ ...shape }</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >            setTimeout(() =&gt; {</span></span>
+              const v = <span class="cstat-no" title="statement not covered" >voices.get(idToRecreate)</span>
+<span class="cstat-no" title="statement not covered" >              if (v) {</span>
+<span class="cstat-no" title="statement not covered" >                try { <span class="cstat-no" title="statement not covered" >v.oscillator.stop() } catch {</span> /* already stopped */ }</span>
+<span class="cstat-no" title="statement not covered" >                if (v.noiseSource) <span class="cstat-no" title="statement not covered" >try { <span class="cstat-no" title="statement not covered" >v.noiseSource.stop() } catch {</span> /* already stopped */ }</span></span>
+<span class="cstat-no" title="statement not covered" >                v.gainNode.disconnect()</span>
+<span class="cstat-no" title="statement not covered" >                v.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak</span>
+<span class="cstat-no" title="statement not covered" >                voices.delete(idToRecreate)</span>
+                // Only recreate if context is running — do NOT call createVoice when suspended;
+                // createVoice() calls getAudioContext() which resumes the context, overriding Stop.
+                // The voice will be absent until the user resumes playback; that is acceptable.
+<span class="cstat-no" title="statement not covered" >                if (audioCtx &amp;&amp; audioCtx.state === 'running') {</span>
+<span class="cstat-no" title="statement not covered" >                  createVoice(shapeSnapshot)</span>
+                }
+<span class="cstat-no" title="statement not covered" >                prevShapes.set(idToRecreate, shapeSnapshot)</span>
+              }
+            }, 60)
+          }
+        }
+<span class="cstat-no" title="statement not covered" >        prevShapes.set(shape.id, shape)</span>
+      }
+    }
+&nbsp;
+    // Detect removals — ramp gain to 0 then stop/disconnect (Phase 3, CANV-03)
+    // Gain ramp-out prevents audible click artifact (RESEARCH.md Pitfall 2, Pattern 5)
+<span class="cstat-no" title="statement not covered" >    for (const id of prevShapes.keys()) {</span>
+<span class="cstat-no" title="statement not covered" >      if (!currIds.has(id)) {</span>
+        const voice = <span class="cstat-no" title="statement not covered" >voices.get(id)</span>
+<span class="cstat-no" title="statement not covered" >        if (voice) {</span>
+<span class="cstat-no" title="statement not covered" >          if (ctx) {</span>
+            // Ramp gain to 0 in τ=0.015s to eliminate click artifact (4τ ≈ 60ms)
+<span class="cstat-no" title="statement not covered" >            voice.gainNode.gain.setTargetAtTime(0, ctx.currentTime, 0.015)</span>
+          }
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >          setTimeout(() =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >            try { <span class="cstat-no" title="statement not covered" >voice.oscillator.stop() } catch {</span> /* already stopped */ }</span>
+<span class="cstat-no" title="statement not covered" >            if (voice.noiseSource) {</span>
+<span class="cstat-no" title="statement not covered" >              try { <span class="cstat-no" title="statement not covered" >voice.noiseSource.stop() } catch {</span> /* already stopped */ }</span>
+            }
+<span class="cstat-no" title="statement not covered" >            voice.gainNode.disconnect()</span>
+<span class="cstat-no" title="statement not covered" >            voice.panner.disconnect()   // Phase 6: disconnect panner to prevent masterGain leak</span>
+<span class="cstat-no" title="statement not covered" >            voices.delete(id)</span>
+          }, 60)  // 60ms = ~4 time constants at τ=0.015s → gain &lt; 2% of original
+        }
+<span class="cstat-no" title="statement not covered" >        prevShapes.delete(id)</span>
+      }
+    }
+  })
+&nbsp;
+  // Phase 5: subscribe to playbackStore for isPlaying, volume changes (D-15)
+  // CRITICAL: do NOT call getAudioContext() here — only act if audioCtx already exists
+  // (i.e., user has already placed a shape). Calling getAudioContext() in subscribe
+  // would create AudioContext outside a user gesture. (RESEARCH.md Pitfall 1)
+  let prevIsPlaying = <span class="cstat-no" title="statement not covered" >playbackStore.getState().isPlaying</span>
+  let prevVolume = <span class="cstat-no" title="statement not covered" >playbackStore.getState().volume</span>
+&nbsp;
+  const unsubscribePlayback = <span class="cstat-no" title="statement not covered" >playbackStore.<span class="fstat-no" title="function not covered" >subscribe((s</span>tate) =&gt; {</span>
+    const ctx = <span class="cstat-no" title="statement not covered" >audioCtx  // Direct module-level null check — do NOT use getAudioContext()</span>
+<span class="cstat-no" title="statement not covered" >    if (!ctx) <span class="cstat-no" title="statement not covered" >return</span></span>
+&nbsp;
+    // isPlaying changed → suspend or resume AudioContext (D-01)
+<span class="cstat-no" title="statement not covered" >    if (state.isPlaying !== prevIsPlaying) {</span>
+<span class="cstat-no" title="statement not covered" >      prevIsPlaying = state.isPlaying</span>
+<span class="cstat-no" title="statement not covered" >      if (state.isPlaying) {</span>
+<span class="cstat-no" title="statement not covered" >        markPlaybackStart()</span>
+<span class="cstat-no" title="statement not covered" >        void ctx.resume()</span>
+        // Create voices for shapes added while the context was suspended
+<span class="cstat-no" title="statement not covered" >        for (const shape of shapeStore.getState().shapes) {</span>
+<span class="cstat-no" title="statement not covered" >          if (!voices.has(shape.id)) {</span>
+<span class="cstat-no" title="statement not covered" >            createVoice(shape)</span>
+<span class="cstat-no" title="statement not covered" >            prevShapes.set(shape.id, shape)</span>
+          }
+        }
+      } else {
+<span class="cstat-no" title="statement not covered" >        void ctx.suspend()</span>
+      }
+    }
+&nbsp;
+    // volume changed → ramp masterGain with τ=0.05s for smooth fade (D-11, Pitfall 6)
+    // volume * 0.15 preserves the 16-voice headroom ceiling set in getAudioContext()
+<span class="cstat-no" title="statement not covered" >    if (state.volume !== prevVolume) {</span>
+<span class="cstat-no" title="statement not covered" >      prevVolume = state.volume</span>
+<span class="cstat-no" title="statement not covered" >      if (masterGain) {</span>
+<span class="cstat-no" title="statement not covered" >        masterGain.gain.setTargetAtTime(state.volume * 0.15, ctx.currentTime, 0.05)</span>
+      }
+    }
+  })
+&nbsp;
+  // ─────────────────────────────────────────────────────────────────────────────
+  // animationStore curve evaluator — runs at ~60fps, evaluates each active curve
+  // at the current beat position and applies to the corresponding AudioParam.
+  // Curves loop independently (ANIM-04): beat position mod curve.duration.
+  // ─────────────────────────────────────────────────────────────────────────────
+  let curveIntervalId: ReturnType&lt;typeof setInterval&gt; | null = <span class="cstat-no" title="statement not covered" >null</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  curveIntervalId = <span class="fstat-no" title="function not covered" >setInterval(() =&gt; {</span></span>
+    const ctx = <span class="cstat-no" title="statement not covered" >audioCtx</span>
+<span class="cstat-no" title="statement not covered" >    if (!ctx) <span class="cstat-no" title="statement not covered" >return</span></span>
+    const { bpm, isPlaying } = <span class="cstat-no" title="statement not covered" >playbackStore.getState()</span>
+<span class="cstat-no" title="statement not covered" >    if (!isPlaying) <span class="cstat-no" title="statement not covered" >return</span></span>
+&nbsp;
+    const <span class="cstat-no" title="statement not covered" >beatPos = getCurrentBeat(bpm)</span>
+    const { curves } = <span class="cstat-no" title="statement not covered" >animationStore.getState()</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    for (const [shapeId, shapeCurves] of Object.entries(curves)) {</span>
+      const voice = <span class="cstat-no" title="statement not covered" >voices.get(shapeId)</span>
+<span class="cstat-no" title="statement not covered" >      if (!voice) <span class="cstat-no" title="statement not covered" >continue</span></span>
+      const shape = <span class="cstat-no" title="statement not covered" >shapeStore.getState().shapes.<span class="fstat-no" title="function not covered" >find((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.id === shapeId)</span></span>
+<span class="cstat-no" title="statement not covered" >      if (!shape) <span class="cstat-no" title="statement not covered" >continue</span></span>
+&nbsp;
+      // 'size' curve → modulate gainNode.gain
+<span class="cstat-no" title="statement not covered" >      if (shapeCurves.size) {</span>
+        const sizeVal = <span class="cstat-no" title="statement not covered" >evalCurveAtBeat(shapeCurves.size, beatPos)</span>
+        const gain = (<span class="cstat-no" title="statement not covered" >sizeVal / 100) * 0.8</span>
+<span class="cstat-no" title="statement not covered" >        voice.gainNode.gain.setTargetAtTime(gain, ctx.currentTime, 0.008)</span>
+      }
+&nbsp;
+      // Pre-evaluate all animated color components for this tick — any curve overrides its static value
+      const animatedHue = <span class="cstat-no" title="statement not covered" >shapeCurves.hue</span>
+        ? evalCurveAtBeat(shapeCurves.hue, beatPos)
+        : shape.color.h
+      const animatedLightness = <span class="cstat-no" title="statement not covered" >shapeCurves.lightness</span>
+        ? evalCurveAtBeat(shapeCurves.lightness, beatPos)
+        : shape.color.l
+      const animatedSaturation = <span class="cstat-no" title="statement not covered" >shapeCurves.saturation</span>
+        ? evalCurveAtBeat(shapeCurves.saturation, beatPos)
+        : shape.color.s
+&nbsp;
+      // Any color curve → call updateVoiceColor with the fully-animated color (hue drives pitch, lightness drives filter).
+<span class="cstat-no" title="statement not covered" >      if ((shapeCurves.hue || shapeCurves.lightness || shapeCurves.saturation) &amp;&amp; voice.oscillator instanceof OscillatorNode) {</span>
+<span class="cstat-no" title="statement not covered" >        updateVoiceColor(shapeId, { h: animatedHue, l: animatedLightness, s: animatedSaturation })</span>
+      }
+    }
+  }, 16)
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return function <span class="fstat-no" title="function not covered" >destroy(): void {</span></span>
+<span class="cstat-no" title="statement not covered" >    unsubscribe()</span>
+<span class="cstat-no" title="statement not covered" >    unsubscribePlayback()  // Phase 5: clean up playback subscription (Pitfall 3)</span>
+<span class="cstat-no" title="statement not covered" >    if (curveIntervalId !== null) <span class="cstat-no" title="statement not covered" >clearInterval(curveIntervalId)</span></span>
+    // Stop all voices on cleanup (e.g., React StrictMode double-invoke)
+<span class="cstat-no" title="statement not covered" >    voices.<span class="fstat-no" title="function not covered" >forEach((v</span>oice) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >      try { <span class="cstat-no" title="statement not covered" >voice.oscillator.stop() } catch {</span> /* already stopped */ }</span>
+<span class="cstat-no" title="statement not covered" >      if (voice.noiseSource) {</span>
+<span class="cstat-no" title="statement not covered" >        try { <span class="cstat-no" title="statement not covered" >voice.noiseSource.stop() } catch {</span> /* already stopped */ }</span>
+      }
+    })
+<span class="cstat-no" title="statement not covered" >    voices.clear()</span>
+<span class="cstat-no" title="statement not covered" >    prevShapes.clear()</span>
+<span class="cstat-no" title="statement not covered" >    cachedPulseWave = null</span>
+<span class="cstat-no" title="statement not covered" >    if (audioCtx) {</span>
+<span class="cstat-no" title="statement not covered" >      void audioCtx.close()</span>
+<span class="cstat-no" title="statement not covered" >      audioCtx = null</span>
+<span class="cstat-no" title="statement not covered" >      masterGain = null</span>
+    }
+  }
+}
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-05-01T11:43:50.387Z
+            </div>
+        <script src="../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../sorter.js"></script>
+        <script src="../block-navigation.js"></script>
+    </body>
+</html>
+    

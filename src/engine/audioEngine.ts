@@ -371,8 +371,8 @@ export function setVoiceDistortionBypass(shapeId: string, bypass: boolean, satur
 // Returns destroy() for React useEffect cleanup
 // ─────────────────────────────────────────────────────────────────────────────
 export function initAudioEngine(): () => void {
-  let prevShapes = new Map<string, Shape>()  // tracks previous shape values for change detection
-
+  const prevShapes = new Map<string, Shape>()  // tracks previous shape values for change detection
+console.log("fisk");
   const unsubscribe = shapeStore.subscribe((state) => {
     const curr = state.shapes
     const currIds = new Set(curr.map((s) => s.id))
